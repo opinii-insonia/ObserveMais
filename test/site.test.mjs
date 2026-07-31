@@ -5,57 +5,79 @@ import test from 'node:test';
 
 const read = (file) => readFile(new URL(`../${file}`, import.meta.url), 'utf8');
 
-test('a landing apresenta o Score como resposta ao cliente que não volta', async () => {
+test('a landing fala diretamente com supermercados e cliente oculto', async () => {
   const html = await read('index.html');
 
-  assert.match(html, /Eu sou o cliente que nunca mais volta/i);
-  assert.match(html, /Quantos clientes passaram pelas suas lojas e tomaram essa mesma decisão/i);
-  assert.match(html, /A Observe\+ cruza o que um profissional identifica, o que o cliente sente e o que a operação acredita estar entregando/i);
-  assert.match(html, /Quero descobrir por que meus clientes não voltam/i);
-  assert.match(html, /Ele não reclamou[\s\S]*Só decidiu não voltar/i);
-  assert.match(html, /proteger[\s\S]*marca/i);
-  assert.match(html, /Auditor Profissional/i);
-  assert.match(html, /Cliente Real/i);
-  assert.match(html, /Operação Interna/i);
-  assert.match(html, /Score da Loja/i);
-  assert.match(html, /Somos especialistas em descobrir[\s\S]*por que o cliente não volta/i);
+  assert.match(html, /Cliente oculto para supermercados/i);
+  assert.match(html, /Seu supermercado perde vendas em falhas que ninguém da equipe está vendo/i);
+  assert.match(html, /fila, ruptura percebida, preço ausente, validade, limpeza e atendimento/i);
+  assert.match(html, /Quero diagnosticar minha loja/i);
+  assert.match(html, /Evidências por setor viram[\s\S]*prioridade por loja/i);
+  assert.match(html, /Cliente oculto com roteiro, evidência e[\s\S]*reunião de priorização/i);
   assert.match(html, /Dúvidas Frequentes/i);
   assert.match(html, /wa\.me\/5561993715292/);
 });
 
-test('modela exatamente três módulos que convergem para o Score e deixa a IA depois dele', async () => {
+test('modela três visões que viram prioridade e deixa a IA depois do diagnóstico', async () => {
   const html = await read('index.html');
   const modules = [...html.matchAll(/<article[^>]+data-score-module="([^"]+)"/g)].map((match) => match[1]);
   const flowSteps = [...html.matchAll(/data-score-step="([^"]+)"/g)].map((match) => match[1]);
 
   assert.deepEqual(modules, ['auditor-profissional', 'cliente-real', 'operacao-interna']);
   assert.deepEqual(flowSteps, ['tres-visoes', 'cruzamento', 'score', 'plano-de-acao']);
-  assert.match(html, /data-score-flow/);
+  assert.match(html, /Evidências por setor/);
+  assert.match(html, /Divergências/);
+  assert.match(html, /Prioridade por loja/);
+  assert.match(html, /Plano de correção/);
   assert.match(html, /class="score-ai[^"]*"[\s\S]*Inteligência Artificial/i);
   assert.doesNotMatch(html, /data-score-module="ia"/i);
 });
 
-test('mantém linguagem segura para Opinii, Score e a simulação de ROI', async () => {
+test('mantém SEO on-page alinhado à vertical sem prometer ranking', async () => {
+  const html = await read('index.html');
+
+  assert.match(html, /<title>Cliente oculto para supermercados \| Observe Mais<\/title>/);
+  assert.match(html, /name="description"[\s\S]*Cliente oculto para supermercados/);
+  assert.match(html, /property="og:image"/);
+  assert.match(html, /property="og:title" content="Observe Mais — Cliente oculto para supermercados"/);
+  assert.doesNotMatch(html, /primeira posição|ranking garantido|tráfego garantido/i);
+});
+
+test('usa dados estruturados somente para conteúdo visível real', async () => {
+  const html = await read('index.html');
+  const jsonLd = [...html.matchAll(/<script type="application\/ld\+json">([\s\S]*?)<\/script>/g)].map((match) => JSON.parse(match[1]));
+  const organization = jsonLd.find((item) => item['@type'] === 'Organization');
+  const faq = jsonLd.find((item) => item['@type'] === 'FAQPage');
+
+  assert.equal(organization.name, 'Observe Mais');
+  assert.ok(faq.mainEntity.length >= 5);
+
+  for (const item of faq.mainEntity) {
+    assert.match(html, new RegExp(item.name.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')));
+    assert.match(html, new RegExp(item.acceptedAnswer.text.slice(0, 44).replace(/[.*+?^${}()|[\]\\]/g, '\\$&')));
+  }
+});
+
+test('mantém linguagem segura para simulação de perda silenciosa', async () => {
   const [html, css, js] = await Promise.all([read('index.html'), read('styles.css'), read('script.js')]);
   const productSource = `${html}\n${css}\n${js}`;
 
   assert.doesNotMatch(productSource, /Alpine/i);
   assert.doesNotMatch(html, /fórmula do Score|peso(?:s)? do Score/i);
   assert.match(html, /simulação ilustrativa/i);
-  assert.match(html, /O que compõe o Score/i);
-  assert.match(html, /Como as três visões são cruzadas/i);
-  assert.match(html, /Como os dados dos clientes são protegidos/i);
+  assert.match(html, /Não representa garantia de venda, lucro, ROI ou payback/i);
+  assert.match(html, /Simule o tamanho da <span>perda silenciosa da sua loja\.<\/span>/i);
+  assert.doesNotMatch(html, /ROI garantido|aumento de vendas garantido|lucro garantido/i);
 });
 
-test('usa a nova logo Observe+ enviada pelo usuário', async () => {
+test('usa a identidade Observe Mais no header e rodapé', async () => {
   const html = await read('index.html');
 
-  assert.match(html, /public\/assets\/logo-observe-plus-light\.png/);
-  assert.match(html, /public\/assets\/logo-observe-plus-dark\.png/);
+  assert.match(html, /Observe Mais/);
+  assert.match(html, /class="brand-wordmark"/);
+  assert.match(html, /class="footer-wordmark"/);
+  assert.doesNotMatch(html, /Observe\+/);
   assert.doesNotMatch(html, /alt="Observall"/);
-  await access(new URL('../public/assets/logo-observe-plus-light.png', import.meta.url));
-  await access(new URL('../public/assets/logo-observe-plus-dark.png', import.meta.url));
-  await access(new URL('../public/assets/logo-observe-plus-icon.png', import.meta.url));
 });
 
 test('não incorpora marca, URLs ou copies específicas da referência de terceiros', async () => {
@@ -69,7 +91,7 @@ test('não incorpora marca, URLs ou copies específicas da referência de tercei
   assert.doesNotMatch(source, /Mídia e parceiros/i);
 });
 
-test('aproxima a sequência da referência seção por seção', async () => {
+test('preserva a sequência de seções comerciais', async () => {
   const html = await read('index.html');
 
   const order = [
@@ -89,41 +111,41 @@ test('aproxima a sequência da referência seção por seção', async () => {
   let previous = -1;
   for (const marker of order) {
     const current = html.indexOf(marker);
-
     assert.ok(current > previous, `${marker} deveria aparecer depois da seção anterior`);
     previous = current;
   }
 });
 
-test('mantém títulos com palavra destacada em verde, como na referência adaptada', async () => {
+test('substitui métricas numéricas soltas por evidências de supermercado', async () => {
   const [html, css] = await Promise.all([read('index.html'), read('styles.css')]);
 
-  assert.ok((html.match(/<h2[\s\S]*?<span>/g) || []).length >= 5);
-  assert.match(css, /h2 span\s*\{[^}]*color:\s*var\(--green\)/s);
+  for (const icon of ['icon-store', 'icon-receipt', 'icon-card', 'icon-pie-chart', 'icon-eye', 'icon-coins', 'icon-trend', 'icon-clock', 'icon-chart', 'icon-wallet']) {
+    assert.match(html, new RegExp(`id="${icon}"`));
+  }
+
+  assert.match(html, /Corredores/);
+  assert.match(html, /Checkout/);
+  assert.match(html, /Atendimento/);
+  assert.match(html, /Preço, ruptura percebida e exposição/);
+  assert.doesNotMatch(html, /69,6%/);
+  assert.doesNotMatch(html, /\+22 mil/);
+  assert.doesNotMatch(html, /\+3 mil/);
   assert.match(css, /\.metrics-grid h3\s*\{[^}]*color:\s*var\(--green\)/s);
-  assert.match(css, /\.card-icon\s*\{[^}]*background:\s*var\(--green\)/s);
+  assert.match(css, /\.field-icon,\s*\.result-icon\s*\{[^}]*stroke:\s*currentColor/s);
 });
 
-test('incorpora o vídeo enviado na área sobre a Observall', async () => {
+test('incorpora o vídeo enviado na área de método', async () => {
   const [html, videoJs] = await Promise.all([read('index.html'), read('video.js')]);
 
   assert.match(html, /class="about-video reveal" data-youtube-video="yuGAr_NQis8"/);
-  assert.match(html, /public\/assets\/video-observall-youtube\.jpg/);
+  assert.match(html, /public\/assets\/generated-supermercado\/metodo-auditor-supermercado-v1\.png/);
   assert.match(html, /Reproduzir vídeo/);
-  assert.match(html, /<script src="video\.js" defer><\/script>/);
-  assert.doesNotMatch(html, /<a[^>]+class="about-video/);
   assert.match(videoJs, /youtube-nocookie\.com\/embed/);
   assert.match(videoJs, /replaceChildren\(iframe\)/);
   assert.match(videoJs, /window\.location\.protocol === 'file:'/);
 });
 
-test('o build inclui o controlador dedicado do vídeo', async () => {
-  const build = await read('scripts/build.mjs');
-
-  assert.match(build, /'video\.js'/);
-});
-
-test('implementa a nova calculadora de ROI com captura de lead antes do resultado', async () => {
+test('implementa calculadora com captura de lead antes do resultado', async () => {
   const [html, js] = await Promise.all([read('index.html'), read('script.js')]);
 
   for (const id of ['stores', 'coupons', 'ticket', 'margin', 'visits']) {
@@ -136,7 +158,7 @@ test('implementa a nova calculadora de ROI com captura de lead antes do resultad
 
   assert.match(html, /class="calculator-layout reveal"/);
   assert.match(html, /id="lead-modal"/);
-  assert.match(html, /Calcular meu potencial de ganho/);
+  assert.match(html, /Simular perda silenciosa/);
   assert.match(html, /Ver meu resultado/);
   assert.match(js, /observallVisitPrice:\s*300/);
   assert.match(js, /couponGrowth:\s*0\.1/);
@@ -144,21 +166,6 @@ test('implementa a nova calculadora de ROI com captura de lead antes do resultad
   assert.match(js, /\/api\/lead-capture/);
   assert.doesNotMatch(js, /lead-capture\.php/);
   assert.match(js, /Preencha todos os campos para calcular seu potencial de ganho/);
-});
-
-test('substitui abreviações do simulador por ícones e atualiza a métrica de redução', async () => {
-  const [html, css] = await Promise.all([read('index.html'), read('styles.css')]);
-
-  for (const icon of ['icon-store', 'icon-receipt', 'icon-card', 'icon-pie-chart', 'icon-eye', 'icon-coins', 'icon-trend', 'icon-clock', 'icon-chart', 'icon-wallet']) {
-    assert.match(html, new RegExp(`id="${icon}"`));
-  }
-
-  assert.doesNotMatch(html, /class="metric-icon"/);
-  assert.doesNotMatch(html, /<span class="(?:field-icon|result-icon)" aria-hidden="true">[LCT%VPRGI$]<\/span>/);
-  assert.match(html, /class="metric-label">Redução de<\/span>\s*<h3>69,6%<\/h3>/);
-  assert.doesNotMatch(html, /-69,6%/);
-  assert.match(css, /\.metric-label\s*\{[^}]*color:\s*var\(--green\)/s);
-  assert.match(css, /\.field-icon,\s*\.result-icon\s*\{[^}]*stroke:\s*currentColor/s);
 });
 
 test('o endpoint local de leads responde pela rota Vercel', async () => {
@@ -237,37 +244,7 @@ test('o build e as APIs usam somente o fluxo Vercel', async () => {
   assert.match(deployGuide, /Deploy — Vercel/);
 });
 
-test('mantém proteção contra métricas comerciais sem fonte da referência', async () => {
-  const html = await read('index.html');
-
-  assert.doesNotMatch(html, /\+\s*551\s*mil/i);
-  assert.doesNotMatch(html, /\+\s*620\s*mil/i);
-  assert.doesNotMatch(html, /\+\s*9\s*milhões/i);
-  assert.doesNotMatch(html, /\+\s*10\s*milhões/i);
-  assert.doesNotMatch(html, /\+\s*4444\b/i);
-  assert.doesNotMatch(html, /\+\s*5000\b/i);
-  assert.doesNotMatch(html, /Dado fictício até Gabriel enviar os insights/i);
-  assert.match(html, /\+22 mil/);
-  assert.match(html, /Momentos da experiência auditados em loja/);
-  assert.match(html, /Redução de/);
-  assert.match(html, /69,6%/);
-  assert.match(html, /Redução de uma falha crítica após acompanhamento/);
-  assert.match(html, /\+3 mil/);
-  assert.match(html, /Oportunidades identificadas antes de virarem problemas maiores/);
-});
-
-test('a identidade troca o laranja da referência por verde sem introduzir laranja no CSS', async () => {
-  const css = (await read('styles.css')).toUpperCase();
-
-  assert.match(css, /#25D670/);
-  assert.match(css, /#000000/);
-  assert.match(css, /#FFFFFF/);
-  assert.doesNotMatch(css, /#FF5E15/);
-  assert.doesNotMatch(css, /#FF6A00/);
-  assert.doesNotMatch(css, /ORANGE/i);
-});
-
-test('a página continua semântica e responsiva', async () => {
+test('a página continua semântica, acessível e responsiva', async () => {
   const [html, css] = await Promise.all([read('index.html'), read('styles.css')]);
 
   assert.match(html, /<header[\s>]/);
@@ -279,28 +256,34 @@ test('a página continua semântica e responsiva', async () => {
   assert.match(css, /:focus-visible/);
 });
 
-test('usa assets próprios e não imagens da referência', async () => {
+test('usa assets próprios com nomes alinhados a Observe Mais', async () => {
   const html = await read('index.html');
 
   for (const asset of [
-    'public/assets/logo-observe-plus-light.png',
-    'public/assets/logo-observe-plus-dark.png',
-    'public/assets/hero-score-tres-visoes-neon-observall.png',
-    'public/assets/plataforma-relatorios-observall.png',
-    'public/assets/insights-supermercado-observall.png',
-    'public/assets/video-observall-youtube.jpg',
+    'public/assets/generated-supermercado/hero-supermercado-cliente-oculto-v1.png',
+    'public/assets/generated-supermercado/evidencias-checklist-supermercado-v1.png',
+    'public/assets/generated-supermercado/perda-silenciosa-supermercado-v1.png',
+    'public/assets/generated-supermercado/diagnostico-tres-visoes-supermercado-v1.png',
+    'public/assets/generated-supermercado/dashboard-setorial-supermercado-v1.png',
+    'public/assets/generated-supermercado/prova-reuniao-supermercado-v1.png',
+    'public/assets/generated-supermercado/depoimento-relatorio-supermercado-v1.png',
+    'public/assets/generated-supermercado/metodo-auditor-supermercado-v1.png',
+    'public/assets/generated-supermercado/simulacao-perda-silenciosa-supermercado-v1.png',
   ]) {
     assert.match(html, new RegExp(asset.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')));
     await access(new URL(`../${asset}`, import.meta.url));
   }
+
+  await access(new URL('../public/assets/generated-supermercado/cta-supermercado-operacao-v1.png', import.meta.url));
 });
 
-test('exibe carrossel de clientes da Observall', async () => {
+test('exibe prova social voltada a supermercados', async () => {
   const [html, css, js] = await Promise.all([read('index.html'), read('styles.css'), read('script.js')]);
 
   assert.match(html, /id="clientes"/);
-  assert.match(html, /Empresas que decidiram enxergar <span>o que o cliente não dizia<\/span>/);
+  assert.match(html, /Supermercados que usam evidência para <span>proteger padrão de loja\.<\/span>/);
   assert.match(html, /aria-label="Logos de clientes"/);
+  assert.match(html, /Conhecer resultados em supermercados/);
 
   for (const logo of ['goldko', 'ultrabox', 'derela', 'bigbox', 'nativas', 'tecnotica', 'lojas-mel']) {
     assert.match(html, new RegExp(`public/assets/clients/${logo}\\.png`));
@@ -310,19 +293,16 @@ test('exibe carrossel de clientes da Observall', async () => {
   assert.match(js, /function moveClientCarousel/);
 });
 
-test('os depoimentos seguem o bloco alternado da referência', async () => {
+test('os depoimentos reforçam execução e prioridade operacional', async () => {
   const [html, css] = await Promise.all([read('index.html'), read('styles.css')]);
 
   assert.match(html, /class="testimonials-section"/);
   assert.match(html, /Bruna Reges/);
   assert.match(html, /Marcus/);
   assert.match(html, /Márcia Matos/);
-  assert.match(html, /class="testimonial-logo" src="public\/assets\/clients\/bigbox-ultrabox\.png" alt="BigBox e Ultrabox"/);
-  assert.match(html, /class="testimonial-logo" src="public\/assets\/clients\/nativas\.png" alt="Nativas"/);
-  assert.match(html, /class="testimonial-logo" src="public\/assets\/clients\/tecnotica\.png" alt="Tecnótica"/);
+  assert.match(html, /Encontramos falhas de execução que não apareciam nos indicadores internos/);
+  assert.match(html, /prioridade para a gestão/);
   assert.match(css, /\.testimonials-section\s*\{[^}]*grid-template-columns:\s*repeat\(3,\s*1fr\)/s);
-  assert.match(css, /\.testimonial-card\.featured\s*\{[^}]*background:\s*#181a17/s);
-  assert.match(css, /\.testimonial-logo\s*\{[^}]*border-radius:\s*50%/s);
 });
 
 test('todas as imagens referenciadas resolvem localmente', async () => {

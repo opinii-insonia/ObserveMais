@@ -264,13 +264,13 @@ function renderResult(input, result) {
   calculatorLayout?.setAttribute('data-roi-state', 'result');
   setFormReadOnly(true);
 
-  if (roiTitle) roiTitle.innerHTML = `Seu investimento com a Observe+ pode <span>se pagar em ${result.paybackLabel}</span>`;
+  if (roiTitle) roiTitle.innerHTML = `Sua perda silenciosa pode exigir <span>diagnóstico antes de promessa.</span>`;
   if (roiSubtitle) {
-    roiSubtitle.textContent = 'Com base nos dados informados, sua operação tem potencial para gerar receita adicional e lucro incremental com mais padrão, execução e experiência em loja.';
+    roiSubtitle.textContent = 'Com base nos dados informados, este cenário ilustrativo ajuda a dimensionar a conversa. A validação real depende de visita, roteiro e evidências da loja.';
   }
-  if (roiFormTitle) roiFormTitle.textContent = 'Resumo da sua operação';
+  if (roiFormTitle) roiFormTitle.textContent = 'Resumo do seu supermercado';
   if (roiOutputKicker) roiOutputKicker.textContent = 'Resultado estimado';
-  if (roiOutputTitle) roiOutputTitle.textContent = 'Sua operação pode estar deixando muito dinheiro na mesa';
+  if (roiOutputTitle) roiOutputTitle.textContent = 'Este é o tamanho possível da perda que merece investigação';
   if (roiPrimaryAction) {
     roiPrimaryAction.textContent = 'Refazer simulação';
     roiPrimaryAction.type = 'button';
@@ -287,10 +287,10 @@ function renderResult(input, result) {
   document.querySelector('#annual-net-gain').textContent = currency.format(result.annualNetGain);
 
   if (roiCommercialCopy) {
-    roiCommercialCopy.textContent = 'Isso significa que a Observe+ não entra como custo, mas como um mecanismo para recuperar lucro perdido na operação e acelerar resultado com mais padrão e execução em loja.';
+    roiCommercialCopy.textContent = 'A simulação não garante resultado. Ela mostra por que fila, ruptura percebida, preço ausente, validade, limpeza e atendimento precisam ser medidos antes de virar plano de ação.';
   }
   if (roiImpactQuote) {
-    roiImpactQuote.innerHTML = 'O problema não é investir em cliente oculto. <strong>O problema é continuar perdendo venda por falhas que ninguém está medindo.</strong>';
+    roiImpactQuote.innerHTML = 'O próximo passo é validar a loja real. <strong>Cliente oculto transforma hipótese em evidência operacional.</strong>';
   }
 }
 
@@ -299,25 +299,25 @@ function resetResults() {
   calculatorLayout?.setAttribute('data-roi-state', 'form');
   setFormReadOnly(false);
 
-  if (roiTitle) roiTitle.innerHTML = 'Quanto custa o cliente <span>que nunca mais volta?</span>';
+  if (roiTitle) roiTitle.innerHTML = 'Simule o tamanho da <span>perda silenciosa da sua loja.</span>';
   if (roiSubtitle) {
-    roiSubtitle.textContent = 'Simule o impacto financeiro de pequenas falhas que fazem consumidores desistirem de comprar novamente.';
+    roiSubtitle.textContent = 'Use um cenário ilustrativo para estimar quanto pequenos atritos de loja podem representar na recorrência do supermercado.';
   }
-  if (roiFormTitle) roiFormTitle.textContent = 'Preencha os dados da sua operação';
-  if (roiOutputKicker) roiOutputKicker.textContent = 'O que você vai descobrir';
-  if (roiOutputTitle) roiOutputTitle.textContent = 'Descubra quanto dinheiro sua operação pode estar perdendo com clientes que não retornam';
+  if (roiFormTitle) roiFormTitle.textContent = 'Preencha os dados do seu supermercado';
+  if (roiOutputKicker) roiOutputKicker.textContent = 'O que você vai estimar';
+  if (roiOutputTitle) roiOutputTitle.textContent = 'Entenda o tamanho financeiro possível das falhas que ninguém está medindo';
   if (roiPrimaryAction) {
-    roiPrimaryAction.textContent = 'Calcular meu potencial de ganho';
+    roiPrimaryAction.textContent = 'Simular perda silenciosa';
     roiPrimaryAction.type = 'submit';
   }
   if (roiPreviewList) roiPreviewList.hidden = false;
   if (roiResultPanel) roiResultPanel.hidden = true;
   if (roiResultActions) roiResultActions.hidden = true;
   if (roiCommercialCopy) {
-    roiCommercialCopy.textContent = 'Pequenas falhas em atendimento, fila, ruptura, exposição e padrão de loja derrubam venda todos os dias. A Observe+ ajuda a transformar essas perdas invisíveis em plano de ação e resultado.';
+    roiCommercialCopy.textContent = 'Pequenas falhas em atendimento, fila, ruptura, exposição e padrão de loja podem derrubar recorrência. A Observe Mais ajuda a transformar essas perdas invisíveis em diagnóstico e plano de ação.';
   }
   if (roiImpactQuote) {
-    roiImpactQuote.innerHTML = 'A Observe+ não entra como custo. <strong>Entra como mecanismo para recuperar lucro perdido na operação.</strong>';
+    roiImpactQuote.innerHTML = 'Antes de prometer ganho, é preciso medir. <strong>O diagnóstico mostra onde a loja está deixando dinheiro escapar.</strong>';
   }
   clearError(errorMessage);
 }

@@ -1,0 +1,517 @@
+<!doctype html>
+<html lang="pt-BR">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Validação Geral do Site - Observe Mais</title>
+    <style>
+      :root {
+        --green: #25d670;
+        --black: #080908;
+        --ink: #202422;
+        --muted: #65716b;
+        --line: #dfe7e2;
+        --paper: #ffffff;
+        --soft: #f4faf6;
+        --warn: #fff4d8;
+        --bad: #ffe8e8;
+      }
+
+      * { box-sizing: border-box; }
+
+      body {
+        margin: 0;
+        color: var(--ink);
+        background: #edf3ef;
+        font-family: Arial, Helvetica, sans-serif;
+        line-height: 1.55;
+      }
+
+      header {
+        padding: 44px clamp(18px, 4vw, 56px);
+        color: #fff;
+        background: var(--black);
+      }
+
+      header h1 {
+        max-width: 980px;
+        margin: 0 0 12px;
+        font-size: clamp(2rem, 5vw, 4rem);
+        line-height: 1.05;
+      }
+
+      header p {
+        max-width: 920px;
+        margin: 0;
+        color: rgba(255, 255, 255, 0.76);
+        font-size: 1.05rem;
+      }
+
+      main {
+        width: min(calc(100% - 32px), 1180px);
+        margin: 28px auto 64px;
+      }
+
+      section,
+      .card {
+        margin-bottom: 22px;
+        padding: clamp(20px, 3vw, 34px);
+        background: var(--paper);
+        border: 1px solid var(--line);
+        border-radius: 8px;
+      }
+
+      h2,
+      h3 {
+        margin: 0 0 12px;
+        color: var(--black);
+        line-height: 1.18;
+      }
+
+      h2 { font-size: clamp(1.45rem, 3vw, 2.2rem); }
+      h3 { font-size: 1.12rem; }
+
+      .kicker {
+        margin: 0 0 8px;
+        color: #08743d;
+        font-size: .78rem;
+        font-weight: 800;
+        letter-spacing: .08em;
+        text-transform: uppercase;
+      }
+
+      .grid {
+        display: grid;
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+        gap: 18px;
+      }
+
+      .area-grid {
+        display: grid;
+        grid-template-columns: minmax(0, 1.08fr) minmax(0, .92fr);
+        gap: 20px;
+        align-items: start;
+      }
+
+      img {
+        display: block;
+        width: 100%;
+        height: auto;
+        border: 1px solid var(--line);
+        border-radius: 8px;
+      }
+
+      table {
+        width: 100%;
+        border-collapse: collapse;
+        overflow: hidden;
+        border: 1px solid var(--line);
+        border-radius: 8px;
+        font-size: .92rem;
+      }
+
+      th,
+      td {
+        padding: 12px;
+        text-align: left;
+        vertical-align: top;
+        border-bottom: 1px solid var(--line);
+      }
+
+      th {
+        color: var(--black);
+        background: var(--soft);
+      }
+
+      tr:last-child td { border-bottom: 0; }
+
+      .verdict {
+        display: inline-block;
+        padding: 6px 10px;
+        color: #111;
+        background: var(--warn);
+        border: 1px solid #ecd48f;
+        border-radius: 999px;
+        font-size: .78rem;
+        font-weight: 800;
+      }
+
+      .bad {
+        background: var(--bad);
+        border-color: #f0b4b4;
+      }
+
+      .ok {
+        background: #e4f8eb;
+        border-color: #9fdcb7;
+      }
+
+      .agent {
+        display: inline-block;
+        margin: 0 6px 6px 0;
+        padding: 4px 8px;
+        color: #06351e;
+        background: #dcf8e7;
+        border-radius: 999px;
+        font-size: .76rem;
+        font-weight: 800;
+      }
+
+      .option {
+        display: grid;
+        gap: 8px;
+        padding: 14px;
+        background: var(--soft);
+        border: 1px solid var(--line);
+        border-radius: 8px;
+      }
+
+      .option label {
+        display: flex;
+        gap: 10px;
+        align-items: flex-start;
+        color: var(--black);
+        font-weight: 800;
+      }
+
+      input[type="checkbox"] {
+        width: 20px;
+        height: 20px;
+        accent-color: var(--green);
+        flex: 0 0 auto;
+      }
+
+      .prompt {
+        padding: 12px;
+        color: #132019;
+        background: #f8fbf9;
+        border: 1px dashed #9ab7a6;
+        border-radius: 8px;
+        font-family: Consolas, Monaco, monospace;
+        font-size: .84rem;
+        white-space: pre-wrap;
+      }
+
+      .meta {
+        color: var(--muted);
+        font-size: .9rem;
+      }
+
+      .source-list a { color: #08743d; font-weight: 700; }
+
+      @media (max-width: 860px) {
+        .grid,
+        .area-grid { grid-template-columns: 1fr; }
+      }
+    </style>
+  </head>
+  <body>
+    <header>
+      <p class="kicker">Validação estratégica - 30/07/2026</p>
+      <h1>Observe Mais: validação geral para reposicionar o site em supermercados</h1>
+      <p>Documento de diagnóstico, não de execução. A única alteração aplicada nesta rodada foi a renomeação permitida do projeto/site para Observe Mais.</p>
+    </header>
+
+    <main>
+      <section>
+        <h2>Veredito Executivo</h2>
+        <p><span class="verdict bad">REPROVADO para campanha vertical de supermercados sem refatoração</span></p>
+        <p>O site atual tem boa base técnica e uma narrativa forte de “cliente que não volta”, mas ainda fala com operações genéricas. Para donos de supermercados, falta sentir imediatamente a rotina de margem apertada, fila, ruptura percebida, preço ausente, validade, limpeza, checkout e concorrente próximo. A hero chega perto, mas ainda não trava a conversa no supermercado.</p>
+        <div>
+          <span class="agent">@MKT:supermercado decidiu o foco setorial</span>
+          <span class="agent">@MKT:persona decidiu dor/objeções</span>
+          <span class="agent">@MKT decidiu SEO on-page</span>
+          <span class="agent">@MKT:validator validou riscos SEO</span>
+          <span class="agent">@C_Cetico contestou claims sem prova</span>
+        </div>
+      </section>
+
+      <section>
+        <h2>Fontes e Padrão SEO</h2>
+        <p>Critério usado: conteúdo útil para pessoas, title/H1 alinhados à intenção, imagens próximas de texto relevante com alt descritivo, schema apenas para conteúdo visível real e sem promessa de ranking.</p>
+        <p class="source-list">
+          Fontes oficiais: 
+          <a href="https://developers.google.com/search/docs/fundamentals/seo-starter-guide">SEO Starter Guide</a>,
+          <a href="https://developers.google.com/search/docs/appearance/google-images">Image SEO Best Practices</a>,
+          <a href="https://developers.google.com/search/docs/appearance/structured-data/sd-policies">Structured Data Guidelines</a>,
+          <a href="https://developers.google.com/search/docs/crawling-indexing/mobile/mobile-sites-mobile-first-indexing">Mobile-first indexing</a>.
+        </p>
+      </section>
+
+      <section>
+        <h2>Agentes Acionados</h2>
+        <table>
+          <thead><tr><th>Agente</th><th>Decisão</th><th>Por quê</th></tr></thead>
+          <tbody>
+            <tr><td>@ONB</td><td>Escopo: validação, não refatoração</td><td>O pedido pede diagnóstico com documento e permite apenas renomeação.</td></tr>
+            <tr><td>@MKT:supermercado</td><td>Verticalizar 100% para supermercados</td><td>A página atual ainda dilui a persona em “operações multiunidade”.</td></tr>
+            <tr><td>@MKT:persona</td><td>Hero deve falar com dono/diretor</td><td>A dor precisa aparecer como perda silenciosa operacional, não como frase genérica.</td></tr>
+            <tr><td>@MKT</td><td>Reestruturar SEO por intenção comercial</td><td>Termos prioritários: cliente oculto para supermercados, auditoria de experiência em loja, qualidade operacional de supermercado.</td></tr>
+            <tr><td>@MKT:validator</td><td>Bloquear claims sem prova</td><td>Métricas como ROI, redução e cases precisam de fonte, autorização ou nota explícita.</td></tr>
+            <tr><td>@C_Cetico</td><td>Plano aprovado só com ressalvas</td><td>As recomendações dependem de provas comerciais, metodologia real e autorização de imagens/clientes.</td></tr>
+          </tbody>
+        </table>
+      </section>
+
+      <section>
+        <h2>Resumo por Eixo</h2>
+        <table>
+          <thead><tr><th>Eixo</th><th>Status</th><th>Ação necessária</th></tr></thead>
+          <tbody>
+            <tr><td>Persona supermercado</td><td><span class="verdict bad">Não conforme</span></td><td>Trocar linguagem genérica por dono/diretor/gestor de supermercado.</td></tr>
+            <tr><td>Hero e primeira dobra</td><td><span class="verdict bad">Não conforme</span></td><td>Mostrar perda silenciosa no supermercado já no H1, imagem e CTA.</td></tr>
+            <tr><td>Imagens</td><td><span class="verdict">Parcial</span></td><td>Algumas remetem a supermercado, mas precisam parecer menos genéricas e mais operacionais.</td></tr>
+            <tr><td>SEO técnico básico</td><td><span class="verdict ok">Conforme com ressalvas</span></td><td>Metas existem, mas title/description/Hs devem focar supermercado.</td></tr>
+            <tr><td>Prova e confiança</td><td><span class="verdict">Parcial</span></td><td>Separar clientes supermercadistas, depoimentos autorizados e exemplos anonimizados.</td></tr>
+            <tr><td>Conversão</td><td><span class="verdict">Parcial</span></td><td>CTA precisa virar diagnóstico/checklist para supermercado, menos amplo.</td></tr>
+            <tr><td>Mensuração</td><td><span class="verdict">Parcial</span></td><td>Definir eventos de clique, envio de lead, scroll de prova e escolha de variante.</td></tr>
+          </tbody>
+        </table>
+      </section>
+
+      <section class="card">
+        <p class="kicker">Área 1 - Hero</p>
+        <h2>Estado atual</h2>
+        <div class="area-grid">
+          <img src="prints/01-hero-atual.png" alt="Print atual da hero do site Observe Mais" />
+          <div>
+            <p><strong>Problema:</strong> a imagem mostra supermercado, mas o texto ainda poderia servir para varejo, restaurante ou hotelaria. Falta a dor do dono: loja cheia, margem apertada e venda perdida por detalhes invisíveis.</p>
+            <p><strong>Decidido por:</strong> <span class="agent">@MKT:supermercado</span><span class="agent">@MKT:persona</span><span class="agent">@C_Cetico</span></p>
+            <div class="grid">
+              <div class="option">
+                <label><input type="checkbox" />Opção A - Dor direta</label>
+                <strong>H1:</strong> Seu supermercado perde vendas em falhas que ninguém da equipe está vendo.
+                <strong>Sub:</strong> Cliente oculto recorrente para revelar fila, ruptura percebida, preço ausente, validade, limpeza e atendimento antes que o cliente escolha o concorrente.
+                <strong>CTA:</strong> Quero diagnosticar minha loja
+              </div>
+              <div class="option">
+                <label><input type="checkbox" />Opção B - Voz do cliente</label>
+                <strong>H1:</strong> “Eu desisti da compra e você só viu o cupom que não saiu.”
+                <strong>Sub:</strong> A Observe Mais mostra onde a experiência do supermercado quebra: da entrada ao caixa, com evidências para priorizar correções.
+                <strong>CTA:</strong> Ver onde estou perdendo clientes
+              </div>
+            </div>
+            <p class="prompt">Prompt de imagem:
+Foto realista horizontal 16:9 dentro de um supermercado brasileiro de médio porte, corredor de mercearia e hortifruti ao fundo, um dono/gestor observando discretamente fila no caixa e gôndola com produto sem preço, clima profissional e consultivo, iluminação natural de loja, sem logotipos de marcas reais, sem texto na imagem, sem pessoas identificáveis olhando para a câmera, espaço limpo à esquerda para headline, cores neutras com acento verde #25D670 em elementos sutis de interface sobrepostos.</p>
+          </div>
+        </div>
+      </section>
+
+      <section class="card">
+        <p class="kicker">Área 2 - Métricas</p>
+        <h2>Estado atual</h2>
+        <div class="area-grid">
+          <img src="prints/02-metricas-atual.png" alt="Print atual da seção de métricas" />
+          <div>
+            <p><strong>Problema:</strong> números chamam atenção, mas não estão amarrados a supermercado. O claim “69,6%” é forte e precisa de fonte, contexto ou anonimização.</p>
+            <p><strong>Decidido por:</strong> <span class="agent">@MKT:validator</span><span class="agent">@C_Cetico</span></p>
+            <div class="grid">
+              <div class="option"><label><input type="checkbox" />Opção A - Prova segura</label><strong>Título:</strong> Evidências de loja antes da reclamação pública.<br /><strong>Cards:</strong> Auditorias em corredores, checkout e atendimento; falhas críticas acompanhadas; oportunidades priorizadas por impacto operacional.</div>
+              <div class="option"><label><input type="checkbox" />Opção B - Métrica com contexto</label><strong>Título:</strong> O que medimos no supermercado para proteger recorrência.<br /><strong>Cards:</strong> Fila e caixa; preço e exposição; atendimento, limpeza e validade.</div>
+            </div>
+            <p class="prompt">Prompt de imagem:
+Composição editorial 16:9 de indicadores reais de supermercado, close em checklist de auditoria em tablet com categorias fila, preço, ruptura, validade, limpeza e atendimento, ao fundo caixa e gôndolas desfocados, estilo fotográfico premium B2B, sem marcas, sem números inventados, sem texto legível além de rótulos genéricos, acento verde #25D670.</p>
+          </div>
+        </div>
+      </section>
+
+      <section class="card">
+        <p class="kicker">Área 3 - Dor / Custo da Inação</p>
+        <h2>Estado atual</h2>
+        <div class="area-grid">
+          <img src="prints/03-dor-atual.png" alt="Print atual da seção de dor" />
+          <div>
+            <p><strong>Problema:</strong> “cliente que não voltou” é bom, mas falta supermercado concreto: perecíveis, checkout, promoções, preço ausente, ruptura e concorrência de bairro.</p>
+            <p><strong>Decidido por:</strong> <span class="agent">@MKT:supermercado</span><span class="agent">@MKT:persona</span></p>
+            <div class="grid">
+              <div class="option"><label><input type="checkbox" />Opção A - Perda silenciosa</label><strong>H2:</strong> O cliente não reclama da fila, do preço ausente ou da gôndola vazia. Ele compra em outro mercado.<br /><strong>CTA:</strong> Encontrar perdas silenciosas da loja</div>
+              <div class="option"><label><input type="checkbox" />Opção B - Rotina do dono</label><strong>H2:</strong> Você não consegue estar em todos os corredores, todos os turnos, todos os dias.<br /><strong>CTA:</strong> Receber um diagnóstico de loja</div>
+            </div>
+            <p class="prompt">Prompt de imagem:
+Cena realista em supermercado brasileiro: gestor olhando relatório em tablet enquanto ao fundo há fila moderada no caixa, etiqueta de preço ausente em uma prateleira e repositor ajustando gôndola, tom sério e operacional, sem dramatização, sem logotipos, sem texto legível, fotografia corporativa natural, acentos verdes discretos.</p>
+          </div>
+        </div>
+      </section>
+
+      <section class="card">
+        <p class="kicker">Área 4 - Solução / Score</p>
+        <h2>Estado atual</h2>
+        <div class="area-grid">
+          <img src="prints/04-score-atual.png" alt="Print atual da seção O Score" />
+          <div>
+            <p><strong>Problema:</strong> a estrutura das três visões é boa, mas os cards ainda falam abstrato. Para supermercado, cada visão precisa revelar itens de auditoria que o dono reconhece na hora.</p>
+            <p><strong>Decidido por:</strong> <span class="agent">@MKT</span><span class="agent">@MKT:supermercado</span></p>
+            <div class="grid">
+              <div class="option"><label><input type="checkbox" />Opção A - Três visões operacionais</label><strong>Cards:</strong> Auditor vê execução; cliente sente atrito; liderança confirma rotina.<br /><strong>Fluxo:</strong> Evidências por setor -> divergências -> prioridade por loja -> plano de correção.</div>
+              <div class="option"><label><input type="checkbox" />Opção B - Checklist supermercadista</label><strong>Cards:</strong> Loja, atendimento e caixa; perecíveis e validade; ruptura, preço e exposição.<br /><strong>Fluxo:</strong> Visita oculta -> relatório -> Score -> reunião de ação.</div>
+            </div>
+            <p class="prompt">Prompt de imagem:
+Infográfico fotorealista 16:9 sobre cliente oculto em supermercado, três painéis visuais sem texto legível: auditor profissional com checklist, cliente real no corredor escolhendo produto, gerente conferindo execução interna; todos convergem para dashboard central com score abstrato, visual limpo, fundo de supermercado, verde #25D670, sem logotipos.</p>
+          </div>
+        </div>
+      </section>
+
+      <section class="card">
+        <p class="kicker">Área 5 - Plataforma / Relatório</p>
+        <h2>Estado atual</h2>
+        <div class="area-grid">
+          <img src="prints/05-plataforma-atual.png" alt="Print atual da seção plataforma" />
+          <div>
+            <p><strong>Problema:</strong> boa seção para explicar método, mas falta exemplo de relatório específico para supermercado e priorização por setor.</p>
+            <p><strong>Decidido por:</strong> <span class="agent">@MKT</span><span class="agent">@C_Cetico</span></p>
+            <div class="grid">
+              <div class="option"><label><input type="checkbox" />Opção A - Dashboard setorial</label><strong>H2:</strong> Veja qual loja, setor e turno estão custando recorrência.<br /><strong>Blocos:</strong> fila, preço, ruptura, validade, limpeza, atendimento.</div>
+              <div class="option"><label><input type="checkbox" />Opção B - Plano de ação</label><strong>H2:</strong> Relatório que não morre em PDF: vira prioridade para gerente e equipe.<br /><strong>Blocos:</strong> evidência, gravidade, responsável, prazo e nova medição.</div>
+            </div>
+            <p class="prompt">Prompt de imagem:
+Mockup realista de dashboard B2B em notebook e tablet sobre mesa de reunião de supermercado, gráficos por loja e setores como checkout, hortifruti, mercearia, açougue e atendimento, cards de prioridade sem números específicos, visual moderno, limpo, branco/preto/verde #25D670, sem marca real e sem texto pequeno ilegível.</p>
+          </div>
+        </div>
+      </section>
+
+      <section class="card">
+        <p class="kicker">Área 6 - Clientes / Prova</p>
+        <h2>Estado atual</h2>
+        <div class="area-grid">
+          <img src="prints/06-clientes-provas-atual.png" alt="Print atual da seção de clientes" />
+          <div>
+            <p><strong>Problema:</strong> há logos fortes, inclusive supermercados, mas a página mistura segmentos. Para vender ao supermercadista, separar “redes e mercados atendidos” dos demais segmentos aumenta relevância.</p>
+            <p><strong>Decidido por:</strong> <span class="agent">@MKT:validator</span><span class="agent">@MKT:supermercado</span></p>
+            <div class="grid">
+              <div class="option"><label><input type="checkbox" />Opção A - Prova vertical</label><strong>H2:</strong> Supermercados que usam evidência para proteger padrão de loja.<br /><strong>Nota:</strong> Exibir apenas clientes autorizados do varejo alimentar.</div>
+              <div class="option"><label><input type="checkbox" />Opção B - Prova por operação</label><strong>H2:</strong> Operações com loja física que decidiram medir a experiência real.<br /><strong>Nota:</strong> Separar supermercado, food service e varejo em tabs.</div>
+            </div>
+            <p class="prompt">Prompt de imagem:
+Foto institucional 16:9 de reunião entre consultor e dono de supermercado em sala simples anexa à loja, mesa com relatório impresso anonimizado e tablet, gôndolas visíveis ao fundo pela porta, clima de confiança e operação real, sem logotipos, sem rostos reconhecíveis, sem texto legível.</p>
+          </div>
+        </div>
+      </section>
+
+      <section class="card">
+        <p class="kicker">Área 7 - Depoimentos</p>
+        <h2>Estado atual</h2>
+        <div class="area-grid">
+          <img src="prints/07-depoimentos-atual.png" alt="Print atual da seção de depoimentos" />
+          <div>
+            <p><strong>Problema:</strong> depoimentos ajudam, mas precisam de autorização e contexto. Para supermercados, o melhor depoimento fala de execução, padronização, atendimento e plano de ação.</p>
+            <p><strong>Decidido por:</strong> <span class="agent">@MKT:validator</span><span class="agent">@C_Cetico</span></p>
+            <div class="grid">
+              <div class="option"><label><input type="checkbox" />Opção A - Depoimento setorial</label><strong>Estrutura:</strong> “Encontramos falhas de execução que não apareciam nos indicadores internos.” + cargo + rede autorizada.</div>
+              <div class="option"><label><input type="checkbox" />Opção B - Prova sem depoimento</label><strong>Estrutura:</strong> “Exemplo anonimizado de melhoria” com antes/depois operacional sem número sensível.</div>
+            </div>
+            <p class="prompt">Prompt de imagem:
+Retrato ambiental não identificável de gerente de supermercado analisando relatório de cliente oculto, foco nas mãos, crachá desfocado sem nome, tablet com gráficos abstratos, fundo com prateleiras organizadas, estilo documental premium, sem logotipo, sem texto legível, iluminação realista.</p>
+          </div>
+        </div>
+      </section>
+
+      <section class="card">
+        <p class="kicker">Área 8 - Sobre / Método</p>
+        <h2>Estado atual</h2>
+        <div class="area-grid">
+          <img src="prints/08-sobre-atual.png" alt="Print atual da seção sobre" />
+          <div>
+            <p><strong>Problema:</strong> bom institucional, mas precisa provar metodologia: como visita, o que mede, como protege privacidade e como transforma evidência em ação.</p>
+            <p><strong>Decidido por:</strong> <span class="agent">@MKT</span><span class="agent">@MKT:validator</span></p>
+            <div class="grid">
+              <div class="option"><label><input type="checkbox" />Opção A - Método</label><strong>H2:</strong> Cliente oculto com roteiro, evidência e reunião de priorização.<br /><strong>Blocos:</strong> visita, checklist, evidência, score, plano.</div>
+              <div class="option"><label><input type="checkbox" />Opção B - Confiança</label><strong>H2:</strong> Uma visão externa da loja, sem expor cliente, equipe ou marca.<br /><strong>Blocos:</strong> anonimato, critérios, recorrência, devolutiva.</div>
+            </div>
+            <p class="prompt">Prompt de imagem:
+Cena horizontal 16:9 de auditor profissional em supermercado preenchendo checklist discreto no celular, foco no método e não em espionagem, ambiente claro, funcionários e clientes desfocados e não identificáveis, sem uniforme de fiscalização, sem marcas, estética séria e confiável, acento verde #25D670.</p>
+          </div>
+        </div>
+      </section>
+
+      <section class="card">
+        <p class="kicker">Área 9 - Simulador ROI</p>
+        <h2>Estado atual</h2>
+        <div class="area-grid">
+          <img src="prints/09-roi-atual.png" alt="Print atual da seção de simulador ROI" />
+          <div>
+            <p><strong>Problema:</strong> é uma boa ferramenta de conversão, mas as hipóteses (+10% cupons, +12% ticket) são sensíveis. Para excelência SEO/comercial, manter disclaimer e transformar em “simulação de cenário”, não promessa.</p>
+            <p><strong>Decidido por:</strong> <span class="agent">@MKT:validator</span><span class="agent">@C_Cetico</span><span class="agent">@BI</span></p>
+            <div class="grid">
+              <div class="option"><label><input type="checkbox" />Opção A - Diagnóstico antes de ROI</label><strong>H2:</strong> Simule o tamanho da perda silenciosa da sua loja.<br /><strong>Campos:</strong> lojas, cupons, ticket, margem, visitas ocultas.</div>
+              <div class="option"><label><input type="checkbox" />Opção B - Checklist como lead magnet</label><strong>H2:</strong> Receba um checklist de auditoria para supermercado.<br /><strong>Conversão:</strong> Captura lead com menor risco de claim financeiro.</div>
+            </div>
+            <p class="prompt">Prompt de imagem:
+Imagem 16:9 de calculadora/relatório em tela de tablet sobre carrinho de compras, com categorias operacionais de supermercado e indicadores abstratos, sem valores financeiros específicos, sem promessas de ROI, visual limpo B2B, verde #25D670 como destaque, fundo de loja real desfocado.</p>
+          </div>
+        </div>
+      </section>
+
+      <section class="card">
+        <p class="kicker">Área 10 - FAQ</p>
+        <h2>Estado atual</h2>
+        <div class="area-grid">
+          <img src="prints/10-faq-atual.png" alt="Print atual da seção FAQ" />
+          <div>
+            <p><strong>Problema:</strong> FAQ responde dúvidas gerais do Score. Para supermercado, deve responder objeções comerciais reais: frequência, anonimato, setores medidos, fotos, privacidade, devolutiva e implantação.</p>
+            <p><strong>Decidido por:</strong> <span class="agent">@MKT:persona</span><span class="agent">@MKT</span></p>
+            <div class="grid">
+              <div class="option"><label><input type="checkbox" />Opção A - FAQ comercial</label>Perguntas: quanto custa, em quanto tempo começa, quem visita, como recebo o relatório, quais setores entram, como proteger privacidade.</div>
+              <div class="option"><label><input type="checkbox" />Opção B - FAQ operacional</label>Perguntas: mede fila? ruptura? validade? limpeza? atendimento? preço? Como comparar lojas e turnos?</div>
+            </div>
+            <p class="prompt">Prompt de imagem:
+Não usar imagem nesta área. Preferir FAQ textual rastreável, escaneável e com schema FAQPage apenas se as perguntas/respostas estiverem visíveis na página e forem aprovadas comercialmente.</p>
+          </div>
+        </div>
+      </section>
+
+      <section class="card">
+        <p class="kicker">Área 11 - CTA Final</p>
+        <h2>Estado atual</h2>
+        <div class="area-grid">
+          <img src="prints/11-cta-final-atual.png" alt="Print atual do CTA final" />
+          <div>
+            <p><strong>Problema:</strong> CTA atual é forte, mas ainda amplo. Deve fechar com ação específica: diagnóstico de loja, checklist de cliente oculto ou conversa com especialista em supermercado.</p>
+            <p><strong>Decidido por:</strong> <span class="agent">@MKT:persona</span><span class="agent">@MKT:supermercado</span></p>
+            <div class="grid">
+              <div class="option"><label><input type="checkbox" />Opção A - Diagnóstico</label><strong>H2:</strong> Descubra o que sua loja perde antes que apareça no caixa.<br /><strong>CTA:</strong> Agendar diagnóstico do supermercado</div>
+              <div class="option"><label><input type="checkbox" />Opção B - Checklist</label><strong>H2:</strong> Veja se sua loja está deixando clientes escaparem em detalhes simples.<br /><strong>CTA:</strong> Receber checklist de cliente oculto</div>
+            </div>
+            <p class="prompt">Prompt de imagem:
+Imagem de fundo 16:9 para CTA final, supermercado brasileiro visto do alto em horário de movimento moderado, caixa e corredores organizados, clima de oportunidade e controle operacional, sem texto, sem marcas, sem rostos identificáveis, espaço central livre para chamada, paleta preto/branco com acento verde #25D670.</p>
+          </div>
+        </div>
+      </section>
+
+      <section>
+        <h2>Plano de Refatoração Recomendado</h2>
+        <table>
+          <thead><tr><th>Prioridade</th><th>Ação</th><th>Owner</th><th>Critério de aceite</th></tr></thead>
+          <tbody>
+            <tr><td>1</td><td>Refazer hero com promessa, imagem e CTA 100% supermercado.</td><td>@MKT:supermercado + @D</td><td>Primeira dobra responde: para quem, dor, resultado e próximo passo.</td></tr>
+            <tr><td>2</td><td>Reescrever title, meta description, H1/H2 e FAQ para intenção comercial vertical.</td><td>@MKT</td><td>Sem stuffing; cada heading ajuda a decisão do supermercadista.</td></tr>
+            <tr><td>3</td><td>Trocar ou regenerar imagens por cenas reais de supermercado e relatórios anonimizados.</td><td>@D + @MKT:validator</td><td>Alt text descritivo, arquivo com nome semântico e imagem próxima ao texto relacionado.</td></tr>
+            <tr><td>4</td><td>Reorganizar prova social por segmento e remover qualquer claim sem fonte.</td><td>@C_Cetico + @MKT:validator</td><td>Cliente, depoimento e número só entram com autorização/fonte ou como exemplo anonimizado.</td></tr>
+            <tr><td>5</td><td>Transformar ROI em simulação segura ou checklist de diagnóstico.</td><td>@BI + @MKT:persona</td><td>Evento de conversão mensurável e disclaimer claro.</td></tr>
+            <tr><td>6</td><td>Validar mobile, performance percebida e acessibilidade.</td><td>@Q + @P</td><td>`npm.cmd run check` verde + smoke 390/768/1440 px.</td></tr>
+          </tbody>
+        </table>
+      </section>
+
+      <section>
+        <h2>Checklist do Cliente</h2>
+        <p>Use estes checks para escolher a direção antes da refatoração.</p>
+        <div class="grid">
+          <label><input type="checkbox" />Hero A - dor direta</label>
+          <label><input type="checkbox" />Hero B - voz do cliente</label>
+          <label><input type="checkbox" />Métricas A - prova segura</label>
+          <label><input type="checkbox" />Métricas B - métrica com contexto</label>
+          <label><input type="checkbox" />ROI A - diagnóstico antes de ROI</label>
+          <label><input type="checkbox" />ROI B - checklist como lead magnet</label>
+          <label><input type="checkbox" />Prova A - clientes supermercadistas</label>
+          <label><input type="checkbox" />Prova B - prova por operação</label>
+        </div>
+      </section>
+
+      <section>
+        <h2>Veredito Cético Final</h2>
+        <p><strong>@C_Cetico:</strong> o plano é bom, mas só deve entrar em implementação quando houver decisão sobre qual opção por área será usada, quais clientes/depoimentos podem aparecer, quais números têm fonte e se o simulador de ROI continuará como conversão principal. Sem isso, a refatoração corre risco de ficar bonita, mas frágil em prova comercial e SEO.</p>
+        <p><strong>Próximo passo obrigatório:</strong> cliente escolher opções A/B no documento; depois abrir spec de refatoração com critérios de aceite e smoke responsivo.</p>
+      </section>
+    </main>
+  </body>
+</html>

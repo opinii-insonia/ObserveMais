@@ -9,7 +9,7 @@ function playVideoInline() {
   const origin = encodeURIComponent(window.location.origin);
 
   iframe.src = `https://www.youtube-nocookie.com/embed/${videoId}?autoplay=1&rel=0&origin=${origin}`;
-  iframe.title = 'Vídeo da Observall';
+  iframe.title = 'Vídeo da Observe Mais';
   iframe.allow = 'accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share';
   iframe.referrerPolicy = 'strict-origin-when-cross-origin';
   iframe.allowFullscreen = true;

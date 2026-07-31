@@ -64,5 +64,5 @@ createServer((request, response) => {
   response.writeHead(200, { 'Content-Type': types[extname(file)] || 'application/octet-stream' });
   createReadStream(file).pipe(response);
 }).listen(port, '127.0.0.1', () => {
-  console.log(`Observall disponível em http://127.0.0.1:${port}`);
+  console.log(`Observe Mais disponível em http://127.0.0.1:${port}`);
 });

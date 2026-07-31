@@ -1,6 +1,6 @@
-# Observall — novo site institucional
+# Observe Mais — site institucional
 
-Landing page estática, responsiva e preparada para deploy na Vercel.
+Landing page estática, responsiva e preparada para deploy na Vercel, com comunicação direcionada a cliente oculto para supermercados.
 
 ## Comandos
 
@@ -14,8 +14,8 @@ O build final é criado em `dist/`. O deploy da Vercel usa `vercel.json`, roda `
 
 ## Estrutura
 
-- `index.html`: conteúdo e semântica.
-- `styles.css`: sistema visual Observall.
+- `index.html`: conteúdo, semântica e SEO on-page.
+- `styles.css`: sistema visual Observe Mais.
 - `script.js`: menu, animações, FAQ e calculadora de ROI.
 - `public/assets/`: imagens próprias recuperadas do site atual.
 - `api/`: funções serverless da Vercel para captura/exportação de leads.

@@ -1,4 +1,4 @@
-# ARCHITECTURE — Observall Site
+# ARCHITECTURE — Observe Mais Site
 
 > Planta técnica deste repositório. Documento exclusivamente AS-IS, derivado do código real.
 

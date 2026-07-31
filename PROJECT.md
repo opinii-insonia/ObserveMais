@@ -1,16 +1,16 @@
-# Projeto Observall
+# Projeto Observe Mais
 
 ## Objetivo
 
-Apresentar a Observall como uma solução de diagnóstico para operações: Auditor Profissional, Cliente Real e Operação Interna se cruzam em um único Score da Loja, usado para priorizar riscos e planos de ação.
+Apresentar a Observe Mais como uma solução de cliente oculto para supermercados: visitas orientadas por roteiro revelam fila, ruptura percebida, preço ausente, validade, limpeza, atendimento e exposição antes que o cliente escolha o concorrente.
 
 ## Produto
 
-- Público: gestores de varejo, restaurantes, hotelaria e operações correlatas.
-- Conversão principal: conversa comercial via WhatsApp e captura de lead na calculadora de ROI.
+- Público: donos de supermercados, diretores de redes regionais e gestores de operação de loja.
+- Conversão principal: conversa comercial via WhatsApp e captura de lead na simulação de perda silenciosa.
 - Paleta: `#25D670`, `#000000`, `#FFFFFF`.
 - A calculadora é uma simulação ilustrativa; não representa garantia comercial.
-- O Score não publica fórmula, pesos ou disponibilidade operacional sem confirmação do produto.
+- O diagnóstico não publica fórmula, pesos, ROI garantido ou disponibilidade operacional sem confirmação do produto.
 
 ## Arquitetura
 
@@ -20,13 +20,13 @@ O desenho técnico derivado do código está em `ARCHITECTURE.md`.
 
 ## Estado de entrega
 
-- A alteração editorial do Score foi validada localmente em 2026-07-17.
+- A verticalização para supermercados com a Opção A de cada área foi implementada localmente em 2026-07-31.
 - Produção, DNS e credenciais não foram acessados nem alterados.
 - O artefato `dist/` foi regenerado localmente; publicação exige `@CRED` e confirmação explícita.
 
 ## Lacunas
 
-- Aprovação visual e editorial do responsável pela Observall.
-- Fórmula, pesos e disponibilidade pública do Score, se vierem a ser divulgados.
+- Aprovação visual e editorial do responsável pela Observe Mais.
+- Provas comerciais, depoimentos e métricas setoriais só devem entrar com autorização/fonte.
 - Configuração confirmada do Blob Store privado e de `ROI_LEADS_TOKEN` no ambiente de hospedagem.
 - Smoke pós-publicação e confirmação de SSL, somente após autorização de deploy.

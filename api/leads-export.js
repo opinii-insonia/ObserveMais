@@ -149,7 +149,7 @@ function renderHtml(records, url) {
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>Leads ROI Observall</title>
+  <title>Leads ROI Observe Mais</title>
   <style>
     :root {
       color-scheme: light;

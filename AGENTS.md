@@ -1,4 +1,4 @@
-# Regras do projeto Observall
+# Regras do projeto Observe Mais
 
 A fonte de governança é [`.codex/AGENTS.md`](.codex/AGENTS.md).
 

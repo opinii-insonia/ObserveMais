@@ -44,7 +44,7 @@ O escopo é institucional e precisa funcionar com baixo risco em hospedagem comp
 
 ### Decisão
 
-Replicar hierarquia, ritmo, composição e qualidade percebida da referência, mas usar apenas conteúdo, identidade e assets próprios da Observall.
+Replicar hierarquia, ritmo, composição e qualidade percebida da referência, mas usar apenas conteúdo, identidade e assets próprios da Observe Mais.
 
 ### Motivo
 
