@@ -71,6 +71,10 @@ export default async function handler(request, response) {
       });
       storage = 'blob';
     } catch (error) {
+      // Sem Blob Store conectado o lead cai em disco efêmero da função e se perde no
+      // reciclo da instância. O visitante ainda vê sucesso, então o único sinal de que
+      // isso está acontecendo é este log e o campo `storage` da resposta.
+      console.error('[lead-capture] Blob indisponível, lead em armazenamento temporário:', error?.message);
       const storageDir = join(tmpdir(), 'observall');
       await mkdir(storageDir, { recursive: true });
       await appendFile(join(storageDir, 'roi-leads.jsonl'), line, 'utf8');

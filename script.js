@@ -54,31 +54,6 @@ document.querySelectorAll('.faq-list details').forEach((item) => {
   });
 });
 
-const clientCarouselViewport = document.querySelector('.client-carousel-viewport');
-const clientCarouselTrack = document.querySelector('.client-track');
-let carouselResumeTimer;
-
-function moveClientCarousel(direction) {
-  if (!clientCarouselViewport || !clientCarouselTrack) return;
-
-  window.clearTimeout(carouselResumeTimer);
-  clientCarouselTrack.classList.add('is-paused');
-  clientCarouselViewport.scrollBy({
-    left: direction * Math.min(clientCarouselViewport.clientWidth * 0.72, 620),
-    behavior: reducedMotion ? 'auto' : 'smooth',
-  });
-
-  carouselResumeTimer = window.setTimeout(() => {
-    clientCarouselTrack.classList.remove('is-paused');
-  }, 1600);
-}
-
-document.querySelectorAll('[data-carousel-direction]').forEach((button) => {
-  button.addEventListener('click', () => {
-    moveClientCarousel(button.dataset.carouselDirection === 'next' ? 1 : -1);
-  });
-});
-
 const roiForm = document.querySelector('#roi-form');
 const errorMessage = document.querySelector('#form-error');
 const leadModal = document.querySelector('#lead-modal');

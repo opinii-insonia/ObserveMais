@@ -8,14 +8,96 @@ const read = (file) => readFile(new URL(`../${file}`, import.meta.url), 'utf8');
 test('a landing fala diretamente com supermercados e cliente oculto', async () => {
   const html = await read('index.html');
 
-  assert.match(html, /Cliente oculto para supermercados/i);
+  assert.match(html, /Cliente oculto para supermercados com IA/i);
   assert.match(html, /Seu supermercado perde vendas em falhas que ninguém da equipe está vendo/i);
   assert.match(html, /fila, ruptura percebida, preço ausente, validade, limpeza e atendimento/i);
-  assert.match(html, /Quero diagnosticar minha loja/i);
   assert.match(html, /Evidências por setor viram[\s\S]*prioridade por loja/i);
   assert.match(html, /Cliente oculto com roteiro, evidência e[\s\S]*reunião de priorização/i);
   assert.match(html, /Dúvidas Frequentes/i);
   assert.match(html, /wa\.me\/5561993715292/);
+});
+
+test('comunica a IA como diferencial, com leitura de dados e entrega no WhatsApp', async () => {
+  const html = await read('index.html');
+
+  assert.match(html, /class="hero-ai"/);
+  assert.match(html, /entrega o insight no seu WhatsApp/i);
+  assert.match(html, /lê o volume de dados que ninguém tem tempo de ler/i);
+  assert.match(html, /interpreta e prioriza\. A visita em loja continua sendo feita por avaliadores humanos\./);
+  assert.doesNotMatch(html, /IA substitui|IA garante|diagnóstico automático sem visita/i);
+});
+
+test('toda menção a IA recebe o destaque em gradiente', async () => {
+  const [html, css] = await Promise.all([read('index.html'), read('styles.css')]);
+
+  assert.match(css, /\.ia\s*\{[^}]*color:\s*var\(--ia-solid\)/s, 'precisa de cor de fallback antes do gradiente');
+  assert.match(css, /background-clip:\s*text/);
+  assert.match(css, /\.ia-mark\s*\{[^}]*var\(--ia-gradient\)/s);
+  assert.match(css, /\.site-footer \.ia\s*\{/, 'fundo escuro precisa de gradiente próprio');
+
+  // O gradiente é roxo -> azul; não pode voltar a puxar para o verde da marca.
+  assert.match(css, /--ia-gradient:\s*linear-gradient\([^)]*#7C3AED[^)]*#2E9BF5/i);
+  assert.doesNotMatch(css, /--ia-gradient[^;]*#0FA958/i);
+
+  // Nenhuma menção textual a IA pode ficar sem o destaque.
+  const body = html.slice(html.indexOf('<body>')).replace(/<script[\s\S]*?<\/script>/g, '');
+  const plain = body.replace(/<span[^>]*class="[^"]*\bia(?:-mark)?\b[^"]*"[^>]*>[\s\S]*?<\/span>/g, '');
+  const leftovers = [...plain.matchAll(/>[^<>]*\b(IA|intelig[êe]ncia artificial)\b/gi)].map((m) => m[0].trim());
+
+  assert.deepEqual(leftovers, [], `menções a IA sem destaque: ${leftovers.join(' | ')}`);
+});
+
+test('o Score da Loja aparece como mockup próprio das três visões', async () => {
+  const [html, css] = await Promise.all([read('index.html'), read('styles.css')]);
+
+  assert.match(html, /class="score360 reveal"/);
+  assert.match(html, /O que o auditor vê/);
+  assert.match(html, /O que o cliente fala/);
+  assert.match(html, /O que a liderança reporta/);
+  assert.match(html, /Boa execução, mas baixa percepção do cliente/);
+  assert.match(html, /class="solutions-divergence reveal"/);
+  assert.match(css, /\.score360\s*\{/);
+
+  // Substitui a imagem antiga e não pode citar cliente real.
+  assert.doesNotMatch(html, /diagnostico-tres-visoes-supermercado-v1\.png/);
+  const mock = html.match(/<figure class="score360[\s\S]*?<\/figure>/)?.[0];
+  assert.ok(mock, 'o mockup do Score deveria existir');
+  for (const brand of ['big box', 'ultrabox', 'ultra box', 'observe+']) {
+    assert.ok(!mock.toLowerCase().includes(brand), `o mockup não deveria citar "${brand}"`);
+  }
+});
+
+test('padroniza o CTA de conversão, sem barra flutuante', async () => {
+  const [html, css, js] = await Promise.all([read('index.html'), read('styles.css'), read('script.js')]);
+  const ctaLabels = [...html.matchAll(/>([^<>]*Agendar diagnóstico[^<>]*)</g)].map((match) => match[1].trim());
+
+  assert.ok(ctaLabels.length >= 6, `esperava ao menos 6 CTAs padronizados, achei ${ctaLabels.length}`);
+
+  assert.doesNotMatch(html, /Quero diagnosticar minha loja/i);
+  assert.doesNotMatch(html, /Encontrar perdas silenciosas da loja/i);
+  assert.doesNotMatch(html, /Conhecer resultados em supermercados/i);
+
+  // A barra flutuante foi removida: o único elemento fixo é o botão do WhatsApp.
+  for (const source of [html, css, js]) {
+    assert.doesNotMatch(source, /cta-dock/);
+  }
+  assert.match(html, /class="whatsapp-float"/);
+});
+
+test('responde por que Observe Mais logo depois da hero', async () => {
+  const [html, css] = await Promise.all([read('index.html'), read('styles.css')]);
+
+  // O bloco precisa ser a primeira seção depois da hero: é a resposta que sustenta a página.
+  const sections = [...html.matchAll(/<section[^>]*\b(?:class="[^"]*"|id="[^"]*")[^>]*>/g)].map((m) => m[0]);
+  assert.match(sections[0], /class="hero"/);
+  assert.match(sections[1], /id="diferenciais"/);
+  assert.match(html, /Cliente oculto sozinho mostra um lado\. <span>Nós mostramos os três\.<\/span>/);
+  assert.match(html, /Por que Observe Mais e não outra empresa de cliente oculto\?/i);
+  assert.match(html, /NPS e pesquisa/);
+  assert.match(html, /Checklist da operação/);
+  assert.match(html, /Visita de cliente oculto/);
+  assert.match(html, /class="gap-callout[^"]*"/);
+  assert.match(css, /\.views-grid\s*\{[^}]*grid-template-columns:\s*repeat\(3/s);
 });
 
 test('modela três visões que viram prioridade e deixa a IA depois do diagnóstico', async () => {
@@ -36,10 +118,10 @@ test('modela três visões que viram prioridade e deixa a IA depois do diagnóst
 test('mantém SEO on-page alinhado à vertical sem prometer ranking', async () => {
   const html = await read('index.html');
 
-  assert.match(html, /<title>Cliente oculto para supermercados \| Observe Mais<\/title>/);
-  assert.match(html, /name="description"[\s\S]*Cliente oculto para supermercados/);
+  assert.match(html, /<title>Cliente oculto para supermercados com IA \| Observe Mais<\/title>/);
+  assert.match(html, /name="description"[\s\S]*Cliente oculto para supermercados com IA/);
   assert.match(html, /property="og:image"/);
-  assert.match(html, /property="og:title" content="Observe Mais — Cliente oculto para supermercados"/);
+  assert.match(html, /property="og:title" content="Observe Mais — Cliente oculto para supermercados com IA"/);
   assert.doesNotMatch(html, /primeira posição|ranking garantido|tráfego garantido/i);
 });
 
@@ -49,12 +131,19 @@ test('usa dados estruturados somente para conteúdo visível real', async () => 
   const organization = jsonLd.find((item) => item['@type'] === 'Organization');
   const faq = jsonLd.find((item) => item['@type'] === 'FAQPage');
 
+  // O texto visível pode conter marcação inline (ex.: <span class="ia">); o contrato é o
+  // conteúdo, não as tags. Por isso comparamos contra o HTML sem marcação.
+  const visible = html.replace(/<script[\s\S]*?<\/script>/g, '').replace(/<[^>]+>/g, '');
+
   assert.equal(organization.name, 'Observe Mais');
   assert.ok(faq.mainEntity.length >= 5);
 
   for (const item of faq.mainEntity) {
-    assert.match(html, new RegExp(item.name.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')));
-    assert.match(html, new RegExp(item.acceptedAnswer.text.slice(0, 44).replace(/[.*+?^${}()|[\]\\]/g, '\\$&')));
+    assert.ok(visible.includes(item.name), `pergunta ausente do conteúdo visível: ${item.name}`);
+    assert.ok(
+      visible.includes(item.acceptedAnswer.text.slice(0, 44)),
+      `resposta ausente do conteúdo visível: ${item.name}`,
+    );
   }
 });
 
@@ -74,9 +163,9 @@ test('usa a identidade Observe Mais no header e rodapé', async () => {
   const html = await read('index.html');
 
   assert.match(html, /Observe Mais/);
-  assert.match(html, /class="brand-wordmark"/);
-  assert.match(html, /class="footer-wordmark"/);
-  assert.doesNotMatch(html, /Observe\+/);
+  assert.match(html, /class="brand-logo"[\s\S]*?logo-observe-plus-light\.png[\s\S]*?alt="Observe Mais"/);
+  assert.match(html, /class="footer-logo"[\s\S]*?logo-observe-plus-dark\.png[\s\S]*?alt="Observe Mais"/);
+  assert.doesNotMatch(html, /class="brand-wordmark"/);
   assert.doesNotMatch(html, /alt="Observall"/);
 });
 
@@ -96,6 +185,7 @@ test('preserva a sequência de seções comerciais', async () => {
 
   const order = [
     'class="hero"',
+    'id="diferenciais"',
     'class="metrics-strip"',
     'class="section value-section"',
     'id="solucoes"',
@@ -260,11 +350,6 @@ test('usa assets próprios com nomes alinhados a Observe Mais', async () => {
   const html = await read('index.html');
 
   for (const asset of [
-    'public/assets/generated-supermercado/hero-supermercado-cliente-oculto-v1.png',
-    'public/assets/generated-supermercado/evidencias-checklist-supermercado-v1.png',
-    'public/assets/generated-supermercado/perda-silenciosa-supermercado-v1.png',
-    'public/assets/generated-supermercado/diagnostico-tres-visoes-supermercado-v1.png',
-    'public/assets/generated-supermercado/dashboard-setorial-supermercado-v1.png',
     'public/assets/generated-supermercado/prova-reuniao-supermercado-v1.png',
     'public/assets/generated-supermercado/depoimento-relatorio-supermercado-v1.png',
     'public/assets/generated-supermercado/metodo-auditor-supermercado-v1.png',
@@ -277,39 +362,92 @@ test('usa assets próprios com nomes alinhados a Observe Mais', async () => {
   await access(new URL('../public/assets/generated-supermercado/cta-supermercado-operacao-v1.png', import.meta.url));
 });
 
+test('as evidências de topo usam fotos reais de operação, não ilustração', async () => {
+  const html = await read('index.html');
+
+  for (const photo of [
+    'public/assets/reais/ruptura-gondola.png',
+    'public/assets/reais/corredor-desorganizado.png',
+    'public/assets/reais/fila-checkout.png',
+  ]) {
+    assert.match(html, new RegExp(photo.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')));
+    await access(new URL(`../${photo}`, import.meta.url));
+  }
+
+  // Hero, evidências e perda silenciosa não podem voltar para a ilustração gerada.
+  // Caminho completo: "perda-silenciosa" é substring de "simulacao-perda-silenciosa",
+  // que segue em uso legítimo na calculadora.
+  for (const generated of [
+    'public/assets/generated-supermercado/hero-supermercado-cliente-oculto-v1.png',
+    'public/assets/generated-supermercado/evidencias-checklist-supermercado-v1.png',
+    'public/assets/generated-supermercado/perda-silenciosa-supermercado-v1.png',
+  ]) {
+    assert.doesNotMatch(html, new RegExp(generated.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')));
+  }
+
+  // Nomes de arquivo precisam ser seguros em URL: sem acento, espaço ou maiúscula.
+  const sources = [...html.matchAll(/src="(public\/assets\/[^"]+)"/g)].map((m) => m[1]);
+  for (const source of sources) {
+    assert.match(source, /^[a-z0-9/_.-]+$/, `caminho de asset inseguro para URL: ${source}`);
+  }
+});
+
 test('exibe prova social voltada a supermercados', async () => {
   const [html, css, js] = await Promise.all([read('index.html'), read('styles.css'), read('script.js')]);
 
   assert.match(html, /id="clientes"/);
   assert.match(html, /Supermercados que usam evidência para <span>proteger padrão de loja\.<\/span>/);
   assert.match(html, /aria-label="Logos de clientes"/);
-  assert.match(html, /Conhecer resultados em supermercados/);
 
-  for (const logo of ['goldko', 'ultrabox', 'derela', 'bigbox', 'nativas', 'tecnotica', 'lojas-mel']) {
+  for (const logo of ['bigbox', 'ultrabox']) {
     assert.match(html, new RegExp(`public/assets/clients/${logo}\\.png`));
   }
 
-  assert.match(css, /@keyframes\s+logo-marquee/);
-  assert.match(js, /function moveClientCarousel/);
+  for (const logo of ['goldko', 'derela', 'nativas', 'tecnotica', 'lojas-mel']) {
+    assert.doesNotMatch(html, new RegExp(`public/assets/clients/${logo}\\.png`));
+  }
+
+  assert.match(css, /\.client-wall\s*\{/);
+  assert.doesNotMatch(css, /@keyframes\s+logo-marquee/);
+  assert.doesNotMatch(js, /moveClientCarousel/);
 });
 
-test('os depoimentos reforçam execução e prioridade operacional', async () => {
+test('mantém apenas o depoimento de supermercado, em destaque', async () => {
   const [html, css] = await Promise.all([read('index.html'), read('styles.css')]);
+  const cards = [...html.matchAll(/class="testimonial-card[^"]*"/g)];
 
   assert.match(html, /class="testimonials-section"/);
+  assert.equal(cards.length, 1);
   assert.match(html, /Bruna Reges/);
-  assert.match(html, /Marcus/);
-  assert.match(html, /Márcia Matos/);
+  assert.match(html, /Big Box e Ultrabox/);
   assert.match(html, /Encontramos falhas de execução que não apareciam nos indicadores internos/);
-  assert.match(html, /prioridade para a gestão/);
-  assert.match(css, /\.testimonials-section\s*\{[^}]*grid-template-columns:\s*repeat\(3,\s*1fr\)/s);
+  assert.doesNotMatch(html, /Marcus/);
+  assert.doesNotMatch(html, /Márcia Matos/);
+  assert.match(css, /\.testimonials-section\s*\{[^}]*grid-template-columns:\s*1fr/s);
+});
+
+test('o relatório é um mockup próprio, sem nome de cliente e sem dado real', async () => {
+  const [html, css] = await Promise.all([read('index.html'), read('styles.css')]);
+
+  assert.match(html, /class="report-mock"/);
+  assert.match(html, /Exemplo ilustrativo da estrutura do relatório\. Lojas anonimizadas e números fictícios\./);
+  assert.match(html, /Loja A — Centro/);
+  assert.match(css, /\.report-mock\s*\{/);
+
+  assert.doesNotMatch(html, /dashboard-setorial-supermercado-v1\.png/);
+
+  const mock = html.match(/<figure class="report-mock"[\s\S]*?<\/figure>/)?.[0];
+  assert.ok(mock, 'o mockup do relatório deveria existir');
+  for (const brand of ['big box', 'ultra box', 'ultrabox', 'brasília', 'bigbox']) {
+    assert.ok(!mock.toLowerCase().includes(brand), `o mockup não deveria citar "${brand}"`);
+  }
 });
 
 test('todas as imagens referenciadas resolvem localmente', async () => {
   const html = await read('index.html');
   const sources = [...html.matchAll(/src="(public\/assets\/[^"]+)"/g)].map((match) => match[1]);
 
-  assert.ok(sources.length >= 14);
+  assert.ok(sources.length >= 12, `esperava ao menos 12 imagens, achei ${sources.length}`);
   await Promise.all(sources.map((source) => access(new URL(`../${source}`, import.meta.url))));
 });
 

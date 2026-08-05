@@ -4,7 +4,7 @@ function isAuthorized(request) {
   const expected = process.env.ROI_LEADS_TOKEN;
   if (!expected) return false;
 
-  const url = new URL(request.url, `https://${request.headers.host || 'observall.com.br'}`);
+  const url = new URL(request.url, `https://${request.headers.host || 'observemais.com.br'}`);
   const provided = request.headers['x-leads-token'] || url.searchParams.get('token');
   return provided === expected;
 }
@@ -350,7 +350,7 @@ export default async function handler(request, response) {
   }
 
   try {
-    const url = new URL(request.url, `https://${request.headers.host || 'observall.com.br'}`);
+    const url = new URL(request.url, `https://${request.headers.host || 'observemais.com.br'}`);
     const format = url.searchParams.get('format');
     const records = [];
     let cursor;
