@@ -125,6 +125,46 @@ test('mantém SEO on-page alinhado à vertical sem prometer ranking', async () =
   assert.doesNotMatch(html, /primeira posição|ranking garantido|tráfego garantido/i);
 });
 
+test('entrega favicon, canonical e cartão de compartilhamento completos', async () => {
+  const html = await read('index.html');
+
+  assert.match(html, /<link rel="canonical" href="https:\/\/observemais\.com\.br\/" \/>/);
+  assert.match(html, /<link rel="icon" href="\/favicon\.svg" type="image\/svg\+xml" \/>/);
+  assert.match(html, /<link rel="apple-touch-icon"/);
+  assert.match(html, /name="robots" content="index, follow/);
+
+  for (const tag of ['og:site_name', 'og:locale', 'og:type', 'og:url', 'og:title', 'og:description', 'og:image', 'og:image:width', 'og:image:height', 'og:image:alt']) {
+    assert.match(html, new RegExp(`property="${tag}"`), `faltou ${tag}`);
+  }
+
+  for (const tag of ['twitter:card', 'twitter:title', 'twitter:description', 'twitter:image']) {
+    assert.match(html, new RegExp(`name="${tag}"`), `faltou ${tag}`);
+  }
+
+  assert.match(html, /name="twitter:card" content="summary_large_image"/);
+
+  // og:image e canonical precisam ser absolutos: crawler não resolve caminho relativo.
+  const absolute = [...html.matchAll(/(?:property="og:image"|name="twitter:image"|rel="canonical")[^>]*?(?:content|href)="([^"]+)"/g)].map((m) => m[1]);
+  assert.ok(absolute.length >= 3);
+  for (const url of absolute) {
+    assert.match(url, /^https:\/\/observemais\.com\.br\//, `URL de compartilhamento não absoluta: ${url}`);
+  }
+});
+
+test('publica favicon, robots e sitemap na raiz do build', async () => {
+  const build = await read('scripts/build.mjs');
+
+  for (const file of ['favicon.svg', 'robots.txt', 'sitemap.xml']) {
+    await access(new URL(`../${file}`, import.meta.url));
+    assert.match(build, new RegExp(`'${file.replace('.', '\\.')}'`), `${file} não é copiado para dist/`);
+  }
+
+  const [robots, sitemap] = await Promise.all([read('robots.txt'), read('sitemap.xml')]);
+  assert.match(robots, /Sitemap: https:\/\/observemais\.com\.br\/sitemap\.xml/);
+  assert.match(robots, /Disallow: \/api\//);
+  assert.match(sitemap, /<loc>https:\/\/observemais\.com\.br\/<\/loc>/);
+});
+
 test('usa dados estruturados somente para conteúdo visível real', async () => {
   const html = await read('index.html');
   const jsonLd = [...html.matchAll(/<script type="application\/ld\+json">([\s\S]*?)<\/script>/g)].map((match) => JSON.parse(match[1]));

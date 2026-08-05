@@ -1,0 +1,7 @@
+User-agent: *
+Allow: /
+
+# A exportação de leads é protegida por token, mas não deve ser rastreada.
+Disallow: /api/
+
+Sitemap: https://observemais.com.br/sitemap.xml

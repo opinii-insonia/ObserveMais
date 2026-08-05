@@ -6,7 +6,17 @@ const dist = new URL('../dist/', import.meta.url);
 await rm(dist, { recursive: true, force: true });
 await mkdir(dist, { recursive: true });
 
-for (const file of ['index.html', 'styles.css', 'script.js', 'video.js']) {
+// favicon.svg, robots.txt e sitemap.xml precisam ficar na raiz do dist/ para
+// responderem em /favicon.svg, /robots.txt e /sitemap.xml.
+for (const file of [
+  'index.html',
+  'styles.css',
+  'script.js',
+  'video.js',
+  'favicon.svg',
+  'robots.txt',
+  'sitemap.xml',
+]) {
   await cp(new URL(`../${file}`, import.meta.url), new URL(`../dist/${file}`, import.meta.url));
 }
 
