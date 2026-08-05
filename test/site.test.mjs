@@ -151,6 +151,27 @@ test('entrega favicon, canonical e cartão de compartilhamento completos', async
   }
 });
 
+test('mantém as imagens leves o bastante para prévia e celular', async () => {
+  const { stat } = await import('node:fs/promises');
+  const html = await read('index.html');
+
+  // WhatsApp e Facebook costumam desistir da prévia acima de ~600KB.
+  const og = await stat(new URL('../public/assets/og-observe-mais-tres-visoes.jpg', import.meta.url));
+  assert.ok(og.size < 600 * 1024, `og:image tem ${Math.round(og.size / 1024)}KB, acima do limite de prévia`);
+  assert.match(html, /property="og:image:type" content="image\/jpeg"/);
+  assert.match(html, /property="og:image:width" content="1200"/);
+  assert.match(html, /property="og:image:height" content="630"/);
+
+  // Fotografia entra como JPEG: PNG dobrava o peso da landing.
+  const fotos = [...html.matchAll(/src="(public\/assets\/reais\/[^"]+)"/g)].map((m) => m[1]);
+  assert.ok(fotos.length >= 3);
+  for (const foto of fotos) {
+    assert.match(foto, /\.jpg$/, `foto de operação deveria ser JPEG: ${foto}`);
+    const info = await stat(new URL(`../${foto}`, import.meta.url));
+    assert.ok(info.size < 250 * 1024, `${foto} tem ${Math.round(info.size / 1024)}KB`);
+  }
+});
+
 test('publica favicon, robots e sitemap na raiz do build', async () => {
   const build = await read('scripts/build.mjs');
 
@@ -203,8 +224,8 @@ test('usa a identidade Observe Mais no header e rodapé', async () => {
   const html = await read('index.html');
 
   assert.match(html, /Observe Mais/);
-  assert.match(html, /class="brand-logo"[\s\S]*?logo-observe-plus-light\.png[\s\S]*?alt="Observe Mais"/);
-  assert.match(html, /class="footer-logo"[\s\S]*?logo-observe-plus-dark\.png[\s\S]*?alt="Observe Mais"/);
+  assert.match(html, /class="brand-logo"[\s\S]*?logo-observe-plus-light-web.png[\s\S]*?alt="Observe Mais"/);
+  assert.match(html, /class="footer-logo"[\s\S]*?logo-observe-plus-dark-web.png[\s\S]*?alt="Observe Mais"/);
   assert.doesNotMatch(html, /class="brand-wordmark"/);
   assert.doesNotMatch(html, /alt="Observall"/);
 });
@@ -268,7 +289,7 @@ test('incorpora o vídeo enviado na área de método', async () => {
   const [html, videoJs] = await Promise.all([read('index.html'), read('video.js')]);
 
   assert.match(html, /class="about-video reveal" data-youtube-video="yuGAr_NQis8"/);
-  assert.match(html, /public\/assets\/generated-supermercado\/metodo-auditor-supermercado-v1\.png/);
+  assert.match(html, /public\/assets\/generated-supermercado\/metodo-auditor-supermercado-v1\.jpg/);
   assert.match(html, /Reproduzir vídeo/);
   assert.match(videoJs, /youtube-nocookie\.com\/embed/);
   assert.match(videoJs, /replaceChildren\(iframe\)/);
@@ -390,10 +411,10 @@ test('usa assets próprios com nomes alinhados a Observe Mais', async () => {
   const html = await read('index.html');
 
   for (const asset of [
-    'public/assets/generated-supermercado/prova-reuniao-supermercado-v1.png',
-    'public/assets/generated-supermercado/depoimento-relatorio-supermercado-v1.png',
-    'public/assets/generated-supermercado/metodo-auditor-supermercado-v1.png',
-    'public/assets/generated-supermercado/simulacao-perda-silenciosa-supermercado-v1.png',
+    'public/assets/generated-supermercado/prova-reuniao-supermercado-v1.jpg',
+    'public/assets/generated-supermercado/depoimento-relatorio-supermercado-v1.jpg',
+    'public/assets/generated-supermercado/metodo-auditor-supermercado-v1.jpg',
+    'public/assets/generated-supermercado/simulacao-perda-silenciosa-supermercado-v1.jpg',
   ]) {
     assert.match(html, new RegExp(asset.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')));
     await access(new URL(`../${asset}`, import.meta.url));
@@ -406,9 +427,9 @@ test('as evidências de topo usam fotos reais de operação, não ilustração',
   const html = await read('index.html');
 
   for (const photo of [
-    'public/assets/reais/ruptura-gondola.png',
-    'public/assets/reais/corredor-desorganizado.png',
-    'public/assets/reais/fila-checkout.png',
+    'public/assets/reais/ruptura-gondola.jpg',
+    'public/assets/reais/corredor-desorganizado.jpg',
+    'public/assets/reais/fila-checkout.jpg',
   ]) {
     assert.match(html, new RegExp(photo.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')));
     await access(new URL(`../${photo}`, import.meta.url));
