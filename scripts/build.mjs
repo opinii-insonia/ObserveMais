@@ -16,6 +16,9 @@ for (const file of [
   'favicon.svg',
   'robots.txt',
   'sitemap.xml',
+  // Simulador interno: fora do menu e do sitemap, bloqueado no robots.txt.
+  'simulador-interno-a7f39c2b.html',
+  'simulador.js',
 ]) {
   await cp(new URL(`../${file}`, import.meta.url), new URL(`../dist/${file}`, import.meta.url));
 }

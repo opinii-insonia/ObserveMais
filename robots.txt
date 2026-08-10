@@ -4,4 +4,8 @@ Allow: /
 # A exportação de leads é protegida por token, mas não deve ser rastreada.
 Disallow: /api/
 
+# Páginas de uso interno não são listadas aqui de propósito: este arquivo é
+# público e citar o caminho o entregaria. Elas saem do índice pelo meta
+# noindex, que só funciona se o crawler puder ler a página.
+
 Sitemap: https://observemais.com.br/sitemap.xml

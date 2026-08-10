@@ -214,10 +214,11 @@ test('mantém linguagem segura para simulação de perda silenciosa', async () =
 
   assert.doesNotMatch(productSource, /Alpine/i);
   assert.doesNotMatch(html, /fórmula do Score|peso(?:s)? do Score/i);
-  assert.match(html, /simulação ilustrativa/i);
-  assert.match(html, /Não representa garantia de venda, lucro, ROI ou payback/i);
-  assert.match(html, /Simule o tamanho da <span>perda silenciosa da sua loja\.<\/span>/i);
   assert.doesNotMatch(html, /ROI garantido|aumento de vendas garantido|lucro garantido/i);
+
+  // O simulador saiu da landing: nem calculadora, nem números de ROI na página pública.
+  assert.doesNotMatch(html, /id="roi-form"|calculator-layout|id="resultados"/);
+  assert.doesNotMatch(html, /payback|ROI anual/i);
 });
 
 test('usa a identidade Observe Mais no header e rodapé', async () => {
@@ -254,7 +255,6 @@ test('preserva a sequência de seções comerciais', async () => {
     'id="clientes"',
     'id="depoimentos"',
     'id="sobre"',
-    'id="resultados"',
     'id="faq"',
     'class="section final-cta-section"',
   ];
@@ -296,27 +296,94 @@ test('incorpora o vídeo enviado na área de método', async () => {
   assert.match(videoJs, /window\.location\.protocol === 'file:'/);
 });
 
-test('implementa calculadora com captura de lead antes do resultado', async () => {
+test('todo CTA de conversão abre o formulário inteligente', async () => {
   const [html, js] = await Promise.all([read('index.html'), read('script.js')]);
 
-  for (const id of ['stores', 'coupons', 'ticket', 'margin', 'visits']) {
-    assert.match(html, new RegExp(`id="${id}"`));
+  // Nenhum CTA de conversão pode continuar mandando direto para o WhatsApp:
+  // o lead precisa passar pelo formulário antes.
+  const ctas = [...html.matchAll(/<(a|button)[^>]*>([^<]*Agendar diagnóstico[^<]*)</g)];
+  assert.ok(ctas.length >= 6, `esperava ao menos 6 CTAs, achei ${ctas.length}`);
+  for (const [tag] of ctas.map((m) => [m[1]])) {
+    assert.equal(tag, 'button', 'CTA de conversão deveria ser botão que abre o formulário');
   }
+  assert.equal([...html.matchAll(/data-lead-flow/g)].length, ctas.length);
 
-  for (const id of ['lead-name', 'lead-company', 'lead-whatsapp', 'lead-email']) {
-    assert.match(html, new RegExp(`id="${id}"`));
-  }
-
-  assert.match(html, /class="calculator-layout reveal"/);
-  assert.match(html, /id="lead-modal"/);
-  assert.match(html, /Simular perda silenciosa/);
-  assert.match(html, /Ver meu resultado/);
-  assert.match(js, /observallVisitPrice:\s*300/);
-  assert.match(js, /couponGrowth:\s*0\.1/);
-  assert.match(js, /ticketGrowth:\s*0\.12/);
+  assert.match(html, /id="lead-flow"/);
   assert.match(js, /\/api\/lead-capture/);
   assert.doesNotMatch(js, /lead-capture\.php/);
-  assert.match(js, /Preencha todos os campos para calcular seu potencial de ganho/);
+});
+
+test('o formulário pergunta um campo por vez, na ordem definida', async () => {
+  const [html, js, css] = await Promise.all([read('index.html'), read('script.js'), read('styles.css')]);
+
+  const etapas = [...html.matchAll(/class="lead-step[^"]*" data-step="([^"]+)"/g)].map((m) => m[1]);
+  assert.deepEqual(etapas, ['email', 'whatsapp', 'nome', 'empresa', 'cargo']);
+
+  // Só uma etapa visível por vez.
+  assert.match(css, /\.lead-step\s*\{[^}]*display:\s*none/s);
+  assert.match(css, /\.lead-step\.is-active\s*\{[^}]*display:\s*block/s);
+
+  for (const chave of etapas) {
+    assert.match(js, new RegExp(`${chave}:\\s*\\{`), `faltou regra de validação para ${chave}`);
+  }
+
+  assert.match(js, /function mostrarEtapa/);
+  assert.match(js, /data-flow-bar/);
+  assert.match(html, /role="progressbar"/);
+});
+
+test('o lead segue para a planilha sem credencial no navegador', async () => {
+  const [api, appsScript, js] = await Promise.all([
+    read('api/lead-capture.js'),
+    read('scripts/planilha-leads.gs'),
+    read('script.js'),
+  ]);
+
+  assert.match(api, /SHEETS_WEBHOOK_URL/);
+  assert.match(api, /SHEETS_WEBHOOK_SECRET/);
+  assert.match(api, /function enviarParaPlanilha/);
+  assert.match(api, /cargo:/);
+
+  // Falha na planilha não pode derrubar a captura: o lead já está no Blob.
+  assert.match(api, /catch[\s\S]*?return 'falhou'/);
+
+  assert.match(appsScript, /function doPost/);
+  assert.match(appsScript, /dados\.segredo !== SEGREDO/);
+
+  // Nenhum segredo ou URL de planilha pode vazar para o frontend.
+  assert.doesNotMatch(js, /SHEETS_WEBHOOK|script\.google\.com|docs\.google\.com/);
+});
+
+test('o simulador de ROI sai da landing e vive em página interna', async () => {
+  const [html, interno, simulador, build, robots] = await Promise.all([
+    read('index.html'),
+    read('simulador-interno-a7f39c2b.html'),
+    read('simulador.js'),
+    read('scripts/build.mjs'),
+    read('robots.txt'),
+  ]);
+
+  // Fora da landing e de qualquer navegação.
+  assert.doesNotMatch(html, /simulador-interno|simulador\.js|id="roi-form"/);
+
+  assert.match(interno, /name="robots" content="noindex, nofollow/);
+  assert.match(interno, /id="revenue"/, 'faltou o campo de faturamento');
+  assert.match(interno, /Fórmula por trás do cálculo/);
+  assert.match(interno, /Uso interno/);
+
+  // A fórmula publicada tem que bater com a implementada.
+  assert.match(simulador, /observallVisitPrice:\s*300/);
+  assert.match(simulador, /couponGrowth:\s*0\.1/);
+  assert.match(simulador, /ticketGrowth:\s*0\.12/);
+  assert.match(interno, /R\$ 300/);
+  assert.match(interno, /\+10%/);
+  assert.match(interno, /\+12%/);
+
+  assert.match(build, /simulador-interno-a7f39c2b\.html/);
+  assert.match(build, /'simulador\.js'/);
+
+  // robots.txt é público: citar o caminho interno ali o entregaria.
+  assert.doesNotMatch(robots, /simulador/i);
 });
 
 test('o endpoint local de leads responde pela rota Vercel', async () => {
@@ -414,7 +481,7 @@ test('usa assets próprios com nomes alinhados a Observe Mais', async () => {
     'public/assets/generated-supermercado/prova-reuniao-supermercado-v1.jpg',
     'public/assets/generated-supermercado/depoimento-relatorio-supermercado-v1.jpg',
     'public/assets/generated-supermercado/metodo-auditor-supermercado-v1.jpg',
-    'public/assets/generated-supermercado/simulacao-perda-silenciosa-supermercado-v1.jpg',
+    
   ]) {
     assert.match(html, new RegExp(asset.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')));
     await access(new URL(`../${asset}`, import.meta.url));

@@ -1,0 +1,193 @@
+<!doctype html>
+<html lang="pt-BR">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+
+    <!-- Página interna: não deve ser indexada nem seguida por buscadores. -->
+    <meta name="robots" content="noindex, nofollow, noarchive, nosnippet" />
+    <meta name="referrer" content="no-referrer" />
+
+    <title>Simulador interno de ROI | Observe Mais</title>
+    <link rel="icon" href="/favicon.svg" type="image/svg+xml" />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700;800&display=swap"
+      rel="stylesheet"
+    />
+    <link rel="stylesheet" href="styles.css" />
+    <script src="simulador.js" defer></script>
+  </head>
+  <body class="interno">
+    <svg class="icon-sprite" aria-hidden="true" focusable="false">
+      <symbol id="icon-store" viewBox="0 0 24 24">
+        <path d="M3 10.5 5 4h14l2 6.5" />
+        <path d="M4 10.5a3 3 0 0 0 5 2.2 3 3 0 0 0 6 0 3 3 0 0 0 5-2.2" />
+        <path d="M5 12v8h14v-8M9 20v-5h6v5" />
+      </symbol>
+      <symbol id="icon-receipt" viewBox="0 0 24 24">
+        <path d="M6 3h12v18l-3-2-3 2-3-2-3 2V3Z" />
+        <path d="M9 8h6M9 12h6M9 16h4" />
+      </symbol>
+      <symbol id="icon-card" viewBox="0 0 24 24">
+        <rect x="3" y="5" width="18" height="14" rx="2" />
+        <path d="M3 10h18M7 15h3" />
+      </symbol>
+      <symbol id="icon-pie-chart" viewBox="0 0 24 24">
+        <path d="M12 3v9h9" />
+        <path d="M21 12a9 9 0 1 1-9-9" />
+      </symbol>
+      <symbol id="icon-eye" viewBox="0 0 24 24">
+        <path d="M2.5 12s3.5-6 9.5-6 9.5 6 9.5 6-3.5 6-9.5 6-9.5-6-9.5-6Z" />
+        <circle cx="12" cy="12" r="2.5" />
+      </symbol>
+      <symbol id="icon-coins" viewBox="0 0 24 24">
+        <ellipse cx="12" cy="6" rx="7" ry="3" />
+        <path d="M5 6v5c0 1.7 3.1 3 7 3s7-1.3 7-3V6M5 11v5c0 1.7 3.1 3 7 3s7-1.3 7-3v-5" />
+      </symbol>
+      <symbol id="icon-trend" viewBox="0 0 24 24">
+        <path d="m3 16 6-6 4 4 8-8" />
+        <path d="M15 6h6v6" />
+      </symbol>
+      <symbol id="icon-clock" viewBox="0 0 24 24">
+        <path d="M4 12a8 8 0 1 0 2.2-5.5" />
+        <path d="M4 4v4h4M12 7v5l3 2" />
+      </symbol>
+      <symbol id="icon-chart" viewBox="0 0 24 24">
+        <path d="M4 20V4M4 20h16" />
+        <path d="M8 16v-4M12 16V8M16 16v-7" />
+      </symbol>
+      <symbol id="icon-wallet" viewBox="0 0 24 24">
+        <path d="M4 7.5A2.5 2.5 0 0 1 6.5 5H19v14H6.5A2.5 2.5 0 0 1 4 16.5v-9Z" />
+        <path d="M4 8h15M15 13h4" />
+      </symbol>
+    </svg>
+
+    <main class="container interno-wrap">
+      <header class="interno-head">
+        <img src="public/assets/logo-observe-plus-light-web.png" alt="Observe Mais" width="440" height="87" />
+        <div>
+          <p class="interno-tag">Uso interno</p>
+          <h1>Simulador de ROI</h1>
+          <p class="interno-sub">
+            Ferramenta de apoio comercial. Não está publicada no site e não deve ser
+            enviada a cliente sem revisão — os números são hipóteses de discussão,
+            não projeção contratável.
+          </p>
+        </div>
+      </header>
+
+      <div class="calculator-layout" data-roi-state="form">
+        <form class="roi-form" id="roi-form">
+          <div class="form-heading">
+            <span>Cenário</span>
+            <h3 id="roi-form-title">Dados da operação</h3>
+            <p>Preencha o que o cliente informou. O faturamento, quando conhecido, substitui a estimativa de cupons × ticket.</p>
+          </div>
+
+          <div class="field-grid roi-fields">
+            <label><svg class="field-icon" aria-hidden="true" focusable="false" viewBox="0 0 24 24"><use href="#icon-store" /></svg><span>Quantidade de lojas</span><input id="stores" name="stores" type="text" value="12" inputmode="numeric" autocomplete="off" /></label>
+            <label><svg class="field-icon" aria-hidden="true" focusable="false" viewBox="0 0 24 24"><use href="#icon-wallet" /></svg><span>Faturamento mensal (opcional)</span><input id="revenue" name="revenue" type="text" value="" placeholder="R$ 0" inputmode="decimal" autocomplete="off" /></label>
+            <label><svg class="field-icon" aria-hidden="true" focusable="false" viewBox="0 0 24 24"><use href="#icon-receipt" /></svg><span>Cupons por mês</span><input id="coupons" name="coupons" type="text" value="12.000" inputmode="numeric" autocomplete="off" /></label>
+            <label><svg class="field-icon" aria-hidden="true" focusable="false" viewBox="0 0 24 24"><use href="#icon-card" /></svg><span>Ticket médio atual</span><input id="ticket" name="ticket" type="text" value="R$ 80" inputmode="decimal" autocomplete="off" /></label>
+            <label><svg class="field-icon" aria-hidden="true" focusable="false" viewBox="0 0 24 24"><use href="#icon-pie-chart" /></svg><span>Margem de lucro média</span><input id="margin" name="margin" type="text" value="20%" inputmode="decimal" autocomplete="off" /></label>
+            <label><svg class="field-icon" aria-hidden="true" focusable="false" viewBox="0 0 24 24"><use href="#icon-eye" /></svg><span>Visitas ocultas por loja / mês</span><input id="visits" name="visits" type="text" value="1" inputmode="numeric" autocomplete="off" /></label>
+          </div>
+
+          <p class="roi-note"><span aria-hidden="true">i</span><span class="roi-note__copy">Esta é uma <strong>simulação ilustrativa</strong>, baseada em hipóteses comerciais para discussão. Não representa garantia de venda, lucro, ROI ou payback.</span></p>
+
+          <div class="form-actions">
+            <button class="button button-primary" id="roi-primary-action" type="submit">Calcular</button>
+            <button class="button button-ghost" id="roi-example" type="button">Restaurar exemplo</button>
+          </div>
+
+          <p class="form-error" id="form-error" role="alert" hidden></p>
+        </form>
+
+        <aside class="roi-output" aria-live="polite">
+          <span class="output-kicker" id="roi-output-kicker">Resultado</span>
+          <h3 id="roi-output-title">Estimativa do cenário informado</h3>
+
+          <div class="roi-result-panel" id="roi-result-panel">
+            <div class="result-highlight"><svg class="result-icon" aria-hidden="true" focusable="false" viewBox="0 0 24 24"><use href="#icon-clock" /></svg><strong id="payback-value">Payback estimado: —</strong></div>
+            <div class="result-row"><span><svg class="result-icon" aria-hidden="true" focusable="false" viewBox="0 0 24 24"><use href="#icon-coins" /></svg>Receita extra estimada / mês</span><strong id="extra-revenue">—</strong></div>
+            <div class="result-row"><span><svg class="result-icon" aria-hidden="true" focusable="false" viewBox="0 0 24 24"><use href="#icon-trend" /></svg>Lucro incremental / mês</span><strong id="incremental-profit">—</strong></div>
+            <div class="result-row"><span><svg class="result-icon" aria-hidden="true" focusable="false" viewBox="0 0 24 24"><use href="#icon-card" /></svg>Investimento Observe Mais / mês</span><strong id="monthly-investment">—</strong></div>
+            <div class="result-row"><span><svg class="result-icon" aria-hidden="true" focusable="false" viewBox="0 0 24 24"><use href="#icon-chart" /></svg>ROI anual estimado</span><strong id="roi-value">—</strong></div>
+            <div class="result-row"><span><svg class="result-icon" aria-hidden="true" focusable="false" viewBox="0 0 24 24"><use href="#icon-wallet" /></svg>Ganho líquido anual estimado</span><strong id="annual-net-gain">—</strong></div>
+          </div>
+
+          <p class="interno-aviso" id="revenue-check" hidden></p>
+        </aside>
+      </div>
+
+      <section class="formula-box">
+        <h2>Fórmula por trás do cálculo</h2>
+
+        <p class="formula-intro">
+          O simulador não mede a loja. Ele projeta um cenário a partir de duas hipóteses
+          fixas de melhoria e do preço de visita praticado. Toda a matemática está abaixo.
+        </p>
+
+        <h3>Premissas fixas</h3>
+        <table class="formula-table">
+          <tbody>
+            <tr><td>Preço por visita oculta</td><td><code>R$ 300</code></td></tr>
+            <tr><td>Crescimento hipotético de cupons</td><td><code>+10%</code></td></tr>
+            <tr><td>Crescimento hipotético de ticket médio</td><td><code>+12%</code></td></tr>
+          </tbody>
+        </table>
+
+        <h3>Passo a passo</h3>
+        <ol class="formula-steps">
+          <li>
+            <strong>Investimento mensal</strong>
+            <code>lojas × visitas por loja × 300</code>
+          </li>
+          <li>
+            <strong>Investimento anual</strong>
+            <code>investimento mensal × 12</code>
+          </li>
+          <li>
+            <strong>Receita atual</strong>
+            <code>faturamento informado</code> — ou, se em branco, <code>cupons × ticket</code>
+          </li>
+          <li>
+            <strong>Receita projetada</strong>
+            <code>receita atual × 1,10 × 1,12</code>
+            <small>Os dois crescimentos se multiplicam, resultando em +23,2% sobre a receita atual.</small>
+          </li>
+          <li>
+            <strong>Receita extra</strong>
+            <code>receita projetada − receita atual</code>
+          </li>
+          <li>
+            <strong>Lucro incremental mensal</strong>
+            <code>receita extra × (margem ÷ 100)</code>
+          </li>
+          <li>
+            <strong>Payback em meses</strong>
+            <code>investimento anual ÷ lucro incremental mensal</code>
+          </li>
+          <li>
+            <strong>Ganho líquido anual</strong>
+            <code>(lucro incremental mensal × 12) − investimento anual</code>
+          </li>
+          <li>
+            <strong>ROI anual</strong>
+            <code>(ganho líquido anual ÷ investimento anual) × 100</code>
+          </li>
+        </ol>
+
+        <div class="formula-alerta">
+          <strong>Leia antes de usar em proposta.</strong>
+          <p>
+            Os ganhos de 10% e 12% são premissas arbitradas para dimensionar conversa, não
+            resultados observados. Como se multiplicam, qualquer cenário devolve receita
+            extra positiva — inclusive os irreais. O payback ignora o tempo de maturação da
+            correção em loja, então tende a ser otimista.
+          </p>
+        </div>
+      </section>
+    </main>
+  </body>
+</html>

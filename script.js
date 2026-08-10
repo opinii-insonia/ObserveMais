@@ -54,322 +54,177 @@ document.querySelectorAll('.faq-list details').forEach((item) => {
   });
 });
 
-const roiForm = document.querySelector('#roi-form');
-const errorMessage = document.querySelector('#form-error');
-const leadModal = document.querySelector('#lead-modal');
-const leadForm = document.querySelector('#lead-form');
-const leadError = document.querySelector('#lead-error');
-const calculatorLayout = document.querySelector('.calculator-layout');
-const roiTitle = document.querySelector('#results-title');
-const roiSubtitle = document.querySelector('#roi-subtitle');
-const roiFormTitle = document.querySelector('#roi-form-title');
-const roiOutputKicker = document.querySelector('#roi-output-kicker');
-const roiOutputTitle = document.querySelector('#roi-output-title');
-const roiPrimaryAction = document.querySelector('#roi-primary-action');
-const roiPreviewList = document.querySelector('#roi-preview-list');
-const roiResultPanel = document.querySelector('#roi-result-panel');
-const roiResultActions = document.querySelector('#roi-result-actions');
-const roiCommercialCopy = document.querySelector('#roi-commercial-copy');
-const roiImpactQuote = document.querySelector('#roi-impact-quote');
-const currency = new Intl.NumberFormat('pt-BR', {
-  style: 'currency',
-  currency: 'BRL',
-  maximumFractionDigits: 0,
-});
-const integer = new Intl.NumberFormat('pt-BR', { maximumFractionDigits: 0 });
-const ROI_ASSUMPTIONS = {
-  observallVisitPrice: 300,
-  couponGrowth: 0.1,
-  ticketGrowth: 0.12,
+/* Formulário inteligente: uma pergunta por vez. */
+
+const leadFlow = document.querySelector('#lead-flow');
+const leadFlowForm = document.querySelector('#lead-flow-form');
+const leadFlowDone = document.querySelector('#lead-flow-done');
+const leadFlowError = document.querySelector('#lead-flow-error');
+const leadFlowBar = document.querySelector('[data-flow-bar]');
+const leadFlowBack = document.querySelector('[data-flow-back]');
+const leadFlowNext = document.querySelector('[data-flow-next]');
+const leadSteps = leadFlow ? [...leadFlow.querySelectorAll('.lead-step')] : [];
+
+const LEAD_RULES = {
+  email: {
+    valida: (v) => /^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/.test(v),
+    erro: 'Digite um e-mail válido, como voce@empresa.com.br.',
+  },
+  whatsapp: {
+    // Aceita 10 ou 11 dígitos (fixo ou celular), com ou sem máscara.
+    valida: (v) => /^\d{10,13}$/.test(v.replace(/\D/g, '')),
+    erro: 'Digite um WhatsApp com DDD, como (61) 99999-9999.',
+  },
+  nome: { valida: (v) => v.trim().length >= 2, erro: 'Digite seu nome.' },
+  empresa: { valida: (v) => v.trim().length >= 2, erro: 'Digite o nome da empresa.' },
+  cargo: { valida: (v) => v.trim().length >= 2, erro: 'Digite seu cargo.' },
 };
-let pendingSimulation = null;
-let latestSimulation = null;
 
-function parseBrazilianNumber(value) {
-  const normalized = String(value || '')
-    .replace(/[^\d,.-]/g, '')
-    .replace(/\.(?=\d{3}(\D|$))/g, '')
-    .replace(',', '.');
+let leadStepIndex = 0;
+let leadOrigem = '';
 
-  return Number(normalized);
+function mascararWhatsapp(valor) {
+  const d = valor.replace(/\D/g, '').slice(0, 11);
+  if (d.length <= 2) return d;
+  if (d.length <= 6) return `(${d.slice(0, 2)}) ${d.slice(2)}`;
+  if (d.length <= 10) return `(${d.slice(0, 2)}) ${d.slice(2, 6)}-${d.slice(6)}`;
+  return `(${d.slice(0, 2)}) ${d.slice(2, 7)}-${d.slice(7)}`;
 }
 
-function valueOf(id) {
-  return parseBrazilianNumber(document.querySelector(`#${id}`)?.value);
+function mostrarEtapa(indice) {
+  leadStepIndex = Math.max(0, Math.min(indice, leadSteps.length - 1));
+
+  leadSteps.forEach((etapa, i) => etapa.classList.toggle('is-active', i === leadStepIndex));
+  leadFlowError.hidden = true;
+
+  const progresso = ((leadStepIndex + 1) / leadSteps.length) * 100;
+  if (leadFlowBar) leadFlowBar.style.width = `${progresso}%`;
+  leadFlow.querySelector('.lead-flow__progress')?.setAttribute('aria-valuenow', String(leadStepIndex + 1));
+
+  leadFlowBack.hidden = leadStepIndex === 0;
+  leadFlowNext.textContent = leadStepIndex === leadSteps.length - 1 ? 'Enviar →' : 'Confirmar →';
+
+  const campo = leadSteps[leadStepIndex].querySelector('input');
+  window.setTimeout(() => campo?.focus(), 60);
 }
 
-function formatPayback(months) {
-  const roundedMonths = Math.max(1, Math.ceil(months));
-  return `${roundedMonths} ${roundedMonths === 1 ? 'mês' : 'meses'}`;
+function abrirLeadFlow(origem) {
+  if (!leadFlow) return;
+  leadOrigem = origem || 'cta';
+  leadFlow.hidden = false;
+  document.body.classList.add('menu-open');
+  leadFlowForm.hidden = false;
+  leadFlowDone.hidden = true;
+  mostrarEtapa(0);
 }
 
-function getSimulationInput() {
-  return {
-    stores: valueOf('stores'),
-    coupons: valueOf('coupons'),
-    ticket: valueOf('ticket'),
-    margin: valueOf('margin'),
-    visits: valueOf('visits'),
-  };
+function fecharLeadFlow() {
+  if (!leadFlow) return;
+  leadFlow.hidden = true;
+  document.body.classList.remove('menu-open');
 }
 
-function validateSimulation(input) {
-  return Object.values(input).every((value) => Number.isFinite(value) && value > 0);
+function coletarRespostas() {
+  const dados = {};
+  for (const etapa of leadSteps) {
+    const campo = etapa.querySelector('input');
+    dados[campo.name] = campo.value.trim();
+  }
+  return dados;
 }
 
-function calculateSimulation(input) {
-  const monthlyInvestment = input.stores * input.visits * ROI_ASSUMPTIONS.observallVisitPrice;
-  const annualInvestment = monthlyInvestment * 12;
-  const currentMonthlyRevenue = input.coupons * input.ticket;
-  const projectedCoupons = input.coupons * (1 + ROI_ASSUMPTIONS.couponGrowth);
-  const projectedTicket = input.ticket * (1 + ROI_ASSUMPTIONS.ticketGrowth);
-  const projectedMonthlyRevenue = projectedCoupons * projectedTicket;
-  const extraMonthlyRevenue = projectedMonthlyRevenue - currentMonthlyRevenue;
-  const incrementalMonthlyProfit = extraMonthlyRevenue * (input.margin / 100);
-  const incrementalAnnualProfit = incrementalMonthlyProfit * 12;
-  const paybackMonths = incrementalMonthlyProfit > 0 ? annualInvestment / incrementalMonthlyProfit : Infinity;
-  const annualNetGain = incrementalAnnualProfit - annualInvestment;
-  const annualRoi = annualInvestment > 0 ? (annualNetGain / annualInvestment) * 100 : 0;
-
-  return {
-    monthlyInvestment,
-    annualInvestment,
-    currentMonthlyRevenue,
-    projectedCoupons,
-    projectedTicket,
-    projectedMonthlyRevenue,
-    extraMonthlyRevenue,
-    incrementalMonthlyProfit,
-    incrementalAnnualProfit,
-    paybackMonths,
-    annualNetGain,
-    annualRoi,
-    paybackLabel: formatPayback(paybackMonths),
-  };
-}
-
-function buildLeadPayload(lead, input, result) {
-  return {
-    source: 'observall-site-roi',
+async function enviarLead() {
+  const lead = coletarRespostas();
+  const payload = {
+    source: 'observe-mais-site-formulario',
     createdAt: new Date().toISOString(),
-    lead,
-    simulation: {
-      quantidadeDeLojas: input.stores,
-      cuponsPorMes: input.coupons,
-      ticketMedio: input.ticket,
-      margemDeLucro: input.margin,
-      visitasOcultasPorLojaMes: input.visits,
-      investimentoMensalObservall: result.monthlyInvestment,
-      investimentoAnualObservall: result.annualInvestment,
-      receitaAtualMensal: result.currentMonthlyRevenue,
-      receitaProjetadaMensal: result.projectedMonthlyRevenue,
-      receitaExtraMensal: result.extraMonthlyRevenue,
-      lucroIncrementalMensal: result.incrementalMonthlyProfit,
-      lucroIncrementalAnual: result.incrementalAnnualProfit,
-      paybackEstimadoMeses: result.paybackMonths,
-      roiAnual: result.annualRoi,
-      ganhoLiquidoAnual: result.annualNetGain,
+    origem: leadOrigem,
+    lead: {
+      nome: lead.nome,
+      empresa: lead.empresa,
+      whatsapp: lead.whatsapp,
+      email: lead.email,
+      cargo: lead.cargo,
     },
   };
-}
 
-function setError(element, message) {
-  if (!element) return;
-  element.textContent = message;
-  element.hidden = false;
-}
-
-function clearError(element) {
-  if (!element) return;
-  element.hidden = true;
-  element.textContent = '';
-}
-
-function saveLeadFallback(payload) {
-  const key = 'observall-roi-leads';
-  const saved = JSON.parse(window.localStorage.getItem(key) || '[]');
-  saved.push(payload);
-  window.localStorage.setItem(key, JSON.stringify(saved));
-}
-
-async function persistLead(payload) {
   try {
-    const response = await fetch('/api/lead-capture', {
+    const resposta = await fetch('/api/lead-capture', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify(payload),
     });
-
-    if (!response.ok) throw new Error(`Lead endpoint returned ${response.status}`);
-    const data = await response.json().catch(() => ({ ok: true }));
-    if (data.ok === false) throw new Error('Lead endpoint rejected the payload');
+    if (!resposta.ok) throw new Error(`lead-capture respondeu ${resposta.status}`);
+    const dados = await resposta.json().catch(() => ({ ok: true }));
+    if (dados.ok === false) throw new Error('lead-capture recusou o envio');
     return true;
-  } catch (error) {
+  } catch (erro) {
+    // Em file:// não há API; guarda localmente para não perder o preenchimento.
     if (window.location.protocol === 'file:') {
-      saveLeadFallback(payload);
+      const chave = 'observe-mais-leads';
+      const salvos = JSON.parse(window.localStorage.getItem(chave) || '[]');
+      salvos.push(payload);
+      window.localStorage.setItem(chave, JSON.stringify(salvos));
       return true;
     }
+    return false;
   }
-
-  return false;
 }
 
-function setFormReadOnly(isReadOnly) {
-  roiForm?.querySelectorAll('input').forEach((input) => {
-    input.readOnly = isReadOnly;
+document.querySelectorAll('[data-lead-flow]').forEach((gatilho) => {
+  gatilho.addEventListener('click', () => {
+    abrirLeadFlow(gatilho.textContent.trim().slice(0, 60));
   });
-}
+});
 
-function showLeadModal() {
-  if (!leadModal) return;
-  leadModal.hidden = false;
-  document.body.classList.add('menu-open');
-  window.setTimeout(() => document.querySelector('#lead-name')?.focus(), 0);
-}
+leadFlow?.querySelectorAll('[data-flow-close]').forEach((item) => {
+  item.addEventListener('click', fecharLeadFlow);
+});
 
-function hideLeadModal() {
-  if (!leadModal) return;
-  leadModal.hidden = true;
-  document.body.classList.remove('menu-open');
-  clearError(leadError);
-}
+leadFlowBack?.addEventListener('click', () => mostrarEtapa(leadStepIndex - 1));
 
-function renderResult(input, result) {
-  latestSimulation = { input, result };
-  calculatorLayout?.setAttribute('data-roi-state', 'result');
-  setFormReadOnly(true);
+document.querySelector('#flow-whatsapp')?.addEventListener('input', (evento) => {
+  evento.target.value = mascararWhatsapp(evento.target.value);
+});
 
-  if (roiTitle) roiTitle.innerHTML = `Sua perda silenciosa pode exigir <span>diagnóstico antes de promessa.</span>`;
-  if (roiSubtitle) {
-    roiSubtitle.textContent = 'Com base nos dados informados, este cenário ilustrativo ajuda a dimensionar a conversa. A validação real depende de visita, roteiro e evidências da loja.';
-  }
-  if (roiFormTitle) roiFormTitle.textContent = 'Resumo do seu supermercado';
-  if (roiOutputKicker) roiOutputKicker.textContent = 'Resultado estimado';
-  if (roiOutputTitle) roiOutputTitle.textContent = 'Este é o tamanho possível da perda que merece investigação';
-  if (roiPrimaryAction) {
-    roiPrimaryAction.textContent = 'Refazer simulação';
-    roiPrimaryAction.type = 'button';
-  }
-  if (roiPreviewList) roiPreviewList.hidden = true;
-  if (roiResultPanel) roiResultPanel.hidden = false;
-  if (roiResultActions) roiResultActions.hidden = false;
+leadFlowForm?.addEventListener('submit', async (evento) => {
+  evento.preventDefault();
 
-  document.querySelector('#payback-value').textContent = `Payback estimado: ${result.paybackLabel}`;
-  document.querySelector('#extra-revenue').textContent = currency.format(result.extraMonthlyRevenue);
-  document.querySelector('#incremental-profit').textContent = currency.format(result.incrementalMonthlyProfit);
-  document.querySelector('#monthly-investment').textContent = currency.format(result.monthlyInvestment);
-  document.querySelector('#roi-value').textContent = `${integer.format(result.annualRoi)}%`;
-  document.querySelector('#annual-net-gain').textContent = currency.format(result.annualNetGain);
+  const etapa = leadSteps[leadStepIndex];
+  const campo = etapa.querySelector('input');
+  const regra = LEAD_RULES[etapa.dataset.step];
 
-  if (roiCommercialCopy) {
-    roiCommercialCopy.textContent = 'A simulação não garante resultado. Ela mostra por que fila, ruptura percebida, preço ausente, validade, limpeza e atendimento precisam ser medidos antes de virar plano de ação.';
-  }
-  if (roiImpactQuote) {
-    roiImpactQuote.innerHTML = 'O próximo passo é validar a loja real. <strong>Cliente oculto transforma hipótese em evidência operacional.</strong>';
-  }
-}
-
-function resetResults() {
-  pendingSimulation = null;
-  calculatorLayout?.setAttribute('data-roi-state', 'form');
-  setFormReadOnly(false);
-
-  if (roiTitle) roiTitle.innerHTML = 'Simule o tamanho da <span>perda silenciosa da sua loja.</span>';
-  if (roiSubtitle) {
-    roiSubtitle.textContent = 'Use um cenário ilustrativo para estimar quanto pequenos atritos de loja podem representar na recorrência do supermercado.';
-  }
-  if (roiFormTitle) roiFormTitle.textContent = 'Preencha os dados do seu supermercado';
-  if (roiOutputKicker) roiOutputKicker.textContent = 'O que você vai estimar';
-  if (roiOutputTitle) roiOutputTitle.textContent = 'Entenda o tamanho financeiro possível das falhas que ninguém está medindo';
-  if (roiPrimaryAction) {
-    roiPrimaryAction.textContent = 'Simular perda silenciosa';
-    roiPrimaryAction.type = 'submit';
-  }
-  if (roiPreviewList) roiPreviewList.hidden = false;
-  if (roiResultPanel) roiResultPanel.hidden = true;
-  if (roiResultActions) roiResultActions.hidden = true;
-  if (roiCommercialCopy) {
-    roiCommercialCopy.textContent = 'Pequenas falhas em atendimento, fila, ruptura, exposição e padrão de loja podem derrubar recorrência. A Observe Mais ajuda a transformar essas perdas invisíveis em diagnóstico e plano de ação.';
-  }
-  if (roiImpactQuote) {
-    roiImpactQuote.innerHTML = 'Antes de prometer ganho, é preciso medir. <strong>O diagnóstico mostra onde a loja está deixando dinheiro escapar.</strong>';
-  }
-  clearError(errorMessage);
-}
-
-function calculateROI(event) {
-  event?.preventDefault();
-
-  const input = getSimulationInput();
-
-  if (!validateSimulation(input)) {
-    resetResults();
-    setError(errorMessage, 'Preencha todos os campos para calcular seu potencial de ganho.');
+  if (regra && !regra.valida(campo.value)) {
+    leadFlowError.textContent = regra.erro;
+    leadFlowError.hidden = false;
+    campo.focus();
     return;
   }
 
-  pendingSimulation = { input, result: calculateSimulation(input) };
-  clearError(errorMessage);
-  showLeadModal();
-}
-
-roiForm?.addEventListener('submit', calculateROI);
-
-roiPrimaryAction?.addEventListener('click', () => {
-  if (calculatorLayout?.dataset.roiState === 'result') resetResults();
-});
-
-document.querySelector('#roi-example')?.addEventListener('click', () => {
-  document.querySelector('#stores').value = '12';
-  document.querySelector('#coupons').value = '12.000';
-  document.querySelector('#ticket').value = 'R$ 80';
-  document.querySelector('#margin').value = '20%';
-  document.querySelector('#visits').value = '1';
-  resetResults();
-  document.querySelector('#stores')?.focus();
-});
-
-roiForm?.addEventListener('reset', () => window.setTimeout(resetResults));
-
-leadModal?.querySelectorAll('[data-modal-close]').forEach((item) => {
-  item.addEventListener('click', hideLeadModal);
-});
-
-window.addEventListener('keydown', (event) => {
-  if (event.key === 'Escape' && leadModal && !leadModal.hidden) hideLeadModal();
-});
-
-leadForm?.addEventListener('submit', async (event) => {
-  event.preventDefault();
-
-  if (!pendingSimulation) return;
-
-  const formData = new FormData(leadForm);
-  const lead = {
-    nome: String(formData.get('name') || '').trim(),
-    empresa: String(formData.get('company') || '').trim(),
-    whatsapp: String(formData.get('whatsapp') || '').trim(),
-    email: String(formData.get('email') || '').trim(),
-  };
-
-  if (!lead.nome || !lead.empresa || !lead.whatsapp || !lead.email) {
-    setError(leadError, 'Preencha todos os campos para visualizar o resultado.');
+  if (leadStepIndex < leadSteps.length - 1) {
+    mostrarEtapa(leadStepIndex + 1);
     return;
   }
 
-  const submitButton = leadForm.querySelector('button[type="submit"]');
-  submitButton.disabled = true;
-  const payload = buildLeadPayload(lead, pendingSimulation.input, pendingSimulation.result);
-  const saved = await persistLead(payload);
-  submitButton.disabled = false;
+  leadFlowNext.disabled = true;
+  leadFlowNext.textContent = 'Enviando…';
+  const enviado = await enviarLead();
+  leadFlowNext.disabled = false;
+  leadFlowNext.textContent = 'Enviar →';
 
-  if (!saved) {
-    setError(leadError, 'Não foi possível salvar seus dados agora. Tente novamente em alguns instantes.');
+  if (!enviado) {
+    leadFlowError.textContent = 'Não foi possível enviar agora. Tente novamente em alguns instantes.';
+    leadFlowError.hidden = false;
     return;
   }
 
-  hideLeadModal();
-  renderResult(pendingSimulation.input, pendingSimulation.result);
+  leadFlowForm.hidden = true;
+  leadFlowDone.hidden = false;
+  if (leadFlowBar) leadFlowBar.style.width = '100%';
+});
+
+window.addEventListener('keydown', (evento) => {
+  if (evento.key === 'Escape' && leadFlow && !leadFlow.hidden) fecharLeadFlow();
 });
 
 const currentYear = document.querySelector('#current-year');

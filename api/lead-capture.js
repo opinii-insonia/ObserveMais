@@ -26,6 +26,46 @@ function cleanText(value) {
   return String(value || '').trim().slice(0, 180);
 }
 
+/**
+ * Envia o lead para a planilha do Google.
+ *
+ * A gravação é feita por um Web App do Apps Script vinculado à planilha, cuja URL
+ * fica em SHEETS_WEBHOOK_URL. Assim nenhuma credencial do Google entra no repositório
+ * nem no navegador, e o projeto segue sem dependências extras.
+ *
+ * O envio nunca derruba a captura: se a planilha falhar, o lead já está no Blob.
+ */
+async function enviarParaPlanilha(record) {
+  const webhook = process.env.SHEETS_WEBHOOK_URL;
+  if (!webhook) return 'nao_configurado';
+
+  try {
+    const resposta = await fetch(webhook, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        segredo: process.env.SHEETS_WEBHOOK_SECRET || '',
+        id: record.id,
+        recebidoEm: record.createdAt,
+        nome: record.lead.nome,
+        empresa: record.lead.empresa,
+        cargo: record.lead.cargo,
+        email: record.lead.email,
+        whatsapp: record.lead.whatsapp,
+        origem: record.origem,
+        fonte: record.source,
+      }),
+      signal: AbortSignal.timeout(8000),
+    });
+
+    if (!resposta.ok) throw new Error(`planilha respondeu ${resposta.status}`);
+    return 'ok';
+  } catch (error) {
+    console.error('[lead-capture] falha ao gravar na planilha:', error?.message);
+    return 'falhou';
+  }
+}
+
 export default async function handler(request, response) {
   response.setHeader('Content-Type', 'application/json; charset=utf-8');
   response.setHeader('Cache-Control', 'no-store');
@@ -42,6 +82,7 @@ export default async function handler(request, response) {
       empresa: cleanText(payload?.lead?.empresa),
       whatsapp: cleanText(payload?.lead?.whatsapp),
       email: cleanText(payload?.lead?.email),
+      cargo: cleanText(payload?.lead?.cargo),
     };
 
     if (!lead.nome || !lead.empresa || !lead.whatsapp || !lead.email) {
@@ -51,7 +92,8 @@ export default async function handler(request, response) {
 
     const record = {
       id: crypto.randomUUID(),
-      source: 'observall-site-roi',
+      source: cleanText(payload?.source) || 'observall-site-roi',
+      origem: cleanText(payload?.origem),
       createdAt: new Date().toISOString(),
       lead,
       simulation: payload?.simulation || {},
@@ -80,7 +122,9 @@ export default async function handler(request, response) {
       await appendFile(join(storageDir, 'roi-leads.jsonl'), line, 'utf8');
     }
 
-    response.status(200).json({ ok: true, storage });
+    const sheet = await enviarParaPlanilha(record);
+
+    response.status(200).json({ ok: true, storage, sheet });
   } catch (error) {
     response.status(400).json({ ok: false, error: 'invalid_payload' });
   }
