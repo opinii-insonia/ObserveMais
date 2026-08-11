@@ -2416,6 +2416,382 @@ h3 {
   background: var(--white);
 }
 
+/* Composição "3 sinais / IOV": as três fontes convergem para um índice único. */
+
+.iov-stage {
+  position: relative;
+  padding-top: 8px;
+}
+
+.iov-signals {
+  display: grid;
+  max-width: 940px;
+  margin: 0 auto;
+  gap: 22px;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  align-items: end;
+}
+
+.iov-signal {
+  position: relative;
+  padding: 30px 24px 24px;
+  background: var(--white);
+  border: 1px solid var(--line);
+  border-radius: 20px;
+  box-shadow: 0 22px 48px rgba(6, 40, 22, 0.12);
+  border-bottom: 4px solid var(--green);
+}
+
+.iov-signal--destaque {
+  margin-bottom: 26px;
+  border-bottom-color: #F5C518;
+  box-shadow: 0 26px 56px rgba(6, 40, 22, 0.18);
+}
+
+.iov-signal__icon {
+  position: absolute;
+  top: -21px;
+  left: 24px;
+  display: grid;
+  width: 42px;
+  height: 42px;
+  background: var(--white);
+  border: 1px solid var(--line);
+  border-radius: 50%;
+  box-shadow: 0 8px 18px rgba(0, 0, 0, 0.1);
+  place-items: center;
+}
+
+.iov-signal--destaque .iov-signal__icon {
+  left: 50%;
+  transform: translateX(-50%);
+}
+
+.iov-signal__icon svg {
+  width: 21px;
+  height: 21px;
+  fill: none;
+  stroke: var(--green-dark);
+  stroke-width: 1.9;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+
+.iov-signal h3 {
+  margin-bottom: 12px;
+  font-size: 1.32rem;
+}
+
+.iov-signal--destaque h3 {
+  text-align: center;
+}
+
+.iov-signal ul {
+  display: grid;
+  margin: 0;
+  padding: 0;
+  gap: 8px;
+  list-style: none;
+}
+
+.iov-signal li {
+  display: flex;
+  color: var(--muted);
+  font-size: 0.94rem;
+  gap: 9px;
+  align-items: center;
+}
+
+.iov-signal li::before {
+  display: grid;
+  width: 17px;
+  min-width: 17px;
+  height: 17px;
+  color: var(--white);
+  background: var(--green);
+  border-radius: 50%;
+  content: "✓";
+  font-size: 0.6rem;
+  font-weight: 800;
+  place-items: center;
+}
+
+/* Feixes que sobem dos cards para a máquina. */
+.iov-beams {
+  position: relative;
+  display: flex;
+  height: 96px;
+  max-width: 700px;
+  margin: 0 auto;
+  gap: 90px;
+  justify-content: center;
+}
+
+.iov-beams i {
+  width: 26px;
+  border-radius: 50% 50% 4px 4px / 70% 70% 4px 4px;
+  filter: blur(1px);
+  background: linear-gradient(180deg, rgba(37, 214, 112, 0), rgba(37, 214, 112, 0.75));
+}
+
+.iov-beams i:nth-child(2) {
+  width: 34px;
+  background: linear-gradient(180deg, rgba(245, 197, 24, 0), rgba(245, 197, 24, 0.85));
+}
+
+.iov-core {
+  display: grid;
+  gap: 30px;
+  grid-template-columns: minmax(0, 1fr) auto minmax(0, 1fr);
+  align-items: center;
+}
+
+.iov-title {
+  margin-bottom: 10px;
+  font-size: clamp(2.6rem, 5vw, 4.2rem);
+  font-weight: 800;
+  line-height: 1;
+  letter-spacing: -0.02em;
+}
+
+.iov-title span {
+  display: block;
+  color: var(--green);
+}
+
+.iov-tagline {
+  margin-bottom: 18px;
+  color: var(--green);
+  font-size: 1.24rem;
+  font-weight: 800;
+}
+
+.iov-lead {
+  max-width: 340px;
+  margin: 0;
+  color: var(--muted);
+  font-size: 1rem;
+  line-height: 1.7;
+}
+
+/* Máquina de fusão: bloco escuro com núcleo luminoso. */
+.iov-machine {
+  display: grid;
+  width: 268px;
+  padding: 16px 16px 14px;
+  background: linear-gradient(180deg, #1b2320, #0a0f0c);
+  border: 1px solid rgba(37, 214, 112, 0.3);
+  border-radius: 22px;
+  box-shadow: 0 30px 70px rgba(0, 0, 0, 0.34), 0 0 46px rgba(37, 214, 112, 0.24);
+  gap: 12px;
+  justify-items: center;
+}
+
+.iov-machine__label,
+.iov-machine__foot {
+  color: rgba(255, 255, 255, 0.6);
+  font-size: 0.62rem;
+  font-weight: 800;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+}
+
+.iov-machine__foot {
+  color: var(--green);
+}
+
+.iov-machine__chamber {
+  position: relative;
+  display: grid;
+  overflow: hidden;
+  width: 100%;
+  height: 168px;
+  background: radial-gradient(60% 70% at 50% 50%, rgba(37, 214, 112, 0.22), rgba(0, 0, 0, 0.6));
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  border-radius: 14px;
+  place-items: center;
+}
+
+/* Duas hélices que se cruzam, sugerindo a fusão dos sinais. */
+.iov-machine__chamber i {
+  position: absolute;
+  width: 8px;
+  height: 132px;
+  background: linear-gradient(180deg, #F5C518, #25D670, #12B6C8);
+  border-radius: 99px;
+  filter: blur(0.5px);
+  transform: rotate(18deg);
+  opacity: 0.9;
+}
+
+.iov-machine__chamber i:last-child {
+  transform: rotate(-18deg);
+  background: linear-gradient(180deg, #25D670, #12B6C8, #F5C518);
+}
+
+.iov-result {
+  display: grid;
+  gap: 18px;
+  justify-items: center;
+}
+
+.iov-orb {
+  display: grid;
+  width: 186px;
+  height: 186px;
+  color: var(--white);
+  background: radial-gradient(circle at 50% 42%, #0f7a3f, #04150c 72%);
+  border: 2px solid rgba(37, 214, 112, 0.5);
+  border-radius: 50%;
+  box-shadow: 0 0 54px rgba(37, 214, 112, 0.42);
+  place-content: center;
+  text-align: center;
+}
+
+.iov-orb span {
+  color: var(--green);
+  font-size: 0.9rem;
+  font-weight: 800;
+  letter-spacing: 0.1em;
+}
+
+.iov-orb strong {
+  display: block;
+  font-size: 3.5rem;
+  font-weight: 800;
+  line-height: 1;
+}
+
+.iov-orb small {
+  display: block;
+  margin-top: 4px;
+  color: rgba(255, 255, 255, 0.74);
+  font-size: 0.68rem;
+  line-height: 1.35;
+}
+
+.iov-panel {
+  display: grid;
+  width: 100%;
+  max-width: 250px;
+  padding: 8px;
+  background: var(--white);
+  border: 1px solid var(--line);
+  border-radius: 18px;
+  box-shadow: 0 20px 44px rgba(6, 40, 22, 0.12);
+  gap: 6px;
+}
+
+.iov-panel__score {
+  display: grid;
+  padding: 14px 16px;
+  background: #f5f9f6;
+  border-radius: 13px;
+  gap: 0 12px;
+  grid-template-columns: 1fr auto;
+  align-items: center;
+}
+
+.iov-panel__score span {
+  color: var(--muted);
+  font-size: 0.76rem;
+  font-weight: 700;
+  grid-column: 1;
+}
+
+.iov-panel__score strong {
+  color: var(--green-dark);
+  font-size: 2.1rem;
+  font-weight: 800;
+  line-height: 1;
+  grid-column: 1;
+}
+
+.iov-spark {
+  width: 78px;
+  height: 40px;
+  grid-area: 1 / 2 / 3 / 3;
+}
+
+.iov-spark polyline {
+  stroke: var(--green);
+  stroke-width: 2.4;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+
+.iov-spark circle {
+  fill: var(--green-dark);
+}
+
+.iov-panel__row {
+  display: flex;
+  padding: 13px 16px;
+  border-radius: 13px;
+  font-size: 0.86rem;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.iov-panel__row span {
+  color: var(--muted);
+  font-weight: 600;
+}
+
+.iov-panel__row b.is-alta {
+  color: #e8433f;
+}
+
+.iov-panel__row b.is-alvo {
+  color: var(--green);
+  font-size: 1.1rem;
+}
+
+.iov-steps {
+  display: flex;
+  margin: 44px 0 0;
+  padding: 0;
+  gap: 10px;
+  flex-wrap: wrap;
+  justify-content: center;
+  list-style: none;
+  counter-reset: iov-step;
+}
+
+.iov-steps li {
+  display: flex;
+  padding: 11px 20px;
+  color: var(--text);
+  background: var(--white);
+  border: 1px solid var(--line);
+  border-radius: 99px;
+  box-shadow: 0 8px 20px rgba(6, 40, 22, 0.07);
+  font-size: 0.86rem;
+  font-weight: 600;
+  gap: 9px;
+  align-items: center;
+}
+
+.iov-steps li::before {
+  display: grid;
+  width: 17px;
+  min-width: 17px;
+  height: 17px;
+  color: var(--white);
+  background: var(--green);
+  border-radius: 50%;
+  content: "✓";
+  font-size: 0.58rem;
+  font-weight: 800;
+  place-items: center;
+}
+
+.iov-steps li:last-child::before {
+  background: var(--green-dark);
+  content: "⚡";
+  font-size: 0.6rem;
+}
+
 .views-grid {
   display: grid;
   gap: 20px;
@@ -2933,6 +3309,22 @@ h3 {
     grid-template-columns: 1fr;
   }
 
+  .iov-core {
+    gap: 34px;
+    grid-template-columns: 1fr;
+    justify-items: center;
+    text-align: center;
+  }
+
+  .iov-lead {
+    margin-inline: auto;
+  }
+
+  .iov-beams {
+    height: 66px;
+    gap: 60px;
+  }
+
   .score360__kpis,
   .score360__priority {
     grid-template-columns: repeat(2, minmax(0, 1fr));
@@ -3136,6 +3528,34 @@ h3 {
 
   .gap-callout {
     padding: 26px 22px;
+  }
+
+  .iov-signals {
+    gap: 34px;
+    grid-template-columns: 1fr;
+  }
+
+  .iov-signal--destaque {
+    margin-bottom: 0;
+  }
+
+  .iov-signal--destaque .iov-signal__icon {
+    left: 24px;
+    transform: none;
+  }
+
+  .iov-signal--destaque h3 {
+    text-align: left;
+  }
+
+  .iov-beams {
+    height: 44px;
+    gap: 34px;
+  }
+
+  .iov-machine {
+    width: 100%;
+    max-width: 268px;
   }
 
   .lead-flow__card {

@@ -91,13 +91,37 @@ test('responde por que Observe Mais logo depois da hero', async () => {
   const sections = [...html.matchAll(/<section[^>]*\b(?:class="[^"]*"|id="[^"]*")[^>]*>/g)].map((m) => m[0]);
   assert.match(sections[0], /class="hero"/);
   assert.match(sections[1], /id="diferenciais"/);
-  assert.match(html, /Cliente oculto sozinho mostra um lado\. <span>Nós mostramos os três\.<\/span>/);
   assert.match(html, /Por que Observe Mais e não outra empresa de cliente oculto\?/i);
-  assert.match(html, /NPS e pesquisa/);
-  assert.match(html, /Checklist da operação/);
-  assert.match(html, /Visita de cliente oculto/);
   assert.match(html, /class="gap-callout[^"]*"/);
-  assert.match(css, /\.views-grid\s*\{[^}]*grid-template-columns:\s*repeat\(3/s);
+});
+
+test('a abertura dos diferenciais mostra os três sinais convergindo no IOV', async () => {
+  const [html, css] = await Promise.all([read('index.html'), read('styles.css')]);
+
+  const palco = html.match(/<div class="iov-stage[\s\S]*?<\/ol>/)?.[0];
+  assert.ok(palco, 'o palco do IOV deveria existir');
+
+  // Os três sinais, na ordem do layout: auditor à esquerda, cliente no centro, liderança à direita.
+  const sinais = [...palco.matchAll(/<h3>([^<]+)<\/h3>/g)].map((m) => m[1]);
+  assert.deepEqual(sinais, ['Cliente oculto', 'Cliente', 'Liderança']);
+
+  for (const item of ['Visita em loja', 'Execução real', 'NPS / Feedback', 'Percepção real', 'Checklist', 'Visão da operação']) {
+    assert.ok(palco.includes(item), `faltou o item "${item}"`);
+  }
+
+  // O título é "3 sinais." + "IOV.", sem o numeral antes de IOV.
+  assert.match(palco, /<h3 class="iov-title">3 sinais\.<span>IOV\.<\/span><\/h3>/);
+  assert.doesNotMatch(palco, /1\s*IOV/);
+
+  assert.match(palco, /Misture\. Veja\. Decida\./);
+  assert.match(palco, /Índice de Operação Viva/);
+
+  const etapas = [...palco.matchAll(/<li>([^<]+)<\/li>/g)].map((m) => m[1]);
+  assert.deepEqual(etapas.slice(-4), ['Dados conectados', 'Analisando sinais', 'Gerando IOV', 'Decisão em tempo real']);
+
+  assert.match(css, /\.iov-signals\s*\{[^}]*grid-template-columns:\s*repeat\(3/s);
+  assert.match(css, /\.iov-orb\s*\{/);
+  assert.match(css, /\.iov-machine\s*\{/);
 });
 
 test('modela três visões que viram prioridade e deixa a IA depois do diagnóstico', async () => {
