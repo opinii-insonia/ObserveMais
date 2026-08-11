@@ -2416,20 +2416,42 @@ h3 {
   background: var(--white);
 }
 
-/* Composição "3 sinais / IOV": arte única com as três fontes convergindo. */
+/* Composição "3 sinais / IOV": o texto ocupa a área vazia à esquerda da arte,
+   que foi desenhada com os elementos concentrados no centro e à direita. */
 
 .iov-stage {
   display: grid;
-  gap: 30px 40px;
-  grid-template-columns: minmax(0, 0.82fr) minmax(0, 1.18fr);
-  align-items: center;
+  width: 100%;
+  grid-template-columns: minmax(0, 1fr);
+  grid-template-rows: auto auto;
+}
+
+.iov-art {
+  margin: 0;
+  grid-area: 1 / 1;
+}
+
+.iov-art img {
+  width: 100%;
+  height: auto;
+}
+
+.iov-copy {
+  z-index: 1;
+  /* A arte deixa livre pouco mais de um terço à esquerda; o texto ocupa essa
+     faixa e desce um pouco para alinhar com o corpo da máquina. */
+  max-width: 33%;
+  margin-top: 9%;
+  grid-area: 1 / 1;
+  align-self: center;
+  justify-self: start;
 }
 
 .iov-title {
-  margin-bottom: 10px;
-  font-size: clamp(2.6rem, 5vw, 4.1rem);
+  margin-bottom: 8px;
+  font-size: clamp(1.6rem, 4.4vw, 3.9rem);
   font-weight: 800;
-  line-height: 1;
+  line-height: 1.02;
   letter-spacing: -0.02em;
 }
 
@@ -2439,38 +2461,28 @@ h3 {
 }
 
 .iov-tagline {
-  margin-bottom: 18px;
-  color: var(--green);
-  font-size: 1.24rem;
+  margin-bottom: 14px;
+  color: var(--black);
+  font-size: clamp(0.8rem, 1.5vw, 1.24rem);
   font-weight: 800;
 }
 
 .iov-lead {
-  max-width: 360px;
   margin: 0;
   color: var(--muted);
-  font-size: 1.02rem;
-  line-height: 1.7;
-}
-
-.iov-art {
-  margin: 0;
-}
-
-.iov-art img {
-  width: 100%;
-  height: auto;
+  font-size: clamp(0.72rem, 1.15vw, 1.02rem);
+  line-height: 1.65;
 }
 
 .iov-steps {
   display: flex;
-  margin: 8px 0 0;
+  margin: 0;
   padding: 0;
   gap: 10px;
   flex-wrap: wrap;
   justify-content: center;
   list-style: none;
-  grid-column: 1 / -1;
+  grid-area: 2 / 1;
 }
 
 .iov-steps li {
@@ -3018,15 +3030,41 @@ h3 {
     grid-template-columns: 1fr;
   }
 
+  /* Abaixo de 860px a arte fica pequena demais para o texto ficar por cima:
+     o empilhamento passa a ser a leitura correta. */
   .iov-stage {
-    gap: 26px;
-    grid-template-columns: 1fr;
+    gap: 24px;
+    grid-template-rows: auto auto auto;
     justify-items: center;
     text-align: center;
   }
 
+  .iov-copy {
+    max-width: 520px;
+    margin-top: 0;
+    grid-area: 1 / 1;
+    justify-self: center;
+  }
+
+  .iov-art {
+    grid-area: 2 / 1;
+  }
+
+  .iov-steps {
+    grid-area: 3 / 1;
+  }
+
+  .iov-title {
+    font-size: clamp(2.4rem, 8vw, 3.4rem);
+  }
+
+  .iov-tagline {
+    font-size: 1.14rem;
+  }
+
   .iov-lead {
     margin-inline: auto;
+    font-size: 1rem;
   }
 
   .iovpanel__kpis,
