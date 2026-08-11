@@ -47,21 +47,21 @@ test('toda menção a IA recebe o destaque em gradiente', async () => {
   assert.deepEqual(leftovers, [], `menções a IA sem destaque: ${leftovers.join(' | ')}`);
 });
 
-test('o Score da Loja aparece como mockup próprio das três visões', async () => {
+test('o IOV aparece como mockup próprio das três visões', async () => {
   const [html, css] = await Promise.all([read('index.html'), read('styles.css')]);
 
-  assert.match(html, /class="score360 reveal"/);
+  assert.match(html, /class="iovpanel reveal"/);
   assert.match(html, /O que o auditor vê/);
   assert.match(html, /O que o cliente fala/);
   assert.match(html, /O que a liderança reporta/);
   assert.match(html, /Boa execução, mas baixa percepção do cliente/);
   assert.match(html, /class="solutions-divergence reveal"/);
-  assert.match(css, /\.score360\s*\{/);
+  assert.match(css, /\.iovpanel\s*\{/);
 
   // Substitui a imagem antiga e não pode citar cliente real.
   assert.doesNotMatch(html, /diagnostico-tres-visoes-supermercado-v1\.png/);
-  const mock = html.match(/<figure class="score360[\s\S]*?<\/figure>/)?.[0];
-  assert.ok(mock, 'o mockup do Score deveria existir');
+  const mock = html.match(/<figure class="iovpanel[\s\S]*?<\/figure>/)?.[0];
+  assert.ok(mock, 'o mockup do IOV deveria existir');
   for (const brand of ['big box', 'ultrabox', 'ultra box', 'observe+']) {
     assert.ok(!mock.toLowerCase().includes(brand), `o mockup não deveria citar "${brand}"`);
   }
@@ -101,42 +101,51 @@ test('a abertura dos diferenciais mostra os três sinais convergindo no IOV', as
   const palco = html.match(/<div class="iov-stage[\s\S]*?<\/ol>/)?.[0];
   assert.ok(palco, 'o palco do IOV deveria existir');
 
-  // Os três sinais, na ordem do layout: auditor à esquerda, cliente no centro, liderança à direita.
-  const sinais = [...palco.matchAll(/<h3>([^<]+)<\/h3>/g)].map((m) => m[1]);
-  assert.deepEqual(sinais, ['Cliente oculto', 'Cliente', 'Liderança']);
-
-  for (const item of ['Visita em loja', 'Execução real', 'NPS / Feedback', 'Percepção real', 'Checklist', 'Visão da operação']) {
-    assert.ok(palco.includes(item), `faltou o item "${item}"`);
-  }
-
   // O título é "3 sinais." + "IOV.", sem o numeral antes de IOV.
   assert.match(palco, /<h3 class="iov-title">3 sinais\.<span>IOV\.<\/span><\/h3>/);
   assert.doesNotMatch(palco, /1\s*IOV/);
 
   assert.match(palco, /Misture\. Veja\. Decida\./);
-  assert.match(palco, /Índice de Operação Viva/);
+  assert.match(palco, /public\/assets\/iov\/tres-sinais-iov\.jpg/);
+  assert.match(palco, /alt="[^"]*IOV[^"]*"/, 'a arte precisa de alt descrevendo o IOV');
 
   const etapas = [...palco.matchAll(/<li>([^<]+)<\/li>/g)].map((m) => m[1]);
-  assert.deepEqual(etapas.slice(-4), ['Dados conectados', 'Analisando sinais', 'Gerando IOV', 'Decisão em tempo real']);
+  assert.deepEqual(etapas, ['Dados conectados', 'Analisando sinais', 'Gerando IOV', 'Decisão em tempo real']);
 
-  assert.match(css, /\.iov-signals\s*\{[^}]*grid-template-columns:\s*repeat\(3/s);
-  assert.match(css, /\.iov-orb\s*\{/);
-  assert.match(css, /\.iov-machine\s*\{/);
+  assert.match(css, /\.iov-art img\s*\{/);
+});
+
+test('o índice se chama IOV em toda a página, sem resquício de Score', async () => {
+  const fontes = await Promise.all([
+    read('index.html'),
+    read('styles.css'),
+    read('script.js'),
+    read('simulador-interno-a7f39c2b.html'),
+  ]);
+
+  for (const fonte of fontes) {
+    assert.doesNotMatch(fonte, /score/i, 'sobrou referência a Score');
+  }
+
+  const html = fontes[0];
+  assert.match(html, /IOV — Índice de Operação Viva/);
+  assert.match(html, /que constroem o IOV/);
+  assert.match(html, /Um IOV, não três relatórios/);
 });
 
 test('modela três visões que viram prioridade e deixa a IA depois do diagnóstico', async () => {
   const html = await read('index.html');
-  const modules = [...html.matchAll(/<article[^>]+data-score-module="([^"]+)"/g)].map((match) => match[1]);
-  const flowSteps = [...html.matchAll(/data-score-step="([^"]+)"/g)].map((match) => match[1]);
+  const modules = [...html.matchAll(/<article[^>]+data-iov-module="([^"]+)"/g)].map((match) => match[1]);
+  const flowSteps = [...html.matchAll(/data-iov-step="([^"]+)"/g)].map((match) => match[1]);
 
   assert.deepEqual(modules, ['auditor-profissional', 'cliente-real', 'operacao-interna']);
-  assert.deepEqual(flowSteps, ['tres-visoes', 'cruzamento', 'score', 'plano-de-acao']);
+  assert.deepEqual(flowSteps, ['tres-visoes', 'cruzamento', 'iov', 'plano-de-acao']);
   assert.match(html, /Evidências por setor/);
   assert.match(html, /Divergências/);
   assert.match(html, /Prioridade por loja/);
   assert.match(html, /Plano de correção/);
-  assert.match(html, /class="score-ai[^"]*"[\s\S]*Inteligência Artificial/i);
-  assert.doesNotMatch(html, /data-score-module="ia"/i);
+  assert.match(html, /class="iov-ai[^"]*"[\s\S]*Inteligência Artificial/i);
+  assert.doesNotMatch(html, /data-iov-module="ia"/i);
 });
 
 test('mantém SEO on-page alinhado à vertical sem prometer ranking', async () => {

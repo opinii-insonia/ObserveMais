@@ -25,7 +25,12 @@ $g = [System.Drawing.Graphics]::FromImage($canvas)
 $g.InterpolationMode = [System.Drawing.Drawing2D.InterpolationMode]::HighQualityBicubic
 $g.SmoothingMode = [System.Drawing.Drawing2D.SmoothingMode]::HighQuality
 $g.PixelOffsetMode = [System.Drawing.Drawing2D.PixelOffsetMode]::HighQuality
-$g.Clear([System.Drawing.Color]::White)
+# PNG preserva alpha; JPEG não tem transparência e precisa de fundo chapado.
+if ([System.IO.Path]::GetExtension($Destino) -eq '.png') {
+  $g.Clear([System.Drawing.Color]::Transparent)
+} else {
+  $g.Clear([System.Drawing.Color]::White)
+}
 
 if ($Cobrir -eq 1) {
   # Recorta o excedente para preencher o quadro sem distorcer.
