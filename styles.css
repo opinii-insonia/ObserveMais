@@ -2439,9 +2439,12 @@ h3 {
 .iov-copy {
   z-index: 1;
   /* A arte deixa livre pouco mais de um terço à esquerda; o texto ocupa essa
-     faixa e desce um pouco para alinhar com o corpo da máquina. */
-  max-width: 33%;
+     faixa e desce um pouco para alinhar com o corpo da máquina. A margem
+     negativa avança sobre a folga do container para o texto não encostar
+     na base da máquina — em % para encolher junto em telas menores. */
+  max-width: 30%;
   margin-top: 9%;
+  margin-left: -3%;
   grid-area: 1 / 1;
   align-self: center;
   justify-self: start;
@@ -3041,7 +3044,7 @@ h3 {
 
   .iov-copy {
     max-width: 520px;
-    margin-top: 0;
+    margin: 0;
     grid-area: 1 / 1;
     justify-self: center;
   }
