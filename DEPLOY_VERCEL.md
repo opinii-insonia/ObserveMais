@@ -17,13 +17,37 @@
 
 ## Planilha do Google
 
-Os leads do formulário do site também vão para a planilha, via Web App do Apps Script.
+Os leads do formulário são enviados por POST em JSON para a URL de
+`SHEETS_WEBHOOK_URL`. Há dois caminhos possíveis — escolha um.
+
+### Opção A — Zapier (mais simples de configurar, exige plano pago)
+
+1. Zapier > Create Zap.
+2. Trigger: **Webhooks by Zapier > Catch Hook**. Copie a URL gerada.
+   Atenção: "Webhooks by Zapier" é integração Premium e não existe no plano gratuito.
+3. Envie um lead de teste pelo site para o Zapier capturar o formato dos campos.
+4. Action: **Google Sheets > Create Spreadsheet Row**, apontando para a planilha e
+   mapeando os campos.
+5. Na Vercel, crie `SHEETS_WEBHOOK_URL` com a URL do passo 2. Não precisa de
+   `SHEETS_WEBHOOK_SECRET`: no Zapier quem protege é a própria URL, que é secreta.
+6. Redeploy.
+
+### Opção B — Apps Script (gratuito, configuração um pouco maior)
 
 1. Siga o passo a passo em `scripts/planilha-leads.gs` (instalação comentada no topo).
 2. Crie na Vercel as variáveis de ambiente:
    - `SHEETS_WEBHOOK_URL` — URL `/exec` do Web App.
    - `SHEETS_WEBHOOK_SECRET` — o mesmo segredo definido no script.
 3. Redeploy para as variáveis valerem.
+
+### Campos enviados
+
+`segredo`, `id`, `recebidoEm`, `nome`, `empresa`, `cargo`, `email`, `whatsapp`,
+`origem` (qual CTA abriu o formulário) e `fonte`.
+
+O envio é considerado bem-sucedido quando a resposta traz `ok: true` (Apps Script)
+ou `status: "success"` (Zapier). Qualquer outra coisa vira `sheet: "falhou"` com o
+motivo no log — a captura em si nunca é derrubada por causa disso.
 
 Sem `SHEETS_WEBHOOK_URL` a captura continua funcionando: o lead vai para o Blob e a
 resposta traz `sheet: "nao_configurado"`. Se a planilha falhar, vem `sheet: "falhou"`

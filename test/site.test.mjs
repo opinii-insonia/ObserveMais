@@ -381,7 +381,8 @@ test('o lead segue para a planilha sem credencial no navegador', async () => {
   assert.match(api, /catch[\s\S]*?return 'falhou'/);
 
   // Apps Script devolve 200 mesmo recusando; conferir só o status daria falso "gravou".
-  assert.match(api, /dados\?\.ok !== true/);
+  // O corpo precisa ser inspecionado, aceitando os dois destinos suportados.
+  assert.match(api, /dados\?\.ok === true \|\| dados\?\.status === 'success'/);
 
   assert.match(appsScript, /function doPost/);
   assert.match(appsScript, /dados\.segredo !== SEGREDO/);

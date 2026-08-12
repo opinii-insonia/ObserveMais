@@ -58,20 +58,23 @@ async function enviarParaPlanilha(record) {
       signal: AbortSignal.timeout(8000),
     });
 
-    if (!resposta.ok) throw new Error(`planilha respondeu ${resposta.status}`);
+    if (!resposta.ok) throw new Error(`webhook respondeu ${resposta.status}`);
 
-    // O Apps Script responde 200 mesmo quando recusa: segredo errado devolve
-    // {ok:false} e uma implantação com acesso restrito devolve a página de login.
-    // Conferir só o status daria "gravou" nos dois casos.
+    // Conferir só o status HTTP não basta: o Apps Script responde 200 mesmo
+    // quando recusa (segredo errado devolve {ok:false}; implantação restrita
+    // devolve a página de login em HTML). Por isso o corpo é inspecionado.
     const corpo = await resposta.text();
     let dados;
     try {
       dados = JSON.parse(corpo);
     } catch {
-      throw new Error('planilha respondeu algo que não é JSON (implantação provavelmente não está como "qualquer pessoa")');
+      throw new Error('webhook respondeu algo que não é JSON (se for Apps Script, a implantação não está como "qualquer pessoa")');
     }
 
-    if (dados?.ok !== true) throw new Error(`planilha recusou: ${dados?.erro || 'motivo não informado'}`);
+    // Aceita os dois destinos suportados: Apps Script devolve {ok:true},
+    // o Catch Hook do Zapier devolve {status:"success"}.
+    const gravou = dados?.ok === true || dados?.status === 'success';
+    if (!gravou) throw new Error(`webhook recusou: ${dados?.erro || dados?.status || 'motivo não informado'}`);
     return 'ok';
   } catch (error) {
     console.error('[lead-capture] falha ao gravar na planilha:', error?.message);
