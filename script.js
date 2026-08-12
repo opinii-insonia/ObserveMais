@@ -141,7 +141,7 @@ function coletarRespostas() {
  * navegador. Quem achar a URL consegue inserir linhas na planilha, então vale
  * um passo de Filter no Zap. Deixar vazio faz o envio usar só /api/lead-capture.
  */
-const ZAPIER_WEBHOOK = '';
+const ZAPIER_WEBHOOK = 'https://hooks.zapier.com/hooks/catch/24294345/46jihq9/';
 
 async function enviarParaZapier(payload) {
   if (!ZAPIER_WEBHOOK) return null;
