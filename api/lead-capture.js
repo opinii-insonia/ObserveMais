@@ -59,6 +59,19 @@ async function enviarParaPlanilha(record) {
     });
 
     if (!resposta.ok) throw new Error(`planilha respondeu ${resposta.status}`);
+
+    // O Apps Script responde 200 mesmo quando recusa: segredo errado devolve
+    // {ok:false} e uma implantação com acesso restrito devolve a página de login.
+    // Conferir só o status daria "gravou" nos dois casos.
+    const corpo = await resposta.text();
+    let dados;
+    try {
+      dados = JSON.parse(corpo);
+    } catch {
+      throw new Error('planilha respondeu algo que não é JSON (implantação provavelmente não está como "qualquer pessoa")');
+    }
+
+    if (dados?.ok !== true) throw new Error(`planilha recusou: ${dados?.erro || 'motivo não informado'}`);
     return 'ok';
   } catch (error) {
     console.error('[lead-capture] falha ao gravar na planilha:', error?.message);

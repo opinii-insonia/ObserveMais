@@ -380,6 +380,9 @@ test('o lead segue para a planilha sem credencial no navegador', async () => {
   // Falha na planilha não pode derrubar a captura: o lead já está no Blob.
   assert.match(api, /catch[\s\S]*?return 'falhou'/);
 
+  // Apps Script devolve 200 mesmo recusando; conferir só o status daria falso "gravou".
+  assert.match(api, /dados\?\.ok !== true/);
+
   assert.match(appsScript, /function doPost/);
   assert.match(appsScript, /dados\.segredo !== SEGREDO/);
 
