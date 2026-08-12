@@ -387,8 +387,23 @@ test('o lead segue para a planilha sem credencial no navegador', async () => {
   assert.match(appsScript, /function doPost/);
   assert.match(appsScript, /dados\.segredo !== SEGREDO/);
 
-  // Nenhum segredo ou URL de planilha pode vazar para o frontend.
+  // O segredo e a URL do Apps Script nunca podem aparecer no frontend.
   assert.doesNotMatch(js, /SHEETS_WEBHOOK|script\.google\.com|docs\.google\.com/);
+
+  // O caminho direto para o Zapier existe, e um destino caído não perde o lead.
+  assert.match(js, /const ZAPIER_WEBHOOK = /);
+  assert.match(js, /return zapier === true \|\| api === true/);
+  assert.match(js, /mode: 'no-cors'/);
+});
+
+test('o lead sai com os campos no primeiro nível, prontos para a planilha', async () => {
+  const js = await read('script.js');
+  const payload = js.match(/const payload = \{[\s\S]*?\n  \};/)?.[0];
+
+  assert.ok(payload, 'o payload do lead deveria existir');
+  for (const campo of ['nome', 'empresa', 'cargo', 'email', 'whatsapp', 'origem']) {
+    assert.match(payload, new RegExp(`^\\s{4}${campo}:`, 'm'), `${campo} precisa estar no primeiro nível`);
+  }
 });
 
 test('o simulador de ROI sai da landing e vive em página interna', async () => {

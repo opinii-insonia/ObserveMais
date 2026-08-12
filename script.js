@@ -133,21 +133,35 @@ function coletarRespostas() {
   return dados;
 }
 
-async function enviarLead() {
-  const lead = coletarRespostas();
-  const payload = {
-    source: 'observe-mais-site-formulario',
-    createdAt: new Date().toISOString(),
-    origem: leadOrigem,
-    lead: {
-      nome: lead.nome,
-      empresa: lead.empresa,
-      whatsapp: lead.whatsapp,
-      email: lead.email,
-      cargo: lead.cargo,
-    },
-  };
+/**
+ * URL do Catch Hook do Zapier. Cole aqui e o lead vai direto para a planilha,
+ * sem nenhuma configuração na Vercel.
+ *
+ * Fica visível no código da página — é inevitável para uma chamada feita pelo
+ * navegador. Quem achar a URL consegue inserir linhas na planilha, então vale
+ * um passo de Filter no Zap. Deixar vazio faz o envio usar só /api/lead-capture.
+ */
+const ZAPIER_WEBHOOK = '';
 
+async function enviarParaZapier(payload) {
+  if (!ZAPIER_WEBHOOK) return null;
+
+  try {
+    // no-cors evita o bloqueio de CORS do Zapier. Em troca a resposta é opaca:
+    // dá para saber que saiu, não que chegou. Por isso o envio à API continua.
+    await fetch(ZAPIER_WEBHOOK, {
+      method: 'POST',
+      mode: 'no-cors',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(payload),
+    });
+    return true;
+  } catch (erro) {
+    return false;
+  }
+}
+
+async function enviarParaApi(payload) {
   try {
     const resposta = await fetch('/api/lead-capture', {
       method: 'POST',
@@ -159,16 +173,44 @@ async function enviarLead() {
     if (dados.ok === false) throw new Error('lead-capture recusou o envio');
     return true;
   } catch (erro) {
-    // Em file:// não há API; guarda localmente para não perder o preenchimento.
-    if (window.location.protocol === 'file:') {
-      const chave = 'observe-mais-leads';
-      const salvos = JSON.parse(window.localStorage.getItem(chave) || '[]');
-      salvos.push(payload);
-      window.localStorage.setItem(chave, JSON.stringify(salvos));
-      return true;
-    }
     return false;
   }
+}
+
+async function enviarLead() {
+  const lead = coletarRespostas();
+  const payload = {
+    source: 'observe-mais-site-formulario',
+    createdAt: new Date().toISOString(),
+    origem: leadOrigem,
+    // Campos no primeiro nível para o Zapier mapear direto, sem passo extra.
+    nome: lead.nome,
+    empresa: lead.empresa,
+    cargo: lead.cargo,
+    email: lead.email,
+    whatsapp: lead.whatsapp,
+    lead: {
+      nome: lead.nome,
+      empresa: lead.empresa,
+      whatsapp: lead.whatsapp,
+      email: lead.email,
+      cargo: lead.cargo,
+    },
+  };
+
+  // Em file:// não há rede nem API; guarda localmente para não perder o preenchimento.
+  if (window.location.protocol === 'file:') {
+    const chave = 'observe-mais-leads';
+    const salvos = JSON.parse(window.localStorage.getItem(chave) || '[]');
+    salvos.push(payload);
+    window.localStorage.setItem(chave, JSON.stringify(salvos));
+    return true;
+  }
+
+  const [zapier, api] = await Promise.all([enviarParaZapier(payload), enviarParaApi(payload)]);
+
+  // Basta um destino ter aceitado: o lead não se perde se um dos dois cair.
+  return zapier === true || api === true;
 }
 
 document.querySelectorAll('[data-lead-flow]').forEach((gatilho) => {

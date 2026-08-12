@@ -17,10 +17,26 @@
 
 ## Planilha do Google
 
-Os leads do formulário são enviados por POST em JSON para a URL de
-`SHEETS_WEBHOOK_URL`. Há dois caminhos possíveis — escolha um.
+Há três caminhos possíveis — escolha um. A opção A é a única que não exige
+nenhuma configuração na Vercel.
 
-### Opção A — Zapier (mais simples de configurar, exige plano pago)
+### Opção A — Zapier direto do navegador (sem nenhuma configuração na Vercel)
+
+1. Zapier > Create Zap > Trigger **Webhooks by Zapier > Catch Hook**. Copie a URL.
+2. Cole a URL na constante `ZAPIER_WEBHOOK`, no topo do bloco de formulário em
+   `script.js`. Commit e push: o deploy da Vercel publica sozinho.
+3. Envie um lead de teste, mapeie os campos no Zap e publique.
+
+A URL fica visível no código da página — é inevitável numa chamada feita pelo
+navegador. Quem encontrá-la consegue inserir linhas na planilha, então vale um passo
+de **Filter by Zapier** no Zap (por exemplo: só continuar se o e-mail contiver "@").
+
+A chamada usa `mode: 'no-cors'`, porque o Zapier não devolve cabeçalho CORS. A
+resposta é opaca: dá para saber que a requisição saiu, não que foi aceita. Por isso
+o envio para `/api/lead-capture` continua acontecendo em paralelo — basta um dos
+dois aceitar para o lead não se perder.
+
+### Opção B — Zapier via variável de ambiente (URL fora do frontend)
 
 1. Zapier > Create Zap.
 2. Trigger: **Webhooks by Zapier > Catch Hook**. Copie a URL gerada.
@@ -32,7 +48,7 @@ Os leads do formulário são enviados por POST em JSON para a URL de
    `SHEETS_WEBHOOK_SECRET`: no Zapier quem protege é a própria URL, que é secreta.
 6. Redeploy.
 
-### Opção B — Apps Script (gratuito, configuração um pouco maior)
+### Opção C — Apps Script (gratuito, sem depender do Zapier)
 
 1. Siga o passo a passo em `scripts/planilha-leads.gs` (instalação comentada no topo).
 2. Crie na Vercel as variáveis de ambiente:
