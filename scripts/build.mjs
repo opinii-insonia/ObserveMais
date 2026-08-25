@@ -27,4 +27,9 @@ await cp(new URL('../public/', import.meta.url), new URL('../dist/public/', impo
   recursive: true,
 });
 
+// Vertical de restaurantes: dist/restaurantes/index.html responde em /restaurantes.
+await cp(new URL('../restaurantes/', import.meta.url), new URL('../dist/restaurantes/', import.meta.url), {
+  recursive: true,
+});
+
 console.log('Build estático criado em dist/.');

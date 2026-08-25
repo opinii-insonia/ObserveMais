@@ -1,4 +1,4 @@
-import { createReadStream, existsSync } from 'node:fs';
+import { createReadStream, existsSync, statSync } from 'node:fs';
 import { createServer } from 'node:http';
 import { extname, join, normalize } from 'node:path';
 
@@ -53,12 +53,20 @@ createServer((request, response) => {
   }
 
   const requestedFile = requestPath === '/' ? 'index.html' : requestPath.replace(/^\/+/, '');
-  const relative = requestedFile;
-  const file = normalize(join(root, relative));
+  let file = normalize(join(root, requestedFile));
 
   if (!file.startsWith(root) || !existsSync(file)) {
     response.writeHead(404).end('Not found');
     return;
+  }
+
+  // Diretório serve o index.html de dentro, como a Vercel faz com /restaurantes.
+  if (statSync(file).isDirectory()) {
+    file = join(file, 'index.html');
+    if (!existsSync(file)) {
+      response.writeHead(404).end('Not found');
+      return;
+    }
   }
 
   response.writeHead(200, { 'Content-Type': types[extname(file)] || 'application/octet-stream' });

@@ -3435,3 +3435,212 @@ h3 {
     transform: none;
   }
 }
+
+/* ---------------------------------------------------------------------------
+   Página de restaurantes (/restaurantes). Reaproveita todo o sistema visual;
+   abaixo só o que é exclusivo do nicho.
+   --------------------------------------------------------------------------- */
+
+.resto-ticket {
+  width: min(100%, 460px);
+  margin: 0;
+  padding: 22px 24px 18px;
+  background: var(--white);
+  border: 1px solid rgba(0, 0, 0, 0.08);
+  border-radius: var(--radius-md);
+  box-shadow: 0 28px 70px rgba(5, 30, 18, 0.2);
+}
+
+.resto-ticket__tag {
+  display: block;
+  margin-bottom: 16px;
+  padding-bottom: 12px;
+  border-bottom: 1px solid var(--line);
+  color: var(--muted);
+  font-size: 0.72rem;
+  font-weight: 800;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+.resto-ticket ul {
+  display: grid;
+  margin: 0;
+  padding: 0;
+  gap: 12px;
+  list-style: none;
+}
+
+.resto-ticket li {
+  display: grid;
+  gap: 4px 12px;
+  grid-template-columns: auto 1fr auto;
+  align-items: center;
+}
+
+.resto-ticket li i {
+  color: var(--muted);
+  font-family: ui-monospace, Consolas, monospace;
+  font-size: 0.78rem;
+  font-style: normal;
+}
+
+.resto-ticket li span {
+  display: grid;
+  color: var(--muted);
+  font-size: 0.82rem;
+  line-height: 1.4;
+}
+
+.resto-ticket li b {
+  color: var(--black);
+  font-size: 0.92rem;
+}
+
+.resto-ticket li em {
+  padding: 3px 10px;
+  border-radius: 99px;
+  font-size: 0.68rem;
+  font-style: normal;
+  font-weight: 800;
+}
+
+.resto-ticket li em.is-ok {
+  color: #0b6b38;
+  background: rgba(37, 214, 112, 0.16);
+}
+
+.resto-ticket li em.is-alerta {
+  color: #8a4b00;
+  background: #ffeccc;
+}
+
+.resto-ticket li em.is-bad {
+  color: #a11916;
+  background: #ffe0df;
+}
+
+.resto-ticket__foot {
+  margin: 16px 0 0;
+  padding-top: 12px;
+  border-top: 1px solid var(--line);
+  color: var(--muted);
+  font-size: 0.74rem;
+  line-height: 1.5;
+}
+
+.resto-gap {
+  display: grid;
+  width: 100%;
+  max-width: 460px;
+  padding: 26px 28px;
+  background: var(--white);
+  border: 1px solid var(--line);
+  border-radius: var(--radius-md);
+  box-shadow: var(--shadow);
+  gap: 14px;
+}
+
+.resto-gap__row {
+  display: flex;
+  padding-bottom: 13px;
+  border-bottom: 1px solid var(--line);
+  align-items: baseline;
+  justify-content: space-between;
+}
+
+.resto-gap__row span {
+  color: var(--muted);
+  font-size: 0.88rem;
+}
+
+.resto-gap__row b {
+  font-size: 1.66rem;
+  font-weight: 800;
+}
+
+.resto-gap__row b.is-ok {
+  color: var(--green-dark);
+}
+
+.resto-gap__row b.is-alerta {
+  color: #f0952b;
+}
+
+.resto-gap__row b.is-bad {
+  color: #e8433f;
+}
+
+.resto-gap__nota {
+  margin: 0;
+  color: var(--text);
+  font-size: 0.88rem;
+  line-height: 1.6;
+}
+
+.resto-passos {
+  display: grid;
+  margin: 0;
+  padding: 0;
+  gap: 20px;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  list-style: none;
+  counter-reset: resto-passo;
+}
+
+.resto-passos li {
+  padding: 28px 24px;
+  background: var(--white);
+  border: 1px solid var(--line);
+  border-radius: var(--radius-md);
+}
+
+.resto-passos li span {
+  display: block;
+  margin-bottom: 12px;
+  color: var(--green);
+  font-size: 1.5rem;
+  font-weight: 800;
+  line-height: 1;
+}
+
+.resto-passos li h3 {
+  margin-bottom: 8px;
+  font-size: 1.06rem;
+}
+
+.resto-passos li p {
+  margin: 0;
+  color: var(--muted);
+  font-size: 0.92rem;
+  line-height: 1.65;
+}
+
+@media (max-width: 1060px) {
+  .resto-passos {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+
+@media (max-width: 720px) {
+  .resto-passos {
+    grid-template-columns: 1fr;
+  }
+
+  .resto-ticket {
+    padding: 18px 16px 14px;
+  }
+
+  .resto-ticket li {
+    grid-template-columns: auto 1fr;
+  }
+
+  .resto-ticket li em {
+    grid-column: 2;
+    justify-self: start;
+  }
+
+  .resto-gap {
+    padding: 20px 18px;
+  }
+}

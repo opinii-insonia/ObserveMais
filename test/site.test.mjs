@@ -640,3 +640,56 @@ test('o rodapé inclui redes sociais e WhatsApp flutuante', async () => {
   assert.match(html, /class="whatsapp-icon"/);
   assert.match(css, /\.whatsapp-float svg/);
 });
+
+test('a vertical de restaurantes existe, isolada da landing de supermercados', async () => {
+  const [resto, index, build, sitemap, vercel] = await Promise.all([
+    read('restaurantes/index.html'),
+    read('index.html'),
+    read('scripts/build.mjs'),
+    read('sitemap.xml'),
+    read('vercel.json'),
+  ]);
+
+  // Comunicação própria do nicho.
+  assert.match(resto, /<title>Cliente oculto para restaurantes com IA \| Observe Mais<\/title>/);
+  assert.match(resto, /O cliente não reclama do prato frio\. Ele só não volta\./);
+  assert.match(resto, /rel="canonical" href="https:\/\/observemais\.com\.br\/restaurantes"/);
+
+  // Nada de vocabulário de supermercado sobrando.
+  for (const termo of ['supermercado', 'gôndola', 'ruptura', 'checkout', 'hortifruti', 'Big Box', 'Ultrabox']) {
+    const escopo = resto.replace(/<a href="\/">[^<]*<\/a>/g, ''); // o link de volta à landing pode citar
+    assert.ok(!escopo.toLowerCase().includes(termo.toLowerCase()), `sobrou "${termo}" na página de restaurantes`);
+  }
+
+  // A landing de supermercados não ganhou link para a vertical: só se chega por URL.
+  assert.doesNotMatch(index, /restaurante/i);
+
+  // Assets em caminho absoluto: a página vive em /restaurantes/, não na raiz.
+  for (const src of [...resto.matchAll(/(?:src|href)="((?:\/public|public)\/[^"]+)"/g)].map((m) => m[1])) {
+    assert.match(src, /^\//, `asset precisa de caminho absoluto: ${src}`);
+  }
+
+  // Publicação e rotas.
+  assert.match(build, /'\.\.\/restaurantes\/'/);
+  assert.match(sitemap, /<loc>https:\/\/observemais\.com\.br\/restaurantes<\/loc>/);
+  assert.match(vercel, /"source": "\/restaurante"/, 'o singular precisa redirecionar para o plural');
+});
+
+test('a página de restaurantes reaproveita o formulário e a prova social do nicho', async () => {
+  const resto = await read('restaurantes/index.html');
+
+  // Mesmo formulário inteligente, com os mesmos IDs que script.js espera.
+  assert.match(resto, /id="lead-flow"/);
+  const etapas = [...resto.matchAll(/class="lead-step[^"]*" data-step="([^"]+)"/g)].map((m) => m[1]);
+  assert.deepEqual(etapas, ['email', 'whatsapp', 'nome', 'empresa', 'cargo']);
+  assert.ok([...resto.matchAll(/data-lead-flow/g)].length >= 5);
+
+  // Depoimento real de restaurante, não reciclado de supermercado.
+  assert.match(resto, /Churrascaria Nativas SIA/);
+  assert.match(resto, /clients\/nativas\.png/);
+
+  // Áreas do nicho no relatório.
+  for (const area of ['Cozinha', 'Salão', 'Bar', 'Banheiros', 'Recepção']) {
+    assert.ok(resto.includes(area), `faltou a área "${area}" no relatório`);
+  }
+});
