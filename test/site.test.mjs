@@ -767,3 +767,25 @@ test('a vertical de restaurantes usa fotos do nicho, com alt e peso sob controle
   assert.match(resto, /\/public\/assets\/iov\/tres-sinais-iov\.jpg/);
   assert.match(resto, /<h3 class="iov-title">3 sinais\.<span>IOV\.<\/span><\/h3>/);
 });
+
+test('a vertical de restaurantes tem cartão de compartilhamento próprio', async () => {
+  const { stat } = await import('node:fs/promises');
+  const resto = await read('restaurantes/index.html');
+
+  const arte = 'public/assets/restaurantes/og-restaurantes.jpg';
+  const info = await stat(new URL(`../${arte}`, import.meta.url));
+  assert.ok(info.size < 600 * 1024, `og:image tem ${Math.round(info.size / 1024)}KB, acima do limite de prévia`);
+
+  for (const tag of ['og:image', 'twitter:image']) {
+    const valor = resto.match(new RegExp(`(?:property|name)="${tag}" content="([^"]+)"`))?.[1];
+    assert.ok(valor, `faltou ${tag}`);
+    assert.equal(valor, `https://observemais.com.br/${arte}`, `${tag} deveria usar a arte do nicho`);
+  }
+
+  // A arte de supermercado não pode voltar a representar a vertical.
+  assert.doesNotMatch(resto, /og-observe-mais-tres-visoes/);
+
+  assert.match(resto, /property="og:image:width" content="1200"/);
+  assert.match(resto, /property="og:image:height" content="630"/);
+  assert.match(resto, /property="og:image:alt" content="[^"]*restaurante[^"]*"/i);
+});
