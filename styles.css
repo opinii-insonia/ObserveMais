@@ -3679,3 +3679,26 @@ h3 {
   line-height: 1.6;
   text-align: center;
 }
+
+/* As fotos da vertical de restaurantes tem entre 600 e 800px. Nos quadros
+   padrao elas seriam ampliadas e o recorte 16/9 cortaria o assunto, entao
+   aqui elas ficam contidas no tamanho nativo. */
+.testimonial-proof--contida {
+  padding: 44px 0;
+}
+
+.testimonial-proof--contida img {
+  width: min(100% - 40px, 680px);
+  max-height: none;
+  margin-inline: auto;
+  aspect-ratio: 3 / 2;
+  border-radius: var(--radius-md);
+}
+
+.metrics-media--nativa {
+  max-width: 620px;
+}
+
+.metrics-media--nativa img {
+  aspect-ratio: 3 / 2;
+}
