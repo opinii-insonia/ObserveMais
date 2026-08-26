@@ -739,3 +739,31 @@ test('a vertical de restaurantes espelha todas as seções da landing principal'
   assert.deepEqual(modulos, ['auditor-profissional', 'cliente-real', 'operacao-interna']);
   assert.deepEqual(etapas, ['tres-visoes', 'cruzamento', 'iov', 'plano-de-acao']);
 });
+
+test('a vertical de restaurantes usa fotos do nicho, com alt e peso sob controle', async () => {
+  const { stat } = await import('node:fs/promises');
+  const resto = await read('restaurantes/index.html');
+
+  const fotos = [
+    'public/assets/restaurantes/hero-restaurante.jpg',
+    'public/assets/restaurantes/cozinha-operacao.webp',
+    'public/assets/restaurantes/cliente-avaliando.jpg',
+    'public/assets/restaurantes/salao-espera.jpg',
+  ];
+
+  for (const foto of fotos) {
+    assert.ok(resto.includes(`/${foto}`), `a foto ${foto} não está referenciada`);
+    const info = await stat(new URL(`../${foto}`, import.meta.url));
+    assert.ok(info.size < 250 * 1024, `${foto} tem ${Math.round(info.size / 1024)}KB`);
+  }
+
+  // Nenhuma foto pode entrar sem alt: elas são a evidência que sustenta o argumento.
+  for (const tag of resto.match(/<img[^>]*>/g) || []) {
+    assert.match(tag, /alt="[^"]+"/, `imagem sem alt: ${tag.slice(0, 90)}`);
+  }
+
+  // A arte do IOV é reaproveitada da landing, no mesmo bloco.
+  assert.match(resto, /class="iov-stage reveal"/);
+  assert.match(resto, /\/public\/assets\/iov\/tres-sinais-iov\.jpg/);
+  assert.match(resto, /<h3 class="iov-title">3 sinais\.<span>IOV\.<\/span><\/h3>/);
+});

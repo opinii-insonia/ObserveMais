@@ -3651,3 +3651,31 @@ h3 {
     radial-gradient(circle at center, var(--white) 54%, transparent 55%),
     conic-gradient(#1faa5c 0 48%, #98a5a0 48% 54%, #e8433f 54% 100%);
 }
+
+/* A linha do tempo saiu do herói e virou evidência de secao; a foto do metodo
+   segue o mesmo enquadramento das demais midias de secao. */
+.metrics-media + .resto-ticket {
+  width: min(100% - 40px, 620px);
+  margin: 26px auto 0;
+}
+
+.metodo-media {
+  max-width: 760px;
+  margin: 0 auto 40px;
+}
+
+.metodo-media img {
+  width: 100%;
+  aspect-ratio: 16 / 9;
+  object-fit: cover;
+  border-radius: 8px;
+  box-shadow: 0 24px 54px rgba(0, 0, 0, 0.14);
+}
+
+.metodo-media figcaption {
+  margin-top: 12px;
+  color: var(--muted);
+  font-size: 0.84rem;
+  line-height: 1.6;
+  text-align: center;
+}
