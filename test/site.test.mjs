@@ -686,7 +686,11 @@ test('a página de restaurantes reaproveita o formulário e a prova social do ni
 
   // Depoimento real de restaurante, não reciclado de supermercado.
   assert.match(resto, /Churrascaria Nativas SIA/);
-  assert.match(resto, /clients\/nativas\.png/);
+  assert.equal(
+    [...resto.matchAll(/clients\/nativas\.png/g)].length,
+    1,
+    'o logo da Nativas nao pode se repetir na pagina',
+  );
 
   // Áreas do nicho no relatório.
   for (const area of ['Cozinha', 'Salão', 'Bar', 'Banheiros', 'Recepção']) {
@@ -706,7 +710,8 @@ test('a vertical de restaurantes espelha todas as seções da landing principal'
     ['class="section value-section"', 'class="section value-section"'],
     ['id="solucoes"', 'id="solucoes"'],
     ['id="plataforma"', 'id="relatorio"'],
-    ['id="clientes"', 'id="clientes"'],
+    // #clientes fica de fora da vertical: com um unico logo de restaurante o muro
+    // ficava vazio e repetia o logo que ja aparece no depoimento.
     ['id="depoimentos"', 'id="depoimentos"'],
     ['id="sobre"', 'id="metodo"'],
     ['id="faq"', 'id="faq"'],
@@ -724,7 +729,7 @@ test('a vertical de restaurantes espelha todas as seções da landing principal'
   }
 
   // Os blocos que sustentam o argumento também precisam existir dos dois lados.
-  for (const bloco of ['iovpanel', 'solutions-divergence', 'iov-flow', 'iov-ai', 'gap-callout', 'differential-list', 'report-mock', 'client-wall']) {
+  for (const bloco of ['iovpanel', 'solutions-divergence', 'iov-flow', 'iov-ai', 'gap-callout', 'differential-list', 'report-mock']) {
     assert.ok(resto.includes(bloco), `faltou o bloco "${bloco}" na vertical de restaurantes`);
   }
 
