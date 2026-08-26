@@ -32,4 +32,9 @@ await cp(new URL('../restaurantes/', import.meta.url), new URL('../dist/restaura
   recursive: true,
 });
 
+// Blog: gerado por scripts/gerar-blog.mjs antes deste passo.
+await cp(new URL('../blog/', import.meta.url), new URL('../dist/blog/', import.meta.url), {
+  recursive: true,
+});
+
 console.log('Build estático criado em dist/.');

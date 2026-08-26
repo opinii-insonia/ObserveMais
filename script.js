@@ -271,3 +271,22 @@ window.addEventListener('keydown', (evento) => {
 
 const currentYear = document.querySelector('#current-year');
 if (currentYear) currentYear.textContent = String(new Date().getFullYear());
+
+/* Busca do blog: filtra os cartões já renderizados, sem ida ao servidor. */
+
+const blogBusca = document.querySelector('[data-blog-busca]');
+const blogLista = document.querySelector('[data-blog-lista]');
+const blogVazio = document.querySelector('[data-blog-vazio]');
+
+blogBusca?.addEventListener('input', () => {
+  const termo = blogBusca.value.trim().toLowerCase();
+  let visiveis = 0;
+
+  for (const cartao of blogLista.querySelectorAll('.post-card')) {
+    const combina = !termo || (cartao.dataset.busca || '').includes(termo);
+    cartao.hidden = !combina;
+    if (combina) visiveis += 1;
+  }
+
+  if (blogVazio) blogVazio.hidden = visiveis > 0;
+});

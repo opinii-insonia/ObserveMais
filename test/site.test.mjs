@@ -789,3 +789,85 @@ test('a vertical de restaurantes tem cartão de compartilhamento próprio', asyn
   assert.match(resto, /property="og:image:height" content="630"/);
   assert.match(resto, /property="og:image:alt" content="[^"]*restaurante[^"]*"/i);
 });
+
+test('o blog é gerado a partir dos artigos e sai no build', async () => {
+  const { artigos } = await import('../scripts/blog-artigos.mjs');
+  const [indice, build, sitemap, pkg] = await Promise.all([
+    read('blog/index.html'),
+    read('scripts/build.mjs'),
+    read('sitemap.xml'),
+    read('package.json'),
+  ]);
+
+  assert.ok(artigos.length >= 5, `esperava ao menos 5 artigos, achei ${artigos.length}`);
+
+  // Cada artigo vira página própria, entra no índice e no sitemap.
+  for (const artigo of artigos) {
+    const pagina = await read(`blog/${artigo.slug}/index.html`);
+    assert.match(pagina, new RegExp(`rel="canonical" href="https://observemais\\.com\\.br/blog/${artigo.slug}"`));
+    assert.ok(pagina.includes(artigo.titulo), `a página de ${artigo.slug} perdeu o título`);
+    assert.match(pagina, /"@type": "BlogPosting"/);
+
+    assert.ok(indice.includes(`/blog/${artigo.slug}`), `${artigo.slug} não está no índice`);
+    assert.ok(sitemap.includes(`/blog/${artigo.slug}<`), `${artigo.slug} não está no sitemap`);
+  }
+
+  assert.match(build, /'\.\.\/blog\/'/);
+  assert.match(pkg, /"blog": "node scripts\/gerar-blog\.mjs"/);
+  assert.match(pkg, /gerar-blog\.mjs && node scripts\/build\.mjs/, 'o build precisa regerar o blog antes de copiar');
+});
+
+test('o blog aparece no menu das duas verticais', async () => {
+  const [index, resto, indiceBlog] = await Promise.all([
+    read('index.html'),
+    read('restaurantes/index.html'),
+    read('blog/index.html'),
+  ]);
+
+  for (const [pagina, nome] of [[index, 'supermercados'], [resto, 'restaurantes']]) {
+    const nav = pagina.match(/<nav id="main-navigation"[\s\S]*?<\/nav>/)?.[0];
+    assert.ok(nav, `não achei o menu da vertical de ${nome}`);
+    assert.match(nav, /<a href="\/blog">Blog<\/a>/, `faltou o link do blog no menu de ${nome}`);
+  }
+
+  // O blog volta para as duas verticais.
+  assert.match(indiceBlog, /<a href="\/">Supermercados<\/a>/);
+  assert.match(indiceBlog, /<a href="\/restaurantes">Restaurantes<\/a>/);
+});
+
+test('o blog tem busca própria e conteúdo autoral com fonte citada', async () => {
+  const { artigos } = await import('../scripts/blog-artigos.mjs');
+  const [indice, js, css] = await Promise.all([read('blog/index.html'), read('script.js'), read('styles.css')]);
+
+  assert.match(indice, /data-blog-busca/);
+  assert.match(indice, /data-blog-lista/);
+  assert.match(js, /data-blog-busca/);
+  assert.match(css, /\.post-card\s*\{/);
+
+  // Cada cartão carrega o texto indexável que a busca filtra.
+  const cartoes = [...indice.matchAll(/data-busca="([^"]+)"/g)];
+  assert.equal(cartoes.length, artigos.length);
+
+  // Todo artigo precisa declarar as fontes que consultou.
+  for (const artigo of artigos) {
+    const fontes = artigo.corpo.find((bloco) => bloco.tipo === 'fontes');
+    assert.ok(fontes?.itens?.length, `o artigo ${artigo.slug} não cita fonte`);
+    for (const fonte of fontes.itens) {
+      assert.match(fonte.url, /^https:\/\//, `fonte sem URL válida em ${artigo.slug}`);
+    }
+  }
+});
+
+test('o blog não reproduz marca nem conteúdo de concorrente', async () => {
+  const { artigos } = await import('../scripts/blog-artigos.mjs');
+  const paginas = await Promise.all([
+    read('blog/index.html'),
+    ...artigos.map((a) => read(`blog/${a.slug}/index.html`)),
+  ]);
+
+  for (const pagina of paginas) {
+    assert.doesNotMatch(pagina, /seuclienteoculto/i);
+    assert.doesNotMatch(pagina, /Seu Cliente Oculto/);
+    assert.doesNotMatch(pagina, /usebaratao/i);
+  }
+});

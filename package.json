@@ -8,8 +8,9 @@
   },
   "scripts": {
     "test": "node --test",
-    "build": "node scripts/build.mjs",
+    "build": "node scripts/gerar-blog.mjs && node scripts/build.mjs",
     "check": "npm test && npm run build",
-    "dev": "node scripts/serve.mjs"
+    "dev": "node scripts/serve.mjs",
+    "blog": "node scripts/gerar-blog.mjs"
   }
 }
