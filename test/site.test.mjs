@@ -693,3 +693,44 @@ test('a página de restaurantes reaproveita o formulário e a prova social do ni
     assert.ok(resto.includes(area), `faltou a área "${area}" no relatório`);
   }
 });
+
+test('a vertical de restaurantes espelha todas as seções da landing principal', async () => {
+  const [index, resto] = await Promise.all([read('index.html'), read('restaurantes/index.html')]);
+
+  // Cada seção da landing precisa ter equivalente na vertical. O id muda quando o
+  // vocabulário do nicho pede (insights -> perdas, plataforma -> relatorio, sobre -> metodo).
+  const equivalentes = [
+    ['class="hero"', 'class="hero"'],
+    ['id="diferenciais"', 'id="diferenciais"'],
+    ['id="insights"', 'id="perdas"'],
+    ['class="section value-section"', 'class="section value-section"'],
+    ['id="solucoes"', 'id="solucoes"'],
+    ['id="plataforma"', 'id="relatorio"'],
+    ['id="clientes"', 'id="clientes"'],
+    ['id="depoimentos"', 'id="depoimentos"'],
+    ['id="sobre"', 'id="metodo"'],
+    ['id="faq"', 'id="faq"'],
+    ['class="section final-cta-section"', 'class="section final-cta-section"'],
+  ];
+
+  let anterior = -1;
+  for (const [naLanding, naVertical] of equivalentes) {
+    assert.ok(index.includes(naLanding), `a landing perdeu a seção ${naLanding}`);
+
+    const posicao = resto.indexOf(naVertical);
+    assert.ok(posicao > -1, `a vertical de restaurantes não tem a seção equivalente a ${naLanding}`);
+    assert.ok(posicao > anterior, `${naVertical} está fora de ordem na vertical`);
+    anterior = posicao;
+  }
+
+  // Os blocos que sustentam o argumento também precisam existir dos dois lados.
+  for (const bloco of ['iovpanel', 'solutions-divergence', 'iov-flow', 'iov-ai', 'gap-callout', 'differential-list', 'report-mock', 'client-wall']) {
+    assert.ok(resto.includes(bloco), `faltou o bloco "${bloco}" na vertical de restaurantes`);
+  }
+
+  // Mesmo contrato de módulos e de fluxo do IOV.
+  const modulos = [...resto.matchAll(/data-iov-module="([^"]+)"/g)].map((m) => m[1]);
+  const etapas = [...resto.matchAll(/data-iov-step="([^"]+)"/g)].map((m) => m[1]);
+  assert.deepEqual(modulos, ['auditor-profissional', 'cliente-real', 'operacao-interna']);
+  assert.deepEqual(etapas, ['tres-visoes', 'cruzamento', 'iov', 'plano-de-acao']);
+});

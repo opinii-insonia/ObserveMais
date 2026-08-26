@@ -3644,3 +3644,10 @@ h3 {
     padding: 20px 18px;
   }
 }
+
+/* NPS do restaurante: mais detratores que promotores, ao contrario do mercado. */
+.iovpanel__donut--resto {
+  background:
+    radial-gradient(circle at center, var(--white) 54%, transparent 55%),
+    conic-gradient(#1faa5c 0 48%, #98a5a0 48% 54%, #e8433f 54% 100%);
+}
