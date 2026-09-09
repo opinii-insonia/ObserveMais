@@ -37,4 +37,9 @@ await cp(new URL('../blog/', import.meta.url), new URL('../dist/blog/', import.m
   recursive: true,
 });
 
+// Painel de publicação: noindex, sem link no site, protegido por senha na API.
+await cp(new URL('../admin/', import.meta.url), new URL('../dist/admin/', import.meta.url), {
+  recursive: true,
+});
+
 console.log('Build estático criado em dist/.');

@@ -871,3 +871,133 @@ test('o blog não reproduz marca nem conteúdo de concorrente', async () => {
     assert.doesNotMatch(pagina, /usebaratao/i);
   }
 });
+
+test('nenhum bloco numérico da vertical passa como resultado de cliente', async () => {
+  const resto = await read('restaurantes/index.html');
+
+  // Cada componente que exibe número precisa declarar que é exemplo: sem isso o
+  // leitor toma o dado como resultado real, e não há prova para sustentar.
+  const blocos = [
+    ['resto-ticket', /Exemplo ilustrativo/],
+    ['resto-gap', /Cenário ilustrativo/],
+    ['iovpanel', /Exemplo ilustrativo/],
+    ['report-mock', /Exemplo ilustrativo/],
+  ];
+
+  for (const [classe, aviso] of blocos) {
+    const inicio = resto.indexOf(`class="${classe}`);
+    assert.ok(inicio > -1, `não achei o bloco ${classe}`);
+    const trecho = resto.slice(inicio, resto.indexOf('</figure>', inicio) + 9 || inicio + 4000);
+    assert.match(trecho, aviso, `o bloco ${classe} exibe número sem dizer que é exemplo`);
+  }
+
+  // Alegações sobre concorrência não têm como ser provadas aqui.
+  assert.doesNotMatch(resto, /a maioria das empresas/i);
+  assert.doesNotMatch(resto, /melhor empresa|líder de mercado|comprovadamente/i);
+
+  // O IOV precisa explicar que é leitura comparável, não nota absoluta.
+  assert.match(resto, /leitura comparável entre unidades, turnos e ciclos/);
+});
+
+test('o painel de publicação não expõe segredo em nada que o navegador baixa', async () => {
+  const publicos = await Promise.all([
+    read('admin/index.html'),
+    read('admin/admin.js'),
+    read('blog/index.html'),
+    read('script.js'),
+    read('index.html'),
+    read('restaurantes/index.html'),
+  ]);
+
+  for (const fonte of publicos) {
+    // Citar o nome da variável em mensagem de ajuda é aceitável; o que não pode
+    // é o valor dela, nem qualquer senha literal, chegar ao navegador.
+    assert.doesNotMatch(fonte, /process\.env/, 'o frontend não deve ler variável de ambiente');
+    assert.doesNotMatch(fonte, /senha\s*[:=]\s*['"][^'"]{3,}['"]/i, 'senha embutida no frontend');
+    assert.doesNotMatch(fonte, /BLOG_ADMIN_SENHA\s*[:=]/, 'valor da senha embutido');
+  }
+
+  // O token de sessão não pode sobreviver ao fechamento da aba. Os comentários
+  // são removidos antes: eles citam localStorage justamente para explicar a ausência.
+  const painel = publicos[1].replace(/\/\*[\s\S]*?\*\//g, '').split('\n').filter((l) => !l.trim().startsWith('//')).join(' ');
+  assert.doesNotMatch(painel, /localStorage|sessionStorage|document\.cookie/);
+  assert.match(painel, /let token = null/);
+});
+
+test('a API do painel exige senha do ambiente e sessão assinada', async () => {
+  const api = await read('api/blog-admin.js');
+
+  // Sem a variável configurada o painel não abre — não há senha padrão.
+  assert.match(api, /process\.env\.BLOG_ADMIN_SENHA/);
+  assert.match(api, /painel_nao_configurado/);
+
+  // Comparação em tempo constante: === vazaria a senha por medição de tempo.
+  assert.match(api, /timingSafeEqual/);
+  assert.doesNotMatch(api, /senha === |=== senhaConfigurada/);
+
+  // Sessão assinada com validade, e toda ação que não é login exige token.
+  assert.match(api, /createHmac\('sha256'/);
+  assert.match(api, /function tokenValido/);
+  assert.match(api, /if \(!tokenValido\(dados\?\.token\)\)/);
+
+  // Login errado responde com atraso, para encarecer força bruta.
+  assert.match(api, /setTimeout\(r, \d{3,}\)/);
+});
+
+test('o conteúdo digitado no painel não vira HTML executável', async () => {
+  const { textoParaBlocos } = await import('../scripts/blog-markdown.mjs');
+
+  const blocos = textoParaBlocos('<script>alert(1)</script>\n\n## Título <b>x</b>\n\n- item "aspas"\n\n> destaque\n\n**forte**');
+  const serializado = JSON.stringify(blocos);
+
+  // Toda tag digitada precisa chegar escapada.
+  assert.doesNotMatch(serializado, /<script>/);
+  assert.doesNotMatch(serializado, /<b>/);
+  assert.match(serializado, /&lt;script&gt;/);
+
+  // A marcação permitida continua funcionando.
+  assert.equal(blocos.find((b) => b.tipo === 'h2')?.texto, 'Título &lt;b&gt;x&lt;/b&gt;');
+  assert.ok(blocos.some((b) => b.tipo === 'lista'));
+  assert.ok(blocos.some((b) => b.tipo === 'destaque'));
+  assert.ok(blocos.some((b) => b.texto?.includes('<strong>forte</strong>')));
+});
+
+test('o painel fica fora do site público e do índice de busca', async () => {
+  const [painel, robots, sitemap, index, resto, blog, build] = await Promise.all([
+    read('admin/index.html'),
+    read('robots.txt'),
+    read('sitemap.xml'),
+    read('index.html'),
+    read('restaurantes/index.html'),
+    read('blog/index.html'),
+    read('scripts/build.mjs'),
+  ]);
+
+  assert.match(painel, /name="robots" content="noindex, nofollow/);
+
+  // Nenhuma página pública pode linkar o painel, e o caminho não entra no
+  // robots.txt nem no sitemap — os dois são públicos e entregariam o endereço.
+  for (const publica of [index, resto, blog, robots, sitemap]) {
+    assert.doesNotMatch(publica, /\/admin/);
+  }
+
+  assert.match(build, /'\.\.\/admin\/'/, 'o painel precisa ir para o dist');
+});
+
+test('artigo publicado pelo painel usa o mesmo renderizador dos versionados', async () => {
+  const [render, gerador, artigoApi, vercel] = await Promise.all([
+    read('scripts/blog-render.mjs'),
+    read('scripts/gerar-blog.mjs'),
+    read('api/artigo.js'),
+    read('vercel.json'),
+  ]);
+
+  // Um renderizador só: é o que garante página idêntica nos dois caminhos.
+  assert.match(render, /export function paginaArtigo/);
+  assert.match(gerador, /from '\.\/blog-render\.mjs'/);
+  assert.match(artigoApi, /from '\.\.\/scripts\/blog-render\.mjs'/);
+
+  // A rota dinâmica só é alcançada quando não existe arquivo estático.
+  assert.match(vercel, /"source": "\/blog\/:slug"/);
+  assert.match(vercel, /"destination": "\/api\/artigo\?slug=:slug"/);
+});

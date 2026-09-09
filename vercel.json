@@ -9,5 +9,11 @@
       "destination": "/restaurantes",
       "permanent": true
     }
+  ],
+  "rewrites": [
+    {
+      "source": "/blog/:slug",
+      "destination": "/api/artigo?slug=:slug"
+    }
   ]
 }

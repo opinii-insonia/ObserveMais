@@ -3992,3 +3992,216 @@ h3 {
     padding: 28px 20px;
   }
 }
+
+/* Todo bloco com número na página precisa dizer que é exemplo. */
+.resto-gap__aviso {
+  margin: 0;
+  padding-top: 12px;
+  border-top: 1px solid var(--line);
+  color: var(--muted);
+  font-size: 0.78rem;
+  line-height: 1.55;
+}
+
+/* ---------------------------------------------------------------------------
+   Painel de publicação (/admin). Fora do site público, sem link em lugar nenhum.
+   --------------------------------------------------------------------------- */
+
+.admin-wrap {
+  max-width: 880px;
+  padding: 44px 0 90px;
+}
+
+.admin-head {
+  display: grid;
+  margin-bottom: 34px;
+  padding-bottom: 26px;
+  border-bottom: 1px solid var(--line);
+  gap: 22px;
+  grid-template-columns: auto 1fr;
+  align-items: start;
+}
+
+.admin-head img {
+  width: 150px;
+  height: auto;
+}
+
+.admin-head h1 {
+  max-width: none;
+  margin-bottom: 10px;
+  color: var(--black);
+  font-size: 2rem;
+}
+
+.admin-card {
+  margin-bottom: 22px;
+  padding: 30px 32px;
+  background: var(--white);
+  border: 1px solid var(--line);
+  border-radius: var(--radius-md);
+  box-shadow: 0 14px 34px rgba(6, 40, 22, 0.06);
+}
+
+.admin-card__topo {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.admin-card h2 {
+  margin-bottom: 8px;
+  font-size: 1.3rem;
+}
+
+.admin-ajuda {
+  margin: 0 0 18px;
+  color: var(--muted);
+  font-size: 0.86rem;
+  line-height: 1.6;
+}
+
+.admin-ajuda code {
+  padding: 2px 7px;
+  background: #f2f5f3;
+  border-radius: 5px;
+  font-family: ui-monospace, Consolas, monospace;
+  font-size: 0.82rem;
+}
+
+.admin-card label {
+  display: block;
+  margin: 18px 0 7px;
+  color: var(--black);
+  font-size: 0.9rem;
+  font-weight: 700;
+}
+
+.admin-card label small {
+  color: var(--muted);
+  font-weight: 500;
+}
+
+.admin-card input,
+.admin-card textarea {
+  width: 100%;
+  padding: 13px 16px;
+  color: var(--text);
+  background: var(--white);
+  border: 1px solid var(--line);
+  border-radius: 10px;
+  font-family: inherit;
+  font-size: 0.96rem;
+  outline: none;
+}
+
+.admin-card textarea {
+  line-height: 1.65;
+  resize: vertical;
+}
+
+.admin-card input:focus,
+.admin-card textarea:focus {
+  border-color: var(--green);
+  box-shadow: 0 0 0 3px rgba(37, 214, 112, 0.16);
+}
+
+.admin-acoes {
+  display: flex;
+  margin-top: 22px;
+  gap: 12px;
+  flex-wrap: wrap;
+}
+
+.admin-erro,
+.admin-ok {
+  margin: 16px 0 0;
+  padding: 12px 15px;
+  border-radius: 10px;
+  font-size: 0.88rem;
+}
+
+.admin-erro {
+  color: #a11916;
+  background: #ffe0df;
+}
+
+.admin-ok {
+  color: #0b6b38;
+  background: rgba(37, 214, 112, 0.16);
+}
+
+.admin-lista {
+  display: grid;
+  gap: 10px;
+}
+
+.admin-item {
+  display: grid;
+  padding: 14px 16px;
+  background: #f7faf8;
+  border: 1px solid var(--line);
+  border-radius: 10px;
+  gap: 14px;
+  grid-template-columns: 1fr auto auto;
+  align-items: center;
+}
+
+.admin-item div {
+  display: grid;
+  min-width: 0;
+  gap: 2px;
+}
+
+.admin-item strong {
+  overflow: hidden;
+  font-size: 0.94rem;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.admin-item span {
+  color: var(--muted);
+  font-size: 0.78rem;
+}
+
+.admin-item a {
+  color: var(--green-dark);
+  font-size: 0.86rem;
+  font-weight: 700;
+  text-decoration: none;
+}
+
+.admin-remover {
+  padding: 7px 13px;
+  color: #a11916;
+  background: transparent;
+  border: 1px solid #f0c3c1;
+  border-radius: 8px;
+  font-size: 0.82rem;
+  font-weight: 700;
+  cursor: pointer;
+}
+
+.admin-remover:hover {
+  background: #ffe0df;
+}
+
+.admin-previa .post-corpo {
+  max-width: none;
+  padding-top: 0;
+}
+
+@media (max-width: 720px) {
+  .admin-head {
+    grid-template-columns: 1fr;
+  }
+
+  .admin-card {
+    padding: 22px 18px;
+  }
+
+  .admin-item {
+    grid-template-columns: 1fr auto;
+  }
+}

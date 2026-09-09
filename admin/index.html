@@ -1,0 +1,106 @@
+<!doctype html>
+<html lang="pt-BR">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+
+    <!-- Página administrativa: fora de buscador e sem rastro de referência. -->
+    <meta name="robots" content="noindex, nofollow, noarchive, nosnippet" />
+    <meta name="referrer" content="no-referrer" />
+
+    <title>Publicar no blog | Observe Mais</title>
+    <link rel="icon" href="/favicon.svg" type="image/svg+xml" />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700;800&display=swap"
+      rel="stylesheet"
+    />
+    <link rel="stylesheet" href="/styles.css" />
+    <script src="/admin/admin.js" defer></script>
+  </head>
+  <body class="interno">
+    <main class="container admin-wrap">
+      <header class="admin-head">
+        <img src="/public/assets/logo-observe-plus-light-web.png" alt="Observe Mais" width="440" height="87" />
+        <div>
+          <p class="interno-tag">Uso interno</p>
+          <h1>Publicar no blog</h1>
+          <p class="interno-sub">
+            O que for publicado aqui entra no ar imediatamente em
+            <a href="/blog">observemais.com.br/blog</a>, visível para qualquer visitante.
+          </p>
+        </div>
+      </header>
+
+      <!-- Login -->
+      <section class="admin-card" id="admin-login">
+        <h2>Entrar</h2>
+        <p class="admin-ajuda">Acesso restrito. A senha é verificada no servidor e não existe neste código.</p>
+        <form id="form-login" novalidate>
+          <label for="senha">Senha</label>
+          <input id="senha" type="password" autocomplete="current-password" placeholder="••••••••" />
+          <p class="admin-erro" id="erro-login" role="alert" hidden></p>
+          <button class="button button-primary" type="submit">Entrar</button>
+        </form>
+      </section>
+
+      <!-- Editor -->
+      <section class="admin-painel" id="admin-painel" hidden>
+        <div class="admin-card">
+          <div class="admin-card__topo">
+            <h2>Novo artigo</h2>
+            <button class="lead-flow__back" type="button" id="sair">Sair</button>
+          </div>
+
+          <form id="form-artigo" novalidate>
+            <label for="titulo">Título</label>
+            <input id="titulo" type="text" placeholder="Ex.: Como medir o tempo de espera no salão" />
+
+            <label for="categoria">Categoria</label>
+            <input id="categoria" type="text" list="categorias" placeholder="Cliente oculto" />
+            <datalist id="categorias">
+              <option value="Cliente oculto"></option>
+              <option value="Experiência do cliente"></option>
+              <option value="Supermercados"></option>
+              <option value="Restaurantes"></option>
+              <option value="Metodologia"></option>
+              <option value="Gestão"></option>
+            </datalist>
+
+            <label for="resumo">Resumo <small>aparece no cartão e no Google</small></label>
+            <textarea id="resumo" rows="3" placeholder="Duas ou três linhas explicando o que o leitor ganha com o artigo."></textarea>
+
+            <label for="corpo">Conteúdo</label>
+            <p class="admin-ajuda">
+              <code>## </code> subtítulo &nbsp;·&nbsp;
+              <code>- </code> item de lista &nbsp;·&nbsp;
+              <code>&gt; </code> destaque &nbsp;·&nbsp;
+              <code>**negrito**</code> &nbsp;·&nbsp; linha em branco separa parágrafo
+            </p>
+            <textarea id="corpo" rows="18" placeholder="Escreva aqui…"></textarea>
+
+            <p class="admin-erro" id="erro-artigo" role="alert" hidden></p>
+            <p class="admin-ok" id="ok-artigo" role="status" hidden></p>
+
+            <div class="admin-acoes">
+              <button class="button button-primary" type="submit" id="publicar">Publicar</button>
+              <button class="button button-ghost" type="button" id="previa">Ver prévia</button>
+            </div>
+          </form>
+        </div>
+
+        <div class="admin-card">
+          <h2>Publicados pelo painel</h2>
+          <p class="admin-ajuda">Os seis artigos originais fazem parte do código e não aparecem aqui.</p>
+          <div id="lista-artigos" class="admin-lista">
+            <p class="admin-ajuda">Carregando…</p>
+          </div>
+        </div>
+      </section>
+
+      <section class="admin-card admin-previa" id="admin-previa" hidden>
+        <h2>Prévia</h2>
+        <div class="post-corpo" id="previa-corpo"></div>
+      </section>
+    </main>
+  </body>
+</html>
