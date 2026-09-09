@@ -539,7 +539,7 @@ test('usa assets próprios com nomes alinhados a Observe Mais', async () => {
     await access(new URL(`../${asset}`, import.meta.url));
   }
 
-  await access(new URL('../public/assets/generated-supermercado/cta-supermercado-operacao-v1.png', import.meta.url));
+  await access(new URL('../public/assets/generated-supermercado/cta-supermercado-operacao-v1.jpg', import.meta.url));
 });
 
 test('as evidências de topo usam fotos reais de operação, não ilustração', async () => {
@@ -722,7 +722,8 @@ test('a vertical de restaurantes espelha todas as seções da landing principal'
   for (const [naLanding, naVertical] of equivalentes) {
     assert.ok(index.includes(naLanding), `a landing perdeu a seção ${naLanding}`);
 
-    const posicao = resto.indexOf(naVertical);
+    // A vertical pode acrescentar modificador na classe; o que importa é a seção existir.
+    const posicao = resto.indexOf(naVertical.replace(/"$/, ''));
     assert.ok(posicao > -1, `a vertical de restaurantes não tem a seção equivalente a ${naLanding}`);
     assert.ok(posicao > anterior, `${naVertical} está fora de ordem na vertical`);
     anterior = posicao;
@@ -1000,4 +1001,33 @@ test('artigo publicado pelo painel usa o mesmo renderizador dos versionados', as
   // A rota dinâmica só é alcançada quando não existe arquivo estático.
   assert.match(vercel, /"source": "\/blog\/:slug"/);
   assert.match(vercel, /"destination": "\/api\/artigo\?slug=:slug"/);
+});
+
+test('o CTA final de cada vertical usa imagem do próprio nicho', async () => {
+  const { stat } = await import('node:fs/promises');
+  const [css, resto, index] = await Promise.all([
+    read('styles.css'),
+    read('restaurantes/index.html'),
+    read('index.html'),
+  ]);
+
+  // A vertical de restaurantes não pode herdar a foto de supermercado do CTA.
+  assert.match(resto, /final-cta-section--resto/);
+  assert.match(css, /\.final-cta-section--resto\s*\{[\s\S]*?restaurantes\/og-restaurantes\.jpg/);
+  assert.doesNotMatch(index, /final-cta-section--resto/);
+
+  // Imagem de fundo pesada custa em toda visita, mesmo quase invisível sob o verde.
+  for (const [, caminho] of css.matchAll(/url\("(public\/assets\/[^"]+)"\)/g)) {
+    const info = await stat(new URL(`../${caminho}`, import.meta.url));
+    assert.ok(info.size < 250 * 1024, `${caminho} tem ${Math.round(info.size / 1024)}KB de fundo`);
+  }
+});
+
+test('a auditoria de assets enxerga o que o CSS carrega', async () => {
+  const script = await read('scripts/assets-nao-usados.mjs');
+
+  // Varrer só o HTML deixava passar background-image, que é o caso mais caro.
+  assert.match(script, /styles\.css/);
+  assert.ok(script.includes(String.raw`url\(`), 'a varredura precisa cobrir url() do CSS');
+  assert.match(script, /restaurantes\/index\.html/);
 });

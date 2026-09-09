@@ -3,9 +3,22 @@
 import { readFileSync, readdirSync, statSync } from 'node:fs';
 import { join } from 'node:path';
 
-const html = readFileSync(new URL('../index.html', import.meta.url), 'utf8');
+// Precisa varrer CSS também: um background-image de 2,3MB já passou despercebido
+// aqui justamente porque a varredura só olhava o HTML.
+const fontes = ['../index.html', '../restaurantes/index.html', '../styles.css', '../blog/index.html']
+  .map((f) => {
+    try {
+      return readFileSync(new URL(f, import.meta.url), 'utf8');
+    } catch {
+      return '';
+    }
+  })
+  .join(String.fromCharCode(10));
+
 const used = new Set(
-  [...html.matchAll(/(?:src|href|content)="[^"]*?(public\/assets\/[^"]+)"/g)].map((m) => m[1]),
+  [...fontes.matchAll(/(?:src|href|content)="[^"]*?(public\/assets\/[^"]+)"|url\(["']?(public\/assets\/[^"')]+)/g)]
+    .map((m) => m[1] || m[2])
+    .filter(Boolean),
 );
 
 const all = [];
