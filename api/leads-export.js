@@ -1,4 +1,5 @@
-import { get, list } from '@vercel/blob';
+import { list } from '@vercel/blob';
+import { decifrar } from './_leads-cofre.js';
 
 function isAuthorized(request) {
   const expected = process.env.ROI_LEADS_TOKEN;
@@ -360,9 +361,14 @@ export default async function handler(request, response) {
       cursor = page.cursor;
 
       for (const blob of page.blobs) {
-        const result = await get(blob.pathname, { access: 'private' });
-        if (result?.statusCode !== 200 || !result.stream) continue;
-        records.push(JSON.parse(await streamToText(result.stream)));
+        try {
+          const resposta = await fetch(blob.url);
+          if (!resposta.ok) continue;
+          records.push(decifrar(await resposta.text()));
+        } catch (erro) {
+          // Um registro ilegível não pode derrubar a exportação inteira.
+          console.error('[leads-export] registro ignorado:', blob.pathname, erro?.message);
+        }
       }
     } while (cursor);
 

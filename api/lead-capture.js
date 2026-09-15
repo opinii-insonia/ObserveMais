@@ -3,6 +3,7 @@ import { join } from 'node:path';
 import { tmpdir } from 'node:os';
 import crypto from 'node:crypto';
 import { put } from '@vercel/blob';
+import { cifrar, cofreAtivo } from './_leads-cofre.js';
 
 const MAX_BODY_SIZE = 20000;
 
@@ -123,11 +124,14 @@ export default async function handler(request, response) {
     let storage = 'temporary';
 
     try {
-      await put(`roi-leads/${record.createdAt.slice(0, 10)}/${record.id}.json`, JSON.stringify(record, null, 2), {
-        access: 'private',
-        contentType: 'application/json',
+      // O store do projeto é público: o conteúdo vai cifrado, porque lead é dado
+      // pessoal e endereço imprevisível não substitui privacidade.
+      const { conteudo } = cifrar(record);
+      await put(`roi-leads/${record.createdAt.slice(0, 10)}/${record.id}.json`, conteudo, {
+        access: 'public',
+        contentType: 'application/octet-stream',
       });
-      storage = 'blob';
+      storage = cofreAtivo() ? 'blob' : 'blob-sem-chave';
     } catch (error) {
       // Sem Blob Store conectado o lead cai em disco efêmero da função e se perde no
       // reciclo da instância. O visitante ainda vê sucesso, então o único sinal de que

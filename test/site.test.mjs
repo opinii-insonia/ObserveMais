@@ -1094,3 +1094,44 @@ test('imagem no artigo só aponta para o armazenamento do próprio site', async 
     assert.equal(textoParaBlocos(`![x](${url})`).filter((b) => b.tipo === 'imagem').length, 0);
   }
 });
+
+test('o lead é gravado cifrado, porque o store do projeto é público', async () => {
+  const [captura, exporta, cofre] = await Promise.all([
+    read('api/lead-capture.js'),
+    read('api/leads-export.js'),
+    read('api/_leads-cofre.js'),
+  ]);
+
+  // O store criado é público; pedir 'private' contra ele falha e o lead se perde.
+  assert.match(captura, /access: 'public'/);
+  assert.doesNotMatch(captura, /access: 'private'/);
+  assert.doesNotMatch(exporta, /access: 'private'/);
+
+  // Dado pessoal não pode ir em claro para endereço público.
+  assert.match(captura, /cifrar\(record\)/);
+  assert.match(exporta, /decifrar\(/);
+  assert.match(cofre, /aes-256-gcm/);
+
+  // GCM autentica: arquivo adulterado falha em vez de devolver lixo.
+  assert.match(cofre, /getAuthTag|setAuthTag/);
+});
+
+test('o cofre cifra de verdade e continua lendo o formato antigo', async () => {
+  const { cifrar, decifrar } = await import('../api/_leads-cofre.js');
+  process.env.LEADS_CHAVE = process.env.LEADS_CHAVE || 'chave-de-teste-para-o-cofre';
+
+  const lead = { id: 'abc', lead: { nome: 'Fulano de Tal', email: 'fulano@exemplo.com' } };
+  const { conteudo, cifrado } = cifrar(lead);
+
+  assert.equal(cifrado, true);
+  assert.ok(!conteudo.includes('Fulano'), 'o nome não pode aparecer em claro no armazenamento');
+  assert.ok(!conteudo.includes('fulano@exemplo.com'), 'o e-mail não pode aparecer em claro');
+  assert.deepEqual(decifrar(conteudo), lead);
+
+  // Leads gravados antes da cifragem precisam continuar exportáveis.
+  assert.deepEqual(decifrar(JSON.stringify(lead)), lead);
+
+  // Conteúdo adulterado não pode passar como válido.
+  const adulterado = conteudo.slice(0, -6) + 'AAAAAA';
+  assert.throws(() => decifrar(adulterado));
+});
