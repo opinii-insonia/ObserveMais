@@ -198,6 +198,10 @@ if (modal) {
     modal.querySelector('[data-capa-status]').textContent = '';
     modal.querySelector('[data-imagem-status]').textContent = '';
     modal.dispatchEvent(new CustomEvent('artigo-publicado'));
+
+    // A grade atrás do modal passa a mostrar o artigo imediatamente, sem esperar
+    // o cache do feed expirar.
+    window.atualizarGradeDoBlog?.({ semCache: true });
   });
 
 /* --------------------------------------------------------------- gerenciar

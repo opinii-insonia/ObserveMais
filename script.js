@@ -299,8 +299,13 @@ blogBusca?.addEventListener('input', () => {
  * Falha em silêncio de propósito — se a API não responder, os artigos que vêm
  * do código seguem visíveis.
  */
-if (blogLista) {
-  fetch('/api/blog-feed')
+function atualizarGradeDoBlog({ semCache = false } = {}) {
+  if (!blogLista) return Promise.resolve();
+
+  // Parâmetro único faz o CDN tratar como outro recurso e devolver o estado atual.
+  const endereco = semCache ? `/api/blog-feed?t=${Date.now()}` : '/api/blog-feed';
+
+  return fetch(endereco, semCache ? { cache: 'no-store' } : undefined)
     .then((r) => (r.ok ? r.json() : { artigos: [], ocultos: [] }))
     .then(({ artigos = [], ocultos = [] }) => {
       for (const slug of ocultos) {
@@ -354,3 +359,8 @@ if (blogLista) {
     })
     .catch(() => {});
 }
+
+atualizarGradeDoBlog();
+
+// O editor chama isto depois de publicar, para quem postou ver na hora.
+window.atualizarGradeDoBlog = atualizarGradeDoBlog;

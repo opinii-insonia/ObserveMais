@@ -106,7 +106,8 @@ export default async function handler(request, response) {
 
     const relacionados = versionados.filter((a) => a.slug !== slug && !ocultos.includes(a.slug)).slice(0, 2);
 
-    response.setHeader('Cache-Control', 'public, max-age=300, s-maxage=300');
+    // 60s em vez de 300: republicar o mesmo slug precisa refletir rápido.
+    response.setHeader('Cache-Control', 'public, max-age=60, s-maxage=60');
     response.status(200).end(paginaArtigo(artigo, relacionados));
   } catch (erro) {
     console.error('[artigo] falha:', erro?.message);

@@ -11,8 +11,10 @@ const PREFIXO = 'blog-artigos/';
 
 export default async function handler(request, response) {
   response.setHeader('Content-Type', 'application/json; charset=utf-8');
-  // Cache curto: publicação nova aparece rápido sem bater no Blob a cada visita.
-  response.setHeader('Cache-Control', 'public, max-age=60, s-maxage=60');
+  // Cache curto: segura a maioria das visitas sem fazer a publicação nova demorar
+  // a aparecer. Quem acabou de publicar não espera nem isso — o editor recarrega
+  // a grade com um parâmetro único, que o CDN trata como outro recurso.
+  response.setHeader('Cache-Control', 'public, max-age=20, s-maxage=20');
 
   try {
     const { blobs } = await list({ prefix: PREFIXO, limit: 1000 });

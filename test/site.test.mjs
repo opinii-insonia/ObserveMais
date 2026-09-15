@@ -1167,3 +1167,26 @@ test('o painel remove qualquer artigo, dos dois tipos', async () => {
   // Remoção definitiva precisa avisar que não tem volta.
   assert.match(editor, /não tem volta/);
 });
+
+test('artigo publicado aparece na hora para quem publicou', async () => {
+  const [feed, rota, script, editor] = await Promise.all([
+    read('api/blog-feed.js'),
+    read('api/artigo.js'),
+    read('script.js'),
+    read('blog-editor.js'),
+  ]);
+
+  // Cache longo no feed faz a publicação demorar a aparecer.
+  const segundosFeed = Number(feed.match(/s-maxage=(\d+)/)?.[1]);
+  assert.ok(segundosFeed <= 30, `feed com s-maxage de ${segundosFeed}s atrasa demais a publicação`);
+
+  // Republicar o mesmo slug precisa refletir rápido na página do artigo.
+  const segundosArtigo = Number(rota.match(/max-age=(\d+), s-maxage=/)?.[1]);
+  assert.ok(segundosArtigo <= 60, `artigo com cache de ${segundosArtigo}s atrasa a republicação`);
+
+  // Quem publicou não espera cache nenhum: a grade é remontada ignorando o CDN.
+  assert.match(script, /function atualizarGradeDoBlog/);
+  assert.match(script, /window\.atualizarGradeDoBlog = atualizarGradeDoBlog/);
+  assert.match(script, /blog-feed\?t=\$\{Date\.now\(\)\}/, 'precisa de parâmetro único para furar o cache');
+  assert.match(editor, /atualizarGradeDoBlog\?\.\(\{ semCache: true \}\)/);
+});
