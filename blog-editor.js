@@ -29,7 +29,7 @@ if (modal) {
     falha_no_armazenamento: 'Não foi possível gravar. O Blob Store precisa estar conectado na Vercel.',
     sessao_expirada: 'Sua sessão expirou. Entre novamente.',
     formato_nao_suportado: 'Use JPG, PNG ou WebP. O arquivo enviado não é uma imagem válida.',
-    imagem_grande: 'Imagem acima de 6 MB. Reduza antes de enviar.',
+    imagem_grande: 'Imagem acima de 2 MB. Exporte menor antes de enviar.',
   };
 
   const explicar = (erro) => MENSAGENS[erro] || 'Não foi possível concluir. Tente novamente.';
@@ -116,7 +116,7 @@ if (modal) {
     if (!arquivo) return;
     erroArtigo.hidden = true;
 
-    if (arquivo.size > 6 * 1024 * 1024) return mostrar(erroArtigo, MENSAGENS.imagem_grande);
+    if (arquivo.size > 2 * 1024 * 1024) return mostrar(erroArtigo, MENSAGENS.imagem_grande);
 
     const dados = await chamar({ acao: 'imagem', token, arquivo: await lerArquivo(arquivo) });
     if (!dados.ok) return mostrar(erroArtigo, explicar(dados.erro));

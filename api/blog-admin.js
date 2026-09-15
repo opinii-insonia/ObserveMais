@@ -114,7 +114,9 @@ const ASSINATURAS = [
   { ext: 'webp', tipo: 'image/webp', bytes: [0x52, 0x49, 0x46, 0x46] },
 ];
 
-const LIMITE_IMAGEM = 6 * 1024 * 1024;
+// 2MB e nao mais: no plano Hobby da Vercel o Blob tem ~256MB de armazenamento
+// e 1GB/mes de transferencia. Imagem de web bem exportada fica bem abaixo disso.
+const LIMITE_IMAGEM = 2 * 1024 * 1024;
 
 function identificarImagem(buffer) {
   for (const assinatura of ASSINATURAS) {
