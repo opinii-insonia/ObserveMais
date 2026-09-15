@@ -802,16 +802,16 @@ test('o blog é gerado a partir dos artigos e sai no build', async () => {
 
   assert.ok(artigos.length >= 5, `esperava ao menos 5 artigos, achei ${artigos.length}`);
 
-  // Cada artigo vira página própria, entra no índice e no sitemap.
+  // As páginas de artigo deixaram de ser arquivos: todas passam por api/artigo.js.
+  // Enquanto eram arquivos estáticos, a Vercel os servia antes da função e o
+  // painel não conseguia tirar do ar os artigos que vêm do código.
   for (const artigo of artigos) {
-    const pagina = await read(`blog/${artigo.slug}/index.html`);
-    assert.match(pagina, new RegExp(`rel="canonical" href="https://observemais\\.com\\.br/blog/${artigo.slug}"`));
-    assert.ok(pagina.includes(artigo.titulo), `a página de ${artigo.slug} perdeu o título`);
-    assert.match(pagina, /"@type": "BlogPosting"/);
-
     assert.ok(indice.includes(`/blog/${artigo.slug}`), `${artigo.slug} não está no índice`);
     assert.ok(sitemap.includes(`/blog/${artigo.slug}<`), `${artigo.slug} não está no sitemap`);
   }
+
+  const rota = await read('api/artigo.js');
+  assert.match(rota, /versionados\.find\(/, 'a rota precisa servir também os artigos do código');
 
   assert.match(build, /'\.\.\/blog\/'/);
   assert.match(pkg, /"blog": "node scripts\/gerar-blog\.mjs"/);
@@ -861,10 +861,7 @@ test('o blog tem busca própria e conteúdo autoral com fonte citada', async () 
 
 test('o blog não reproduz marca nem conteúdo de concorrente', async () => {
   const { artigos } = await import('../scripts/blog-artigos.mjs');
-  const paginas = await Promise.all([
-    read('blog/index.html'),
-    ...artigos.map((a) => read(`blog/${a.slug}/index.html`)),
-  ]);
+  const paginas = await Promise.all([read('blog/index.html'), read('scripts/blog-artigos.mjs')]);
 
   for (const pagina of paginas) {
     assert.doesNotMatch(pagina, /seuclienteoculto/i);
@@ -1033,23 +1030,24 @@ test('a auditoria de assets enxerga o que o CSS carrega', async () => {
 });
 
 test('o botão de postagem existe no blog e abre o modal de credenciais', async () => {
-  const [indice, artigo, editor, build] = await Promise.all([
+  const [indice, editor, build] = await Promise.all([
     read('blog/index.html'),
-    read('blog/o-que-e-cliente-oculto/index.html'),
     read('blog-editor.js'),
     read('scripts/build.mjs'),
   ]);
 
-  assert.match(indice, /data-abrir-editor>Fazer uma postagem</);
+  // A entrada fica no menu, discreta: não pode competir com o CTA de conversão.
+  const nav = indice.match(/<nav id="main-navigation"[\s\S]*?<\/nav>/)?.[0];
+  assert.match(nav, /class="nav-postar"[^>]*data-abrir-editor>Fazer uma postagem</);
+  assert.doesNotMatch(indice, /blog-acoes/);
   assert.match(indice, /id="editor-modal"/);
   assert.match(indice, /data-form-login/);
   assert.match(indice, /id="ed-capa"/, 'faltou o campo de capa');
   assert.match(indice, /id="ed-imagem"/, 'faltou inserir imagem no texto');
 
-  // O editor só é carregado no índice; página de artigo não precisa dele.
   assert.match(indice, /blog-editor\.js/);
-  assert.doesNotMatch(artigo, /blog-editor\.js/);
   assert.match(build, /'blog-editor\.js'/);
+  assert.match(indice, /<p class="admin-ajuda">Acesso restrito\.<\/p>/);
 
   // O editor não pode guardar credencial nem sessão fora da memória.
   const semComentario = editor.replace(/\/\*[\s\S]*?\*\//g, '').split('\n').filter((l) => !l.trim().startsWith('*') && !l.trim().startsWith('//')).join(' ');
@@ -1134,4 +1132,38 @@ test('o cofre cifra de verdade e continua lendo o formato antigo', async () => {
   // Conteúdo adulterado não pode passar como válido.
   const adulterado = conteudo.slice(0, -6) + 'AAAAAA';
   assert.throws(() => decifrar(adulterado));
+});
+
+test('o painel remove qualquer artigo, dos dois tipos', async () => {
+  const [api, editor, rota, feed] = await Promise.all([
+    read('api/blog-admin.js'),
+    read('blog-editor.js'),
+    read('api/artigo.js'),
+    read('api/blog-feed.js'),
+  ]);
+
+  // A listagem precisa trazer os dois, marcando de onde vêm.
+  assert.match(api, /origem: 'painel'/);
+  assert.match(api, /origem: 'codigo'/);
+
+  // Artigo do painel some do armazenamento; o do código entra na lista de ocultos,
+  // porque o arquivo continua no repositório.
+  assert.match(api, /await del\(blobs\[0\]\.url\)/);
+  assert.match(api, /gravarOcultos\(\[\.\.\.ocultos, slug\]\)/);
+  assert.match(api, /acao === 'restaurar'/, 'esconder precisa ter volta');
+
+  // A rota respeita a lista e some com o artigo escondido.
+  assert.match(rota, /ocultos\.includes\(slug\)/);
+
+  // Se o armazenamento cair, os artigos do código não podem sumir junto.
+  assert.match(rota, /export async function lerOcultos/);
+  assert.match(rota, /catch \{\s*return \[\];\s*\}/s, 'a leitura de ocultos precisa falhar aberta');
+
+  // O índice é estático: o feed diz o que esconder sem precisar de novo build.
+  assert.match(feed, /ocultos/);
+  assert.match(editor, /acao: 'restaurar'/);
+  assert.match(editor, /data-lista-artigos/);
+
+  // Remoção definitiva precisa avisar que não tem volta.
+  assert.match(editor, /não tem volta/);
 });

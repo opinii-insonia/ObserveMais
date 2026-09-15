@@ -84,6 +84,7 @@ function navegacao() {
           <a href="/">Supermercados</a>
           <a href="/restaurantes">Restaurantes</a>
           <a href="/blog" aria-current="page">Blog</a>
+          <button class="nav-postar" type="button" data-abrir-editor>Fazer uma postagem</button>
         </nav>
 
         <a class="button button-primary header-blog" href="/blog">Blog</a>
@@ -286,7 +287,7 @@ function modalEditor() {
           <h2 id="editor-titulo">Publicar no blog</h2>
 
           <div data-editor-login>
-            <p class="admin-ajuda">Acesso restrito. A senha é conferida no servidor e não existe no código desta página.</p>
+            <p class="admin-ajuda">Acesso restrito.</p>
             <form data-form-login novalidate>
               <label for="ed-senha">Senha</label>
               <input id="ed-senha" type="password" autocomplete="current-password" placeholder="••••••••" />
@@ -339,6 +340,11 @@ function modalEditor() {
                 <button class="lead-flow__back" type="button" data-editor-fechar>Fechar</button>
               </div>
             </form>
+
+            <section class="editor-lista" aria-labelledby="editor-lista-titulo">
+              <h3 id="editor-lista-titulo">Artigos no ar</h3>
+              <div data-lista-artigos><p class="admin-ajuda">Carregando…</p></div>
+            </section>
           </div>
         </div>
       </div>`;
@@ -379,10 +385,6 @@ ${navegacao()}
           <p>Conteúdo autoral sobre cliente oculto, experiência do cliente e execução de operação — o que medir, como cruzar as fontes e o que fazer com o que aparece.</p>
         </div>
       </section>
-
-      <div class="container blog-acoes">
-        <button class="button button-dark" type="button" data-abrir-editor>Fazer uma postagem</button>
-      </div>
 
       <div class="container blog-busca">
         <label class="visually-hidden" for="blog-search">Pesquisar por artigos</label>

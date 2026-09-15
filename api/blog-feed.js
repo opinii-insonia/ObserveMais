@@ -5,6 +5,7 @@
  * que permite ao índice estático do blog completar a grade com os artigos novos.
  */
 import { list } from '@vercel/blob';
+import { lerOcultos } from './artigo.js';
 
 const PREFIXO = 'blog-artigos/';
 
@@ -37,11 +38,19 @@ export default async function handler(request, response) {
       }
     }
 
+    const ocultos = await lerOcultos();
     artigos.sort((a, b) => String(b.data).localeCompare(String(a.data)));
-    response.status(200).json({ ok: true, artigos });
+
+    // O índice é estático e já traz os artigos do código; `ocultos` diz quais
+    // esconder sem precisar de novo build.
+    response.status(200).json({
+      ok: true,
+      artigos: artigos.filter((a) => !ocultos.includes(a.slug)),
+      ocultos,
+    });
   } catch (erro) {
     console.error('[blog-feed] falha:', erro?.message);
     // Sem Blob configurado o blog segue funcionando com os artigos versionados.
-    response.status(200).json({ ok: true, artigos: [] });
+    response.status(200).json({ ok: true, artigos: [], ocultos: [] });
   }
 }

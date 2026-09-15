@@ -20,8 +20,11 @@
  */
 import crypto from 'node:crypto';
 import { list, put, del } from '@vercel/blob';
+import { artigos as versionados } from '../scripts/blog-artigos.mjs';
+import { lerOcultos } from './artigo.js';
 
 const PREFIXO = 'blog-artigos/';
+const OCULTOS = 'blog-config/ocultos.json';
 const VALIDADE_HORAS = 8;
 const TAMANHO_MAXIMO = 9000000; // comporta imagem em base64
 
@@ -85,20 +88,59 @@ function gerarSlug(titulo) {
     .replace(/-+/g, '-');
 }
 
+/**
+ * Lista tudo que está no blog, das duas origens.
+ *
+ * Artigo do painel pode ser apagado de verdade; artigo do código é escondido por
+ * uma lista, já que o arquivo continua no repositório. A diferença aparece no
+ * campo `origem`, para o painel avisar quem publica.
+ */
 async function listarArtigos() {
   const { blobs } = await list({ prefix: PREFIXO, limit: 1000 });
-  const artigos = [];
+  const publicados = [];
 
   for (const blob of blobs) {
     try {
       const resposta = await fetch(blob.url);
-      if (resposta.ok) artigos.push(await resposta.json());
+      if (resposta.ok) publicados.push(await resposta.json());
     } catch {
       // Um artigo ilegível não pode derrubar a listagem inteira.
     }
   }
 
-  return artigos.sort((a, b) => String(b.data).localeCompare(String(a.data)));
+  const ocultos = await lerOcultos();
+  const slugsPublicados = new Set(publicados.map((a) => a.slug));
+
+  const doPainel = publicados.map((a) => ({
+    slug: a.slug,
+    titulo: a.titulo,
+    categoria: a.categoria,
+    data: a.data,
+    origem: 'painel',
+    oculto: ocultos.includes(a.slug),
+  }));
+
+  const doCodigo = versionados
+    .filter((a) => !slugsPublicados.has(a.slug))
+    .map((a) => ({
+      slug: a.slug,
+      titulo: a.titulo,
+      categoria: a.categoria,
+      data: a.data,
+      origem: 'codigo',
+      oculto: ocultos.includes(a.slug),
+    }));
+
+  return [...doPainel, ...doCodigo].sort((a, b) => String(b.data).localeCompare(String(a.data)));
+}
+
+async function gravarOcultos(slugs) {
+  await put(OCULTOS, JSON.stringify({ slugs: [...new Set(slugs)] }, null, 2), {
+    access: 'public',
+    contentType: 'application/json',
+    addRandomSuffix: false,
+    allowOverwrite: true,
+  });
 }
 
 /**
@@ -255,8 +297,31 @@ export default async function handler(request, response) {
         return;
       }
 
+      // Artigo publicado pelo painel some do armazenamento.
       const { blobs } = await list({ prefix: `${PREFIXO}${slug}.json`, limit: 1 });
       if (blobs[0]) await del(blobs[0].url);
+
+      // Artigo do código não some do repositório, então entra na lista de ocultos.
+      // A rota de artigo e o índice respeitam essa lista.
+      const doCodigo = versionados.some((a) => a.slug === slug);
+      if (doCodigo) {
+        const ocultos = await lerOcultos();
+        await gravarOcultos([...ocultos, slug]);
+      }
+
+      response.status(200).json({ ok: true, reversivel: doCodigo });
+      return;
+    }
+
+    if (acao === 'restaurar') {
+      const slug = gerarSlug(dados?.slug);
+      if (!slug) {
+        response.status(422).json({ ok: false, erro: 'slug_obrigatorio' });
+        return;
+      }
+
+      const ocultos = await lerOcultos();
+      await gravarOcultos(ocultos.filter((s) => s !== slug));
 
       response.status(200).json({ ok: true });
       return;

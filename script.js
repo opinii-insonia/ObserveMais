@@ -290,3 +290,67 @@ blogBusca?.addEventListener('input', () => {
 
   if (blogVazio) blogVazio.hidden = visiveis > 0;
 });
+
+/**
+ * Completa a grade do blog com o que foi publicado pelo painel e remove o que
+ * foi escondido. O índice é estático: sem isso, artigo novo só apareceria no
+ * próximo build e artigo removido continuaria listado.
+ *
+ * Falha em silêncio de propósito — se a API não responder, os artigos que vêm
+ * do código seguem visíveis.
+ */
+if (blogLista) {
+  fetch('/api/blog-feed')
+    .then((r) => (r.ok ? r.json() : { artigos: [], ocultos: [] }))
+    .then(({ artigos = [], ocultos = [] }) => {
+      for (const slug of ocultos) {
+        blogLista.querySelector(`a[href="/blog/${slug}"]`)?.closest('.post-card')?.remove();
+      }
+
+      const jaNaPagina = new Set(
+        [...blogLista.querySelectorAll('a[href^="/blog/"]')].map((a) => a.getAttribute('href')),
+      );
+
+      for (const artigo of [...artigos].reverse()) {
+        if (jaNaPagina.has(`/blog/${artigo.slug}`)) continue;
+
+        const cartao = document.createElement('article');
+        cartao.className = 'post-card';
+        cartao.dataset.busca = `${artigo.titulo || ''} ${artigo.resumo || ''} ${artigo.categoria || ''}`.toLowerCase();
+
+        if (artigo.capa) {
+          cartao.classList.add('post-card--com-capa');
+          const link = document.createElement('a');
+          link.className = 'post-card__capa';
+          link.href = `/blog/${artigo.slug}`;
+          link.tabIndex = -1;
+          const img = document.createElement('img');
+          img.src = artigo.capa;
+          img.alt = '';
+          img.loading = 'lazy';
+          link.append(img);
+          cartao.append(link);
+        }
+
+        const tag = document.createElement('span');
+        tag.className = 'post-card__tag';
+        tag.textContent = artigo.categoria || 'Cliente oculto';
+
+        const titulo = document.createElement('h3');
+        const link = document.createElement('a');
+        link.href = `/blog/${artigo.slug}`;
+        link.textContent = artigo.titulo;
+        titulo.append(link);
+
+        const resumo = document.createElement('p');
+        resumo.textContent = artigo.resumo || '';
+
+        const rodape = document.createElement('footer');
+        rodape.textContent = [artigo.data, artigo.leitura].filter(Boolean).join(' • ');
+
+        cartao.append(tag, titulo, resumo, rodape);
+        blogLista.prepend(cartao);
+      }
+    })
+    .catch(() => {});
+}

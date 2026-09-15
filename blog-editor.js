@@ -99,6 +99,7 @@ if (modal) {
     modal.querySelector('#ed-senha').value = '';
     passoLogin.hidden = true;
     passoEditor.hidden = false;
+    modal.dispatchEvent(new CustomEvent('sessao-aberta'));
   });
 
   /* ------------------------------------------------------------ imagem */
@@ -196,5 +197,91 @@ if (modal) {
     capaPreview.hidden = true;
     modal.querySelector('[data-capa-status]').textContent = '';
     modal.querySelector('[data-imagem-status]').textContent = '';
+    modal.dispatchEvent(new CustomEvent('artigo-publicado'));
   });
+
+/* --------------------------------------------------------------- gerenciar
+
+   Lista tudo que está no ar. Artigo publicado pelo painel é apagado de vez;
+   artigo que vem do código é escondido, porque o arquivo continua no
+   repositório — por isso esse caso é reversível.                            */
+
+  const lista = modal.querySelector('[data-lista-artigos]');
+
+  async function carregarLista() {
+    const dados = await chamar({ acao: 'listar', token });
+
+    if (!dados.ok) {
+      lista.replaceChildren(Object.assign(document.createElement('p'), {
+        className: 'admin-ajuda',
+        textContent: explicar(dados.erro),
+      }));
+      return;
+    }
+
+    if (!dados.artigos?.length) {
+      lista.replaceChildren(Object.assign(document.createElement('p'), {
+        className: 'admin-ajuda',
+        textContent: 'Nenhum artigo encontrado.',
+      }));
+      return;
+    }
+
+    lista.replaceChildren(...dados.artigos.map((artigo) => {
+      const linha = document.createElement('div');
+      linha.className = `editor-item${artigo.oculto ? ' is-oculto' : ''}`;
+
+      const info = document.createElement('div');
+      const titulo = document.createElement('strong');
+      titulo.textContent = artigo.titulo;
+      const meta = document.createElement('span');
+      meta.textContent = [
+        artigo.categoria,
+        artigo.origem === 'codigo' ? 'do código' : 'do painel',
+        artigo.oculto ? 'fora do ar' : null,
+      ].filter(Boolean).join(' · ');
+      info.append(titulo, meta);
+      linha.append(info);
+
+      if (artigo.oculto) {
+        const restaurar = document.createElement('button');
+        restaurar.type = 'button';
+        restaurar.className = 'editor-restaurar';
+        restaurar.textContent = 'Republicar';
+        restaurar.addEventListener('click', async () => {
+          const r = await chamar({ acao: 'restaurar', token, slug: artigo.slug });
+          if (r.ok) carregarLista();
+        });
+        linha.append(restaurar);
+        return linha;
+      }
+
+      const abrir = document.createElement('a');
+      abrir.href = `/blog/${artigo.slug}`;
+      abrir.target = '_blank';
+      abrir.rel = 'noopener';
+      abrir.textContent = 'Abrir';
+
+      const remover = document.createElement('button');
+      remover.type = 'button';
+      remover.className = 'editor-remover';
+      remover.textContent = 'Remover';
+      remover.addEventListener('click', async () => {
+        const aviso = artigo.origem === 'codigo'
+          ? `Tirar "${artigo.titulo}" do ar? Ele vem do código, então dá para republicar depois.`
+          : `Apagar "${artigo.titulo}" de vez? Isso não tem volta.`;
+        if (!window.confirm(aviso)) return;
+
+        const r = await chamar({ acao: 'remover', token, slug: artigo.slug });
+        if (r.ok) carregarLista();
+      });
+
+      linha.append(abrir, remover);
+      return linha;
+    }));
+  }
+
+  // Carrega a lista assim que a sessão abre e depois de cada publicação.
+  modal.addEventListener('sessao-aberta', carregarLista);
+  modal.addEventListener('artigo-publicado', carregarLista);
 }
