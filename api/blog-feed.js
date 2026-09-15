@@ -30,6 +30,7 @@ export default async function handler(request, response) {
           categoria: artigo.categoria,
           data: artigo.data,
           leitura: artigo.leitura,
+          capa: artigo.capa || '',
         });
       } catch {
         // Artigo ilegível é ignorado, não derruba o feed.

@@ -38,6 +38,18 @@ export function textoParaBlocos(texto) {
       continue;
     }
 
+    // ![descrição](url) vira figura. A URL é aceita apenas se apontar para o
+    // armazenamento do próprio site: link externo viraria vetor de rastreamento.
+    const imagem = linha.match(/^!\[([^\]]*)\]\(([^)\s]+)\)$/);
+    if (imagem) {
+      fecharLista();
+      const url = imagem[2];
+      if (/^(https:\/\/[a-z0-9.-]*\.public\.blob\.vercel-storage\.com\/|\/public\/)/i.test(url)) {
+        blocos.push({ tipo: 'imagem', url: escapar(url), alt: escapar(imagem[1]), legenda: escapar(imagem[1]) });
+      }
+      continue;
+    }
+
     if (linha.startsWith('## ')) {
       fecharLista();
       blocos.push({ tipo: 'h2', texto: negrito(linha.slice(3)) });

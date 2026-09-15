@@ -19,6 +19,7 @@ for (const file of [
   // Simulador interno: fora do menu e do sitemap, bloqueado no robots.txt.
   'simulador-interno-a7f39c2b.html',
   'simulador.js',
+  'blog-editor.js',
 ]) {
   await cp(new URL(`../${file}`, import.meta.url), new URL(`../dist/${file}`, import.meta.url));
 }

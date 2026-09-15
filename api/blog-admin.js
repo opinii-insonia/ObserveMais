@@ -23,7 +23,7 @@ import { list, put, del } from '@vercel/blob';
 
 const PREFIXO = 'blog-artigos/';
 const VALIDADE_HORAS = 8;
-const TAMANHO_MAXIMO = 200000;
+const TAMANHO_MAXIMO = 9000000; // comporta imagem em base64
 
 function lerCorpo(request) {
   return new Promise((resolve, reject) => {
@@ -101,6 +101,32 @@ async function listarArtigos() {
   return artigos.sort((a, b) => String(b.data).localeCompare(String(a.data)));
 }
 
+/**
+ * Aceita imagem enviada pelo painel.
+ *
+ * O tipo declarado pelo navegador não é confiável — quem chama a API escolhe o
+ * que declarar. Por isso o formato é confirmado pelos bytes iniciais do arquivo,
+ * e só JPEG, PNG e WebP passam. Um .html renomeado para .jpg seria recusado aqui.
+ */
+const ASSINATURAS = [
+  { ext: 'jpg', tipo: 'image/jpeg', bytes: [0xff, 0xd8, 0xff] },
+  { ext: 'png', tipo: 'image/png', bytes: [0x89, 0x50, 0x4e, 0x47] },
+  { ext: 'webp', tipo: 'image/webp', bytes: [0x52, 0x49, 0x46, 0x46] },
+];
+
+const LIMITE_IMAGEM = 6 * 1024 * 1024;
+
+function identificarImagem(buffer) {
+  for (const assinatura of ASSINATURAS) {
+    if (assinatura.bytes.every((b, i) => buffer[i] === b)) {
+      // WebP precisa da marca no offset 8; RIFF sozinho também é áudio.
+      if (assinatura.ext === 'webp' && buffer.slice(8, 12).toString('latin1') !== 'WEBP') continue;
+      return assinatura;
+    }
+  }
+  return null;
+}
+
 export default async function handler(request, response) {
   response.setHeader('Content-Type', 'application/json; charset=utf-8');
   response.setHeader('Cache-Control', 'no-store');
@@ -150,12 +176,46 @@ export default async function handler(request, response) {
       return;
     }
 
+    if (acao === 'imagem') {
+      const base64 = String(dados?.arquivo || '').replace(/^data:[^;]+;base64,/, '');
+      if (!base64) {
+        response.status(422).json({ ok: false, erro: 'arquivo_ausente' });
+        return;
+      }
+
+      const buffer = Buffer.from(base64, 'base64');
+      if (buffer.length > LIMITE_IMAGEM) {
+        response.status(413).json({ ok: false, erro: 'imagem_grande' });
+        return;
+      }
+
+      const formato = identificarImagem(buffer);
+      if (!formato) {
+        response.status(415).json({ ok: false, erro: 'formato_nao_suportado' });
+        return;
+      }
+
+      const nome = `blog-imagens/${Date.now()}-${crypto.randomBytes(6).toString('hex')}.${formato.ext}`;
+      const { url } = await put(nome, buffer, {
+        access: 'public',
+        contentType: formato.tipo,
+        addRandomSuffix: false,
+      });
+
+      response.status(200).json({ ok: true, url, bytes: buffer.length });
+      return;
+    }
+
     if (acao === 'publicar') {
       const titulo = limpar(dados?.titulo, 160);
       const resumo = limpar(dados?.resumo, 320);
       const categoria = limpar(dados?.categoria, 40) || 'Cliente oculto';
       const corpo = String(dados?.corpo || '').trim().slice(0, 60000);
       const slug = gerarSlug(dados?.slug || titulo);
+
+      // A capa só pode apontar para o armazenamento do próprio site.
+      const capaBruta = limpar(dados?.capa, 400);
+      const capa = /^https:\/\/[a-z0-9.-]*\.public\.blob\.vercel-storage\.com\//i.test(capaBruta) ? capaBruta : '';
 
       if (!titulo || !resumo || !corpo || !slug) {
         response.status(422).json({ ok: false, erro: 'campos_obrigatorios' });
@@ -168,6 +228,8 @@ export default async function handler(request, response) {
         resumo,
         categoria,
         corpo,
+        capa,
+        capaAlt: limpar(dados?.capaAlt, 180) || titulo,
         data: limpar(dados?.data, 10) || new Date().toISOString().slice(0, 10),
         leitura: `${Math.max(1, Math.round(corpo.split(/\s+/).length / 200))} min`,
         publicadoEm: new Date().toISOString(),

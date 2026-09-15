@@ -44,6 +44,8 @@ export default async function handler(request, response) {
       categoria: dados.categoria,
       data: dados.data,
       leitura: dados.leitura || '5 min',
+      capa: dados.capa || '',
+      capaAlt: dados.capaAlt || dados.titulo,
       corpo: textoParaBlocos(dados.corpo),
     };
 

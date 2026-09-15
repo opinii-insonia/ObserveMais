@@ -14,8 +14,6 @@
 
     <meta property="og:site_name" content="Observe Mais" />
     <meta property="og:locale" content="pt_BR" />
-    <meta property="og:type" content="website" />
-    <meta property="og:url" content="https://observemais.com.br/blog" />
     <meta property="og:title" content="Blog | Observe Mais" />
     <meta property="og:description" content="Conteúdo autoral sobre cliente oculto, experiência do cliente e execução de loja: o que medir, como cruzar as fontes e o que fazer com a evidência." />
     <meta property="og:image" content="https://observemais.com.br/public/assets/og-observe-mais-tres-visoes.jpg" />
@@ -38,6 +36,7 @@
     />
     <link rel="stylesheet" href="/styles.css" />
     <script src="/script.js" defer></script>
+    <script src="/blog-editor.js" defer></script>
 
     <script type="application/ld+json">
       {
@@ -124,6 +123,10 @@
         </div>
       </section>
 
+      <div class="container blog-acoes">
+        <button class="button button-dark" type="button" data-abrir-editor>Fazer uma postagem</button>
+      </div>
+
       <div class="container blog-busca">
         <label class="visually-hidden" for="blog-search">Pesquisar por artigos</label>
         <input id="blog-search" type="search" placeholder="Pesquisar por artigos…" autocomplete="off" data-blog-busca />
@@ -167,6 +170,71 @@
               <p>A casa cheia esconde falhas que só vão aparecer meses depois, quando a recorrência cai. Os pontos de atrito que passam despercebidos em salão e cozinha.</p>
               <footer><time datetime="2026-08-18">18 de agosto de 2026</time> <span aria-hidden="true">•</span> 6 min</footer>
             </article>
+      </div>
+
+      <div class="editor-modal" id="editor-modal" role="dialog" aria-modal="true" aria-labelledby="editor-titulo" hidden>
+        <div class="editor-modal__fundo" data-editor-fechar></div>
+
+        <div class="editor-modal__card">
+          <button class="lead-flow__close" type="button" data-editor-fechar aria-label="Fechar">×</button>
+          <h2 id="editor-titulo">Publicar no blog</h2>
+
+          <div data-editor-login>
+            <p class="admin-ajuda">Acesso restrito. A senha é conferida no servidor e não existe no código desta página.</p>
+            <form data-form-login novalidate>
+              <label for="ed-senha">Senha</label>
+              <input id="ed-senha" type="password" autocomplete="current-password" placeholder="••••••••" />
+              <p class="admin-erro" data-erro-login role="alert" hidden></p>
+              <button class="button button-primary" type="submit">Entrar</button>
+            </form>
+          </div>
+
+          <div data-editor-form hidden>
+            <form data-form-artigo novalidate>
+              <label for="ed-titulo">Título</label>
+              <input id="ed-titulo" type="text" placeholder="Ex.: O que medir na primeira visita" />
+
+              <label for="ed-categoria">Categoria</label>
+              <input id="ed-categoria" type="text" list="ed-categorias" placeholder="Cliente oculto" />
+              <datalist id="ed-categorias">
+                <option value="Cliente oculto"></option>
+                <option value="Experiência do cliente"></option>
+                <option value="Supermercados"></option>
+                <option value="Restaurantes"></option>
+                <option value="Metodologia"></option>
+                <option value="Gestão"></option>
+              </datalist>
+
+              <label for="ed-resumo">Resumo <small>aparece no cartão e no Google</small></label>
+              <textarea id="ed-resumo" rows="3" placeholder="Duas ou três linhas sobre o que o leitor ganha."></textarea>
+
+              <label for="ed-capa">Imagem de capa <small>vira o cartão e a prévia ao compartilhar</small></label>
+              <input id="ed-capa" type="file" accept="image/jpeg,image/png,image/webp" />
+              <p class="admin-ajuda" data-capa-status></p>
+              <img class="editor-capa" data-capa-preview alt="Prévia da capa" hidden />
+
+              <label for="ed-corpo">Conteúdo</label>
+              <p class="admin-ajuda">
+                <code>## </code> subtítulo &nbsp;·&nbsp; <code>- </code> lista &nbsp;·&nbsp;
+                <code>&gt; </code> destaque &nbsp;·&nbsp; <code>**negrito**</code> &nbsp;·&nbsp;
+                linha em branco separa parágrafo
+              </p>
+              <textarea id="ed-corpo" rows="14" placeholder="Escreva aqui…"></textarea>
+
+              <label for="ed-imagem">Inserir imagem no texto</label>
+              <input id="ed-imagem" type="file" accept="image/jpeg,image/png,image/webp" />
+              <p class="admin-ajuda" data-imagem-status></p>
+
+              <p class="admin-erro" data-erro-artigo role="alert" hidden></p>
+              <p class="admin-ok" data-ok-artigo role="status" hidden></p>
+
+              <div class="admin-acoes">
+                <button class="button button-primary" type="submit" data-publicar>Publicar</button>
+                <button class="lead-flow__back" type="button" data-editor-fechar>Fechar</button>
+              </div>
+            </form>
+          </div>
+        </div>
       </div>
     </main>
 

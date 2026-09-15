@@ -1031,3 +1031,66 @@ test('a auditoria de assets enxerga o que o CSS carrega', async () => {
   assert.ok(script.includes(String.raw`url\(`), 'a varredura precisa cobrir url() do CSS');
   assert.match(script, /restaurantes\/index\.html/);
 });
+
+test('o botão de postagem existe no blog e abre o modal de credenciais', async () => {
+  const [indice, artigo, editor, build] = await Promise.all([
+    read('blog/index.html'),
+    read('blog/o-que-e-cliente-oculto/index.html'),
+    read('blog-editor.js'),
+    read('scripts/build.mjs'),
+  ]);
+
+  assert.match(indice, /data-abrir-editor>Fazer uma postagem</);
+  assert.match(indice, /id="editor-modal"/);
+  assert.match(indice, /data-form-login/);
+  assert.match(indice, /id="ed-capa"/, 'faltou o campo de capa');
+  assert.match(indice, /id="ed-imagem"/, 'faltou inserir imagem no texto');
+
+  // O editor só é carregado no índice; página de artigo não precisa dele.
+  assert.match(indice, /blog-editor\.js/);
+  assert.doesNotMatch(artigo, /blog-editor\.js/);
+  assert.match(build, /'blog-editor\.js'/);
+
+  // O editor não pode guardar credencial nem sessão fora da memória.
+  const semComentario = editor.replace(/\/\*[\s\S]*?\*\//g, '').split('\n').filter((l) => !l.trim().startsWith('*') && !l.trim().startsWith('//')).join(' ');
+  assert.doesNotMatch(semComentario, /localStorage|sessionStorage|document\.cookie/);
+  assert.doesNotMatch(semComentario, /BLOG_ADMIN|process\.env/);
+  assert.match(editor, /let token = null/);
+});
+
+test('o upload de imagem confere os bytes, não o tipo declarado', async () => {
+  const api = await read('api/blog-admin.js');
+
+  // Quem chama a API escolhe o Content-Type; só a assinatura do arquivo prova o formato.
+  assert.match(api, /function identificarImagem/);
+  assert.match(api, /0xff, 0xd8, 0xff/, 'faltou a assinatura do JPEG');
+  assert.match(api, /0x89, 0x50, 0x4e, 0x47/, 'faltou a assinatura do PNG');
+  assert.match(api, /'WEBP'/, 'RIFF sozinho também é áudio: precisa conferir o offset 8');
+  assert.match(api, /formato_nao_suportado/);
+
+  // Limite de tamanho e nome imprevisível.
+  assert.match(api, /LIMITE_IMAGEM/);
+  assert.match(api, /randomBytes\(6\)/);
+
+  // Upload exige sessão: fica depois da verificação de token.
+  const posToken = api.indexOf("if (!tokenValido(dados?.token))");
+  const posImagem = api.indexOf("acao === 'imagem'");
+  assert.ok(posToken > -1 && posImagem > posToken, 'o upload precisa vir depois da checagem de sessão');
+});
+
+test('imagem no artigo só aponta para o armazenamento do próprio site', async () => {
+  const { textoParaBlocos } = await import('../scripts/blog-markdown.mjs');
+
+  const externa = textoParaBlocos('![x](https://site-qualquer.com/rastreador.gif)');
+  assert.equal(externa.filter((b) => b.tipo === 'imagem').length, 0, 'link externo não pode virar imagem');
+
+  const propria = textoParaBlocos('![Gôndola vazia](https://abc123.public.blob.vercel-storage.com/blog-imagens/x.jpg)');
+  const bloco = propria.find((b) => b.tipo === 'imagem');
+  assert.ok(bloco, 'imagem do próprio armazenamento deveria ser aceita');
+  assert.equal(bloco.alt, 'Gôndola vazia');
+
+  // javascript: e data: não podem passar.
+  for (const url of ['javascript:alert(1)', 'data:text/html,<script>alert(1)</script>']) {
+    assert.equal(textoParaBlocos(`![x](${url})`).filter((b) => b.tipo === 'imagem').length, 0);
+  }
+});

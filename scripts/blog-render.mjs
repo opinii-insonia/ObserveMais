@@ -18,7 +18,14 @@ export const semTags = (texto) => String(texto).replace(/<[^>]+>/g, '');
 export const dataLonga = (iso) =>
   new Date(`${iso}T12:00:00Z`).toLocaleDateString('pt-BR', { day: '2-digit', month: 'long', year: 'numeric' });
 
-function cabecalho({ titulo, descricao, url, canonical }) {
+const EDITOR_TAG = [
+  '',
+  '    <script src="/blog-editor.js" defer></script>',
+].join(String.fromCharCode(10));
+
+function cabecalho({ titulo, descricao, url, canonical, imagem }) {
+  const incluiEditor = url === '/blog';
+  const cartao = imagem || `${SITE}/public/assets/og-observe-mais-tres-visoes.jpg`;
   return `<!doctype html>
 <html lang="pt-BR">
   <head>
@@ -35,11 +42,9 @@ function cabecalho({ titulo, descricao, url, canonical }) {
 
     <meta property="og:site_name" content="Observe Mais" />
     <meta property="og:locale" content="pt_BR" />
-    <meta property="og:type" content="${url === '/blog' ? 'website' : 'article'}" />
-    <meta property="og:url" content="${canonical}" />
     <meta property="og:title" content="${escapar(titulo)}" />
     <meta property="og:description" content="${escapar(descricao)}" />
-    <meta property="og:image" content="${SITE}/public/assets/og-observe-mais-tres-visoes.jpg" />
+    <meta property="og:image" content="${cartao}" />
     <meta property="og:image:type" content="image/jpeg" />
     <meta property="og:image:width" content="1200" />
     <meta property="og:image:height" content="630" />
@@ -48,7 +53,7 @@ function cabecalho({ titulo, descricao, url, canonical }) {
     <meta name="twitter:card" content="summary_large_image" />
     <meta name="twitter:title" content="${escapar(titulo)}" />
     <meta name="twitter:description" content="${escapar(descricao)}" />
-    <meta name="twitter:image" content="${SITE}/public/assets/og-observe-mais-tres-visoes.jpg" />
+    <meta name="twitter:image" content="${cartao}" />
 
     <title>${escapar(titulo)}</title>
     <link rel="preconnect" href="https://fonts.googleapis.com" />
@@ -58,7 +63,7 @@ function cabecalho({ titulo, descricao, url, canonical }) {
       rel="stylesheet"
     />
     <link rel="stylesheet" href="/styles.css" />
-    <script src="/script.js" defer></script>`;
+    <script src="/script.js" defer></script>${incluiEditor ? EDITOR_TAG : ''}`;
 }
 
 function navegacao() {
@@ -176,6 +181,12 @@ function corpoDoArtigo(blocos) {
       if (bloco.tipo === 'lista') {
         return `        <ul class="post-lista">\n${bloco.itens.map((i) => `          <li>${i}</li>`).join('\n')}\n        </ul>`;
       }
+      if (bloco.tipo === 'imagem') {
+        return `        <figure class="post-figura">
+          <img src="${bloco.url}" alt="${bloco.alt}" loading="lazy" />
+${bloco.legenda ? `          <figcaption>${bloco.legenda}</figcaption>
+` : ''}        </figure>`;
+      }
       if (bloco.tipo === 'fontes') {
         return `        <aside class="post-fontes">
           <h2>Fontes consultadas</h2>
@@ -208,7 +219,7 @@ export function paginaArtigo(artigo, relacionados) {
     },
   };
 
-  return `${cabecalho({ titulo: `${artigo.titulo} | Blog Observe Mais`, descricao: semTags(artigo.resumo), url: `/blog/${artigo.slug}`, canonical })}
+  return `${cabecalho({ titulo: `${artigo.titulo} | Blog Observe Mais`, descricao: semTags(artigo.resumo), url: `/blog/${artigo.slug}`, canonical, imagem: artigo.capa })}
 
     <script type="application/ld+json">
 ${JSON.stringify(schema, null, 6).replace(/^/gm, '      ')}
@@ -227,7 +238,10 @@ ${navegacao()}
           <p class="post-meta"><time datetime="${artigo.data}">${dataLonga(artigo.data)}</time> <span aria-hidden="true">•</span> ${artigo.leitura} de leitura</p>
         </header>
 
-        <div class="post-corpo container">
+${artigo.capa ? `        <figure class="post-capa container">
+          <img src="${artigo.capa}" alt="${escapar(artigo.capaAlt || artigo.titulo)}" />
+        </figure>
+` : ''}        <div class="post-corpo container">
 ${corpoDoArtigo(artigo.corpo)}
         </div>
 
@@ -250,12 +264,84 @@ ${rodape()}`;
 }
 
 export function cartao(artigo) {
-  return `            <article class="post-card" data-busca="${escapar(`${semTags(artigo.titulo)} ${semTags(artigo.resumo)} ${artigo.categoria}`.toLowerCase())}">
+  const capa = artigo.capa
+    ? `
+              <a class="post-card__capa" href="/blog/${artigo.slug}" tabindex="-1" aria-hidden="true"><img src="${escapar(artigo.capa)}" alt="" loading="lazy" /></a>`
+    : '';
+
+  return `            <article class="post-card${artigo.capa ? ' post-card--com-capa' : ''}" data-busca="${escapar(`${semTags(artigo.titulo)} ${semTags(artigo.resumo)} ${artigo.categoria}`.toLowerCase())}">${capa}
               <span class="post-card__tag">${artigo.categoria}</span>
               <h3><a href="/blog/${artigo.slug}">${artigo.titulo}</a></h3>
               <p>${artigo.resumo}</p>
               <footer><time datetime="${artigo.data}">${dataLonga(artigo.data)}</time> <span aria-hidden="true">•</span> ${artigo.leitura}</footer>
             </article>`;
+}
+
+function modalEditor() {
+  return `<div class="editor-modal" id="editor-modal" role="dialog" aria-modal="true" aria-labelledby="editor-titulo" hidden>
+        <div class="editor-modal__fundo" data-editor-fechar></div>
+
+        <div class="editor-modal__card">
+          <button class="lead-flow__close" type="button" data-editor-fechar aria-label="Fechar">×</button>
+          <h2 id="editor-titulo">Publicar no blog</h2>
+
+          <div data-editor-login>
+            <p class="admin-ajuda">Acesso restrito. A senha é conferida no servidor e não existe no código desta página.</p>
+            <form data-form-login novalidate>
+              <label for="ed-senha">Senha</label>
+              <input id="ed-senha" type="password" autocomplete="current-password" placeholder="••••••••" />
+              <p class="admin-erro" data-erro-login role="alert" hidden></p>
+              <button class="button button-primary" type="submit">Entrar</button>
+            </form>
+          </div>
+
+          <div data-editor-form hidden>
+            <form data-form-artigo novalidate>
+              <label for="ed-titulo">Título</label>
+              <input id="ed-titulo" type="text" placeholder="Ex.: O que medir na primeira visita" />
+
+              <label for="ed-categoria">Categoria</label>
+              <input id="ed-categoria" type="text" list="ed-categorias" placeholder="Cliente oculto" />
+              <datalist id="ed-categorias">
+                <option value="Cliente oculto"></option>
+                <option value="Experiência do cliente"></option>
+                <option value="Supermercados"></option>
+                <option value="Restaurantes"></option>
+                <option value="Metodologia"></option>
+                <option value="Gestão"></option>
+              </datalist>
+
+              <label for="ed-resumo">Resumo <small>aparece no cartão e no Google</small></label>
+              <textarea id="ed-resumo" rows="3" placeholder="Duas ou três linhas sobre o que o leitor ganha."></textarea>
+
+              <label for="ed-capa">Imagem de capa <small>vira o cartão e a prévia ao compartilhar</small></label>
+              <input id="ed-capa" type="file" accept="image/jpeg,image/png,image/webp" />
+              <p class="admin-ajuda" data-capa-status></p>
+              <img class="editor-capa" data-capa-preview alt="Prévia da capa" hidden />
+
+              <label for="ed-corpo">Conteúdo</label>
+              <p class="admin-ajuda">
+                <code>## </code> subtítulo &nbsp;·&nbsp; <code>- </code> lista &nbsp;·&nbsp;
+                <code>&gt; </code> destaque &nbsp;·&nbsp; <code>**negrito**</code> &nbsp;·&nbsp;
+                linha em branco separa parágrafo
+              </p>
+              <textarea id="ed-corpo" rows="14" placeholder="Escreva aqui…"></textarea>
+
+              <label for="ed-imagem">Inserir imagem no texto</label>
+              <input id="ed-imagem" type="file" accept="image/jpeg,image/png,image/webp" />
+              <p class="admin-ajuda" data-imagem-status></p>
+
+              <p class="admin-erro" data-erro-artigo role="alert" hidden></p>
+              <p class="admin-ok" data-ok-artigo role="status" hidden></p>
+
+              <div class="admin-acoes">
+                <button class="button button-primary" type="submit" data-publicar>Publicar</button>
+                <button class="lead-flow__back" type="button" data-editor-fechar>Fechar</button>
+              </div>
+            </form>
+          </div>
+        </div>
+      </div>`;
 }
 
 export function paginaIndice(lista) {
@@ -294,6 +380,10 @@ ${navegacao()}
         </div>
       </section>
 
+      <div class="container blog-acoes">
+        <button class="button button-dark" type="button" data-abrir-editor>Fazer uma postagem</button>
+      </div>
+
       <div class="container blog-busca">
         <label class="visually-hidden" for="blog-search">Pesquisar por artigos</label>
         <input id="blog-search" type="search" placeholder="Pesquisar por artigos…" autocomplete="off" data-blog-busca />
@@ -303,6 +393,8 @@ ${navegacao()}
       <div class="container post-grid" data-blog-lista>
 ${lista.map(cartao).join('\n')}
       </div>
+
+      ${modalEditor()}
     </main>
 
 ${rodape()}`;
