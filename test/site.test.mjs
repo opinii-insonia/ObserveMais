@@ -9,12 +9,17 @@ test('a landing fala diretamente com supermercados e cliente oculto', async () =
   const html = await read('index.html');
 
   assert.match(html, /Cliente oculto para supermercados com IA/i);
-  assert.match(html, /O sistema diz que tem\. A gôndola diz que não\. O cliente acredita na gôndola\./);
+  assert.match(html, /A venda que sua loja perdeu hoje não vai aparecer em nenhum relatório\./);
 
-  // A copy precisa falar a língua de quem opera a loja, não a de consultoria.
-  // Termo genérico não faz o dono reconhecer a própria operação.
-  for (const termo of ['curva A', 'frente vazia', 'etiqueta órfã', 'linear', 'PVPS', 'hortifrúti', 'empacotador', 'pallet', 'itens por cupom', 'balcão do açougue']) {
-    assert.ok(html.includes(termo), `a landing perdeu o termo de operação "${termo}"`);
+  // O alvo é o dono e o diretor de operação. A linguagem precisa ser a da rede,
+  // com cena concreta — não a de consultoria, nem a de analista de estoque.
+  for (const termo of ['venda perdida', 'gôndola vazia', 'depósito', 'prateleira', 'hortifrúti', 'empacotador', 'ticket médio', 'padaria']) {
+    assert.ok(html.includes(termo), `a landing perdeu o termo de gestão "${termo}"`);
+  }
+
+  // Jargão de inventário afasta quem decide a compra do serviço.
+  for (const jargao of ['curva A', 'PVPS', 'etiqueta órfã', 'SKU', 'encarte', 'tabloide']) {
+    assert.ok(!html.includes(jargao), `"${jargao}" é jargão de estoque, não linguagem de gestão`);
   }
   assert.match(html, /Evidências por setor viram[\s\S]*prioridade por loja/i);
   assert.match(html, /Cliente oculto com roteiro, evidência e[\s\S]*reunião de priorização/i);
@@ -315,10 +320,8 @@ test('substitui métricas numéricas soltas por evidências de supermercado', as
   assert.match(html, /Gôndola e preço/);
   assert.match(html, /Perecíveis/);
   assert.match(html, /Frente de loja/);
-  assert.match(html, /Frente vazia com saldo no sistema, etiqueta órfã, preço da gôndola diferente do caixa/);
+  assert.match(html, /Gôndola vazia com produto parado no depósito, etiqueta sem produto, preço da etiqueta diferente do caixa/);
 
-  // O eixo é a divergência entre saldo do sistema e gôndola, não a peça de oferta.
-  assert.doesNotMatch(html, /encarte|tabloide|panfleto/i);
   assert.doesNotMatch(html, /69,6%/);
   assert.doesNotMatch(html, /\+22 mil/);
   assert.doesNotMatch(html, /\+3 mil/);
