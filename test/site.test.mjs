@@ -9,8 +9,13 @@ test('a landing fala diretamente com supermercados e cliente oculto', async () =
   const html = await read('index.html');
 
   assert.match(html, /Cliente oculto para supermercados com IA/i);
-  assert.match(html, /Seu supermercado perde vendas em falhas que ninguém da equipe está vendo/i);
-  assert.match(html, /fila, ruptura percebida, preço ausente, validade, limpeza e atendimento/i);
+  assert.match(html, /O encarte trouxe o cliente até a gôndola\. A gôndola estava vazia\./);
+
+  // A copy precisa falar a língua de quem opera a loja, não a de consultoria.
+  // Termo genérico não faz o dono reconhecer a própria operação.
+  for (const termo of ['encarte', 'linear', 'PVPS', 'hortifrúti', 'empacotador', 'pallet', 'itens por cupom', 'balcão do açougue']) {
+    assert.ok(html.includes(termo), `a landing perdeu o termo de operação "${termo}"`);
+  }
   assert.match(html, /Evidências por setor viram[\s\S]*prioridade por loja/i);
   assert.match(html, /Cliente oculto com roteiro, evidência e[\s\S]*reunião de priorização/i);
   assert.match(html, /Dúvidas Frequentes/i);
@@ -21,8 +26,8 @@ test('comunica a IA como diferencial, com leitura de dados e entrega no WhatsApp
   const html = await read('index.html');
 
   assert.match(html, /class="hero-ai"/);
-  assert.match(html, /entrega o insight no seu WhatsApp/i);
-  assert.match(html, /lê o volume de dados que ninguém tem tempo de ler/i);
+  assert.match(html, /manda a prioridade da semana no seu WhatsApp/i);
+  assert.match(html, /Uma rede de dez lojas gera milhares de itens checados por ciclo/i);
   assert.match(html, /interpreta e prioriza\. A visita em loja continua sendo feita por avaliadores humanos\./);
   assert.doesNotMatch(html, /IA substitui|IA garante|diagnóstico automático sem visita/i);
 });
@@ -307,10 +312,10 @@ test('substitui métricas numéricas soltas por evidências de supermercado', as
     assert.match(html, new RegExp(`id="${icon}"`));
   }
 
-  assert.match(html, /Corredores/);
-  assert.match(html, /Checkout/);
-  assert.match(html, /Atendimento/);
-  assert.match(html, /Preço, ruptura percebida e exposição/);
+  assert.match(html, /Gôndola e preço/);
+  assert.match(html, /Perecíveis/);
+  assert.match(html, /Frente de loja/);
+  assert.match(html, /Item do encarte em ruptura, etiqueta sem produto, preço da gôndola diferente do caixa/);
   assert.doesNotMatch(html, /69,6%/);
   assert.doesNotMatch(html, /\+22 mil/);
   assert.doesNotMatch(html, /\+3 mil/);
@@ -652,7 +657,12 @@ test('a vertical de restaurantes existe, isolada da landing de supermercados', a
 
   // Comunicação própria do nicho.
   assert.match(resto, /<title>Cliente oculto para restaurantes com IA \| Observe Mais<\/title>/);
-  assert.match(resto, /O cliente não reclama do prato frio\. Ele só não volta\./);
+  assert.match(resto, /A mesa esperou 27 minutos, comeu calada e não reservou de novo\./);
+
+  // Mesma exigência da landing: vocabulário de quem opera, não de consultoria.
+  for (const termo of ['comanda', 'passagem', 'ficha técnica', 'praça', 'mise en place', 'em 86', 'runner', 'ticket médio']) {
+    assert.ok(resto.includes(termo), `a vertical perdeu o termo de operação "${termo}"`);
+  }
   assert.match(resto, /rel="canonical" href="https:\/\/observemais\.com\.br\/restaurantes"/);
 
   // Nada de vocabulário de supermercado sobrando.
