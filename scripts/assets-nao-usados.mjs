@@ -5,7 +5,14 @@ import { join } from 'node:path';
 
 // Precisa varrer CSS também: um background-image de 2,3MB já passou despercebido
 // aqui justamente porque a varredura só olhava o HTML.
-const fontes = ['../index.html', '../restaurantes/index.html', '../styles.css', '../blog/index.html']
+const fontes = [
+  '../index.html',
+  '../restaurantes/index.html',
+  '../diagnostico-gratuito/index.html',
+  '../site.css',
+  '../styles.css',
+  '../blog/index.html',
+]
   .map((f) => {
     try {
       return readFileSync(new URL(f, import.meta.url), 'utf8');

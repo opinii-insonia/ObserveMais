@@ -10,9 +10,12 @@ await mkdir(dist, { recursive: true });
 // responderem em /favicon.svg, /robots.txt e /sitemap.xml.
 for (const file of [
   'index.html',
+  // Landings (home, /restaurantes e /diagnostico-gratuito).
+  'site.css',
+  'site.js',
+  // Blog e painel continuam no visual anterior.
   'styles.css',
   'script.js',
-  'video.js',
   'favicon.svg',
   'robots.txt',
   'sitemap.xml',
@@ -30,6 +33,11 @@ await cp(new URL('../public/', import.meta.url), new URL('../dist/public/', impo
 
 // Vertical de restaurantes: dist/restaurantes/index.html responde em /restaurantes.
 await cp(new URL('../restaurantes/', import.meta.url), new URL('../dist/restaurantes/', import.meta.url), {
+  recursive: true,
+});
+
+// Produto isca: dist/diagnostico-gratuito/index.html responde em /diagnostico-gratuito.
+await cp(new URL('../diagnostico-gratuito/', import.meta.url), new URL('../dist/diagnostico-gratuito/', import.meta.url), {
   recursive: true,
 });
 

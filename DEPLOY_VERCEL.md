@@ -56,6 +56,33 @@ dois aceitar para o lead não se perder.
    - `SHEETS_WEBHOOK_SECRET` — o mesmo segredo definido no script.
 3. Redeploy para as variáveis valerem.
 
+### Formulário de contato (Kommo)
+
+Na home e em /restaurantes o contato é o formulário da Kommo (id `1734095`), no bloco
+`#contato`. Esses leads vão direto para o CRM e **não** passam pelo Zapier nem por
+`/api/lead-capture`. O script da Kommo insere o formulário logo antes da tag
+`amoforms_script_1734095`: o código precisa continuar dentro de `.kommo-form`.
+Campos, imagem e cores do formulário são configurados na própria Kommo.
+
+### Diagnóstico gratuito (/diagnostico-gratuito)
+
+Todo cadastro é gravado, aprovado ou não. A aprovação é **Brasília/DF com 4 ou mais
+unidades**; a regra vive em `api/lead-capture.js` (`DIAGNOSTICO_REGIAO`,
+`DIAGNOSTICO_UNIDADES_MINIMAS`) e é espelhada em `site.js` (`DIAGNOSTICO`) só para a
+resposta na tela. A API recalcula: o valor que o navegador manda é ignorado.
+
+Campos extras desses envios: `tipo` = `diagnostico-gratuito`, `segmento`,
+`localizacao` (`df` | `entorno` | `outra`), `cidade`, `unidades`, `qualificado`
+(`sim` | `não`) e `motivo`.
+
+- **Zapier (Opção A, a ativa hoje):** os cadastros chegam no mesmo Catch Hook. No Zap,
+  adicione **Paths** (ou Filter) por `tipo` e mande `diagnostico-gratuito` para uma aba
+  própria da planilha, mapeando os campos acima. Sem isso eles caem na aba de leads
+  comum, sem as colunas de qualificação.
+- **Apps Script (Opção C):** `scripts/planilha-leads.gs` já cria a aba
+  `Diagnóstico gratuito` com as colunas de qualificação. Cole a versão nova no editor
+  do Apps Script e publique uma **nova versão** da implantação.
+
 ### Campos enviados
 
 `segredo`, `id`, `recebidoEm`, `nome`, `empresa`, `cargo`, `email`, `whatsapp`,

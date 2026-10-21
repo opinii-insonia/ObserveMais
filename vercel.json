@@ -8,6 +8,11 @@
       "source": "/restaurante",
       "destination": "/restaurantes",
       "permanent": true
+    },
+    {
+      "source": "/diagnostico",
+      "destination": "/diagnostico-gratuito",
+      "permanent": false
     }
   ],
   "rewrites": [

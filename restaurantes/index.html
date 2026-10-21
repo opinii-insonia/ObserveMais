@@ -1,783 +1,472 @@
 <!doctype html>
 <html lang="pt-BR">
-  <head>
-    <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <meta
-      name="description"
-      content="Cliente oculto para restaurantes com IA: cronometramos o tempo entre comanda e passagem, conferimos o ponto contra a ficha técnica e medimos o que o salão deixou de oferecer — antes de virar mesa que não reserva de novo."
-    />
-    <meta name="theme-color" content="#25D670" />
-    <meta name="robots" content="index, follow, max-image-preview:large, max-snippet:-1" />
-    <meta name="author" content="Observe Mais" />
-    <link rel="canonical" href="https://observemais.com.br/restaurantes" />
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Cliente oculto para restaurantes | Observe+</title>
+  <meta name="description" content="Cliente oculto para restaurantes: clientes reais jantam na sua casa, cronometram da comanda à passagem, conferem o prato contra a ficha técnica e mostram onde o salão está perdendo vendas.">
+  <meta name="theme-color" content="#0B1520">
+  <meta name="robots" content="index, follow, max-image-preview:large, max-snippet:-1">
+  <link rel="canonical" href="https://observemais.com.br/restaurantes">
 
-    <link rel="icon" href="/favicon.svg" type="image/svg+xml" />
-    <link rel="apple-touch-icon" href="/public/assets/apple-touch-icon.png" />
+  <meta property="og:site_name" content="Observe+">
+  <meta property="og:type" content="website">
+  <meta property="og:url" content="https://observemais.com.br/restaurantes">
+  <meta property="og:title" content="Observe+ | Cliente oculto para restaurantes">
+  <meta property="og:description" content="A mesa esperou, comeu calada e não reservou de novo. Descubra onde seu restaurante está perdendo vendas.">
+  <meta property="og:image" content="https://observemais.com.br/public/assets/restaurantes/og-restaurantes.jpg">
+  <meta property="og:image:type" content="image/jpeg">
+  <meta property="og:image:width" content="1200">
+  <meta property="og:image:height" content="630">
+  <meta property="og:image:alt" content="Salão de restaurante montado e pronto para o serviço, com mesas postas">
+  <meta property="og:locale" content="pt_BR">
+  <meta name="twitter:card" content="summary_large_image">
+  <meta name="twitter:title" content="Observe+ | Cliente oculto para restaurantes">
+  <meta name="twitter:description" content="Da comanda à conta: cliente oculto que mostra onde o restaurante perde vendas.">
+  <meta name="twitter:image" content="https://observemais.com.br/public/assets/restaurantes/og-restaurantes.jpg">
 
-    <meta property="og:site_name" content="Observe Mais" />
-    <meta property="og:locale" content="pt_BR" />
-    <meta property="og:type" content="website" />
-    <meta property="og:url" content="https://observemais.com.br/restaurantes" />
-    <meta property="og:title" content="Observe Mais — Cliente oculto para restaurantes com IA" />
-    <meta
-      property="og:description"
-      content="A mesa esperou 27 minutos, comeu calada e não reservou de novo. Cliente oculto, NPS e checklist na mesma leitura, com prioridade por IA."
-    />
-    <meta property="og:image" content="https://observemais.com.br/public/assets/restaurantes/og-restaurantes.jpg" />
-    <meta property="og:image:type" content="image/jpeg" />
-    <meta property="og:image:width" content="1200" />
-    <meta property="og:image:height" content="630" />
-    <meta property="og:image:alt" content="Salão de restaurante montado e pronto para o serviço, com mesas postas" />
+  <link rel="icon" type="image/svg+xml" href="/favicon.svg">
+  <link rel="apple-touch-icon" href="/public/assets/observe/apple-touch-icon.png">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="/site.css">
+  <script src="/site.js" defer></script>
+  <script type="application/ld+json">
+    {
+      "@context": "https://schema.org",
+      "@type": "Service",
+      "name": "Cliente oculto para restaurantes",
+      "serviceType": "Cliente oculto e diagnóstico de experiência em restaurantes",
+      "provider": { "@type": "Organization", "name": "Observe+", "url": "https://observemais.com.br/" },
+      "areaServed": { "@type": "Country", "name": "Brasil" },
+      "audience": { "@type": "BusinessAudience", "name": "Restaurantes, churrascarias, cafeterias e redes de food service" },
+      "description": "Visitas de cliente oculto que medem recepção, tempo da comanda à passagem, prato contra a ficha técnica, sugestão de venda, limpeza e fechamento da conta, com evidências e plano de ação por unidade."
+    }
+  </script>
+</head>
+<body>
 
-    <meta name="twitter:card" content="summary_large_image" />
-    <meta name="twitter:title" content="Observe Mais — Cliente oculto para restaurantes com IA" />
-    <meta name="twitter:description" content="A mesa esperou 27 minutos, comeu calada e não reservou de novo. Diagnóstico recorrente de praça, cozinha e fechamento." />
-    <meta name="twitter:image" content="https://observemais.com.br/public/assets/restaurantes/og-restaurantes.jpg" />
+<!-- ============ SVG SPRITE ============ -->
+<svg width="0" height="0" style="position:absolute" aria-hidden="true">
+  <defs>
+    <symbol id="i-arrow" viewBox="0 0 24 24"><path d="M5 12h14M13 6l6 6-6 6"/></symbol>
+    <symbol id="i-play" viewBox="0 0 24 24"><path d="M10 8.5v7l5.5-3.5z" fill="currentColor" stroke="none"/></symbol>
+    <symbol id="i-sales" viewBox="0 0 24 24"><path d="M4 20v-5M9 20v-8M14 20v-6M19 20V9M3 10l6-5 4 3 7-5M16 3h4v4"/></symbol>
+    <symbol id="i-star" viewBox="0 0 24 24"><path d="M12 2.8l2.8 5.8 6.4.8-4.7 4.4 1.2 6.3L12 17l-5.7 3.1 1.2-6.3-4.7-4.4 6.4-.8z"/></symbol>
+    <symbol id="i-shield" viewBox="0 0 24 24"><path d="M12 3l8 3v6c0 5-3.4 8-8 9-4.6-1-8-4-8-9V6z"/><path d="M8.6 12.2l2.4 2.4 4.5-4.8"/></symbol>
+    <symbol id="i-data" viewBox="0 0 24 24"><path d="M3 21h18"/><rect x="5" y="12" width="3" height="6" rx=".5"/><rect x="10.5" y="7" width="3" height="11" rx=".5"/><rect x="16" y="3.5" width="3" height="14.5" rx=".5"/></symbol>
+    <symbol id="i-help" viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="M9.6 9.3a2.5 2.5 0 1 1 3.4 2.4c-.6.3-1 .9-1 1.6v.5"/><circle cx="12" cy="17" r=".6" fill="currentColor"/></symbol>
+    <symbol id="i-eye" viewBox="0 0 24 24"><path d="M2 12s3.6-7 10-7 10 7 10 7-3.6 7-10 7S2 12 2 12z"/><circle cx="12" cy="12" r="3"/></symbol>
+    <symbol id="i-plan" viewBox="0 0 24 24"><rect x="5" y="4" width="14" height="17" rx="2"/><path d="M9 4V3h6v1M8.5 10h7M8.5 14h7M8.5 18h4"/></symbol>
+    <symbol id="i-visit" viewBox="0 0 24 24"><path d="M12 21s-7-6.2-7-11a7 7 0 0 1 14 0c0 4.8-7 11-7 11z"/><circle cx="12" cy="10" r="2.6"/></symbol>
+    <symbol id="i-camera" viewBox="0 0 24 24"><path d="M4 8h3l2-3h6l2 3h3v11H4z"/><circle cx="12" cy="13" r="3.5"/></symbol>
+    <symbol id="i-target" viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><circle cx="12" cy="12" r="5"/><circle cx="12" cy="12" r="1.4" fill="currentColor"/></symbol>
+    <symbol id="i-chat" viewBox="0 0 24 24"><path d="M4 5h16v11H10l-6 4z"/><path d="M8 9.5h8M8 12.5h5"/></symbol>
+    <symbol id="i-handshake" viewBox="0 0 24 24"><circle cx="9" cy="8" r="3.5"/><path d="M2.5 20c0-3.6 2.9-6 6.5-6 1.6 0 3 .4 4.1 1.2"/><path d="M16 14v6M13 17h6"/></symbol>
+    <symbol id="i-store" viewBox="0 0 24 24"><path d="M3.5 9L5 4h14l1.5 5"/><path d="M3.5 9a2.8 2.8 0 0 0 5.6 0 2.8 2.8 0 0 0 5.8 0 2.8 2.8 0 0 0 5.6 0"/><path d="M5 12v9h14v-9M10 21v-5h4v5"/></symbol>
+    <symbol id="i-box" viewBox="0 0 24 24"><path d="M21 7.5l-9-4.5-9 4.5 9 4.5z"/><path d="M3 7.5v9l9 4.5 9-4.5v-9M12 12v9"/></symbol>
+    <symbol id="i-process" viewBox="0 0 24 24"><path d="M4.5 12a7.5 7.5 0 0 1 13.2-4.9L19.5 9M19.5 4v5h-5"/><path d="M19.5 12a7.5 7.5 0 0 1-13.2 4.9L4.5 15M4.5 20v-5h5"/></symbol>
+    <symbol id="i-card" viewBox="0 0 24 24"><rect x="3" y="5.5" width="18" height="13" rx="2"/><path d="M3 10h18M7 15h4"/></symbol>
+    <symbol id="i-check" viewBox="0 0 24 24"><path d="M5 12.5l4.5 4.5L19 7.5"/></symbol>
+    <symbol id="i-alert" viewBox="0 0 24 24"><path d="M12 3.5l9.5 16.5h-19z"/><path d="M12 10v4.5"/><circle cx="12" cy="17.3" r=".6" fill="currentColor"/></symbol>
+    <symbol id="i-chev-l" viewBox="0 0 24 24"><path d="M15 5l-7 7 7 7"/></symbol>
+    <symbol id="i-chev-r" viewBox="0 0 24 24"><path d="M9 5l7 7-7 7"/></symbol>
+    <symbol id="i-menu" viewBox="0 0 24 24"><path d="M4 7h16M4 12h16M4 17h16"/></symbol>
+    <symbol id="i-close" viewBox="0 0 24 24"><path d="M6 6l12 12M18 6L6 18"/></symbol>
+    <symbol id="i-cart" viewBox="0 0 24 24"><path d="M3 4h2.5l2.2 11h10.6L20.5 7H7"/><circle cx="9.5" cy="19" r="1.4"/><circle cx="17" cy="19" r="1.4"/></symbol>
+    <symbol id="i-glasses" viewBox="0 0 24 24"><circle cx="6.5" cy="14" r="3.5"/><circle cx="17.5" cy="14" r="3.5"/><path d="M10 14h4M3 14l1.5-6M21 14l-1.5-6"/></symbol>
+    <symbol id="i-food" viewBox="0 0 24 24"><path d="M7 3v8M4.5 3v5a2.5 2.5 0 0 0 5 0V3M7 11v10M17 21V3c-2.2 1.2-3.5 3.6-3.5 7v4H17"/></symbol>
+    <symbol id="i-gym" viewBox="0 0 24 24"><path d="M6.5 7v10M17.5 7v10M3.5 9.5v5M20.5 9.5v5M6.5 12h11"/></symbol>
+    <symbol id="i-clinic" viewBox="0 0 24 24"><rect x="3.5" y="3.5" width="17" height="17" rx="3"/><path d="M12 8v8M8 12h8"/></symbol>
+    <symbol id="i-network" viewBox="0 0 24 24"><rect x="9" y="3" width="6" height="5" rx="1"/><rect x="3" y="16" width="6" height="5" rx="1"/><rect x="15" y="16" width="6" height="5" rx="1"/><path d="M12 8v4M6 16v-4h12v4"/></symbol>
+    <symbol id="i-service" viewBox="0 0 24 24"><path d="M3 18h18M5 18a7 7 0 0 1 14 0M12 8V6M10.5 6h3"/></symbol>
+    <symbol id="i-instagram" viewBox="0 0 24 24"><rect x="3.5" y="3.5" width="17" height="17" rx="5"/><circle cx="12" cy="12" r="4"/><circle cx="17.2" cy="6.8" r=".9" fill="currentColor" stroke="none"/></symbol>
+    <symbol id="i-youtube" viewBox="0 0 24 24"><path fill="currentColor" stroke="none" d="M21.6 7.2a2.5 2.5 0 0 0-1.77-1.77C18.27 5 12 5 12 5s-6.27 0-7.83.43A2.5 2.5 0 0 0 2.4 7.2 26 26 0 0 0 2 12a26 26 0 0 0 .4 4.8 2.5 2.5 0 0 0 1.77 1.77C5.73 19 12 19 12 19s6.27 0 7.83-.43a2.5 2.5 0 0 0 1.77-1.77A26 26 0 0 0 22 12a26 26 0 0 0-.4-4.8zM10 15V9l5.2 3z"/></symbol>
+    <symbol id="i-whatsapp" viewBox="0 0 32 32"><path fill="currentColor" stroke="none" d="M16.01 3.2A12.63 12.63 0 0 0 5.1 22.2L3.5 28.8l6.76-1.58a12.62 12.62 0 0 0 5.75 1.38h.01A12.7 12.7 0 0 0 28.8 15.95 12.73 12.73 0 0 0 16.01 3.2Zm0 22.98h-.01a10.24 10.24 0 0 1-5.2-1.42l-.38-.23-4.02.94.96-3.92-.25-.4A10.2 10.2 0 1 1 26.38 16 10.36 10.36 0 0 1 16.01 26.18Zm5.6-7.63c-.31-.15-1.82-.9-2.1-1-.28-.11-.48-.15-.69.15-.2.31-.79 1-.97 1.2-.18.2-.36.23-.67.08-.31-.15-1.3-.48-2.48-1.53a9.3 9.3 0 0 1-1.72-2.14c-.18-.31-.02-.48.14-.63.14-.14.31-.36.46-.54.15-.18.2-.31.31-.51.1-.2.05-.38-.03-.54-.08-.15-.69-1.66-.94-2.27-.25-.6-.5-.52-.69-.53h-.59c-.2 0-.54.08-.82.38-.28.31-1.07 1.05-1.07 2.56s1.1 2.97 1.25 3.17c.15.2 2.16 3.3 5.24 4.63.73.32 1.3.51 1.75.65.74.23 1.41.2 1.94.12.59-.09 1.82-.74 2.08-1.45.26-.72.26-1.33.18-1.45-.08-.13-.28-.2-.59-.34Z"/></symbol>
+    <symbol id="i-clock" viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/></symbol>
+    <!-- Simbolo O+ -->
+    <symbol id="logo-mark" viewBox="0 0 100 64"><circle cx="32" cy="32" r="23.5" fill="none" stroke="currentColor" stroke-width="15"/><path fill="#FF6A00" d="M74 14h12v12h12v12H86v12H74V38H62V26h12z"/></symbol>
+  </defs>
+</svg>
 
-    <title>Cliente oculto para restaurantes com IA | Observe Mais</title>
-    <link rel="preconnect" href="https://fonts.googleapis.com" />
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-    <link
-      href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700;800&display=swap"
-      rel="stylesheet"
-    />
-    <link rel="stylesheet" href="/styles.css" />
-    <script src="/script.js" defer></script>
+<a class="skip-link" href="#conteudo">Pular para o conteúdo</a>
 
-    <script type="application/ld+json">
-      {
-        "@context": "https://schema.org",
-        "@type": "Service",
-        "name": "Cliente oculto para restaurantes",
-        "serviceType": "Cliente oculto e diagnóstico de experiência em restaurantes",
-        "provider": {
-          "@type": "Organization",
-          "name": "Observe Mais",
-          "url": "https://observemais.com.br/"
-        },
-        "areaServed": { "@type": "Country", "name": "Brasil" },
-        "audience": {
-          "@type": "BusinessAudience",
-          "name": "Restaurantes, churrascarias, redes de food service e operações com múltiplas unidades"
-        },
-        "description": "Visitas orientadas por roteiro que registram tempo de espera, padrão e temperatura do prato, erro no pedido, cordialidade, limpeza de salão e banheiros. As evidências são cruzadas com NPS e checklist da liderança e priorizadas por unidade."
-      }
-    </script>
-    <script type="application/ld+json">
-      {
-        "@context": "https://schema.org",
-        "@type": "FAQPage",
-        "mainEntity": [
-          {
-            "@type": "Question",
-            "name": "Como funciona o cliente oculto em restaurante?",
-            "acceptedAnswer": {
-              "@type": "Answer",
-              "text": "Um avaliador janta como qualquer cliente, sem aviso à equipe, e cronometra cada etapa: quanto até a abordagem, quanto entre a comanda e a passagem, se o ponto saiu como pede a ficha técnica, se ofereceram entrada e sobremesa, e quanto demorou a conta."
-            }
-          },
-          {
-            "@type": "Question",
-            "name": "O que é avaliado na visita?",
-            "acceptedAnswer": {
-              "@type": "Answer",
-              "text": "Tempo de abordagem, tempo de passagem por praça, ponto e montagem contra a ficha técnica, item em 86 comunicado ao salão, oferta de entrada, bebida e sobremesa, limpeza de salão e banheiros, e o fechamento da conta. O roteiro é definido no briefing."
-            }
-          },
-          {
-            "@type": "Question",
-            "name": "A equipe fica sabendo da visita?",
-            "acceptedAnswer": {
-              "@type": "Answer",
-              "text": "Não. A visita acontece sem aviso para que a experiência observada seja a mesma que qualquer cliente teria. O objetivo não é punir a equipe, e sim mostrar onde a operação precisa de apoio."
-            }
-          },
-          {
-            "@type": "Question",
-            "name": "Serve para restaurante com uma unidade só?",
-            "acceptedAnswer": {
-              "@type": "Answer",
-              "text": "Sim. Com uma casa só, a comparação é entre turnos e dias: almoço de terça contra jantar de sexta, que é quando a praça costuma travar. Em redes, a comparação também acontece entre unidades."
-            }
-          },
-          {
-            "@type": "Question",
-            "name": "Quanto custa contratar cliente oculto para restaurante?",
-            "acceptedAnswer": {
-              "@type": "Answer",
-              "text": "Depende de quantas casas, com que frequência, quantos turnos e quantos itens serão medidos. A conversa inicial define o escopo antes da proposta comercial."
-            }
-          },
-          {
-            "@type": "Question",
-            "name": "O que a inteligência artificial faz no diagnóstico?",
-            "acceptedAnswer": {
-              "@type": "Answer",
-              "text": "A IA faz a leitura do volume de dados coletados em visita, NPS e checklist, encontra reincidência e divergência entre turnos e unidades, e transforma isso em insights priorizados entregues no WhatsApp do gestor. A visita continua sendo feita por avaliadores humanos."
-            }
-          }
-        ]
-      }
-    </script>
-  </head>
-  <body>
-    <svg class="icon-sprite" aria-hidden="true" focusable="false">
-      <symbol id="icon-clock" viewBox="0 0 24 24">
-        <path d="M4 12a8 8 0 1 0 2.2-5.5" />
-        <path d="M4 4v4h4M12 7v5l3 2" />
-      </symbol>
-      <symbol id="icon-plate" viewBox="0 0 24 24">
-        <circle cx="12" cy="12" r="8.6" />
-        <circle cx="12" cy="12" r="4.2" />
-      </symbol>
-      <symbol id="icon-chat" viewBox="0 0 24 24">
-        <path d="M20 15a3 3 0 0 1-3 3H8l-4 3V6a3 3 0 0 1 3-3h10a3 3 0 0 1 3 3Z" />
-      </symbol>
-      <symbol id="icon-chart" viewBox="0 0 24 24">
-        <path d="M4 20V4M4 20h16" />
-        <path d="M8 16v-4M12 16V8M16 16v-7" />
-      </symbol>
-    </svg>
+<!-- ============ 1. MENU ============ -->
+<header class="site-header" id="topo">
+  <div class="container header-inner">
+    <a class="brand" href="/restaurantes" aria-label="Observe+ — cliente oculto para restaurantes">
+      <svg class="brand-mark" aria-hidden="true"><use href="#logo-mark"/></svg>
+      <span class="brand-text">
+        <span class="brand-name">Observe<span class="plus">+</span></span>
+        <span class="brand-tagline">Enxergue o que está custando vendas.</span>
+      </span>
+    </a>
 
-    <a class="skip-link" href="#conteudo">Pular para o conteúdo</a>
+    <nav class="main-nav" id="main-nav" aria-label="Navegação principal">
+      <ul>
+        <li><a href="#solucoes">Soluções</a></li>
+        <li><a href="#como-funciona">Como funciona</a></li>
+        <li><a href="#segmentos">Tipos de casa</a></li>
+        <li><a href="#cases">Depoimento</a></li>
+        <li><a href="/blog">Conteúdos</a></li>
+      </ul>
+      <a class="btn btn-primary btn-sm nav-cta-mobile" href="#contato">Falar com um especialista <svg class="ico" aria-hidden="true"><use href="#i-arrow"/></svg></a>
+    </nav>
 
-    <header class="site-header" id="topo">
-      <div class="container header-inner">
-        <a class="brand" href="/restaurantes" aria-label="Observe Mais — cliente oculto para restaurantes">
-          <img class="brand-logo" src="/public/assets/logo-observe-plus-light-web.png" alt="Observe Mais" width="440" height="87" />
-        </a>
+    <a class="btn btn-primary btn-sm header-cta" href="#contato">Falar com um especialista <svg class="ico" aria-hidden="true"><use href="#i-arrow"/></svg></a>
 
-        <button class="menu-toggle" type="button" aria-expanded="false" aria-controls="main-navigation" aria-label="Abrir menu">
-          <span></span><span></span><span></span>
-        </button>
+    <button class="nav-toggle" type="button" aria-controls="main-nav" aria-expanded="false" aria-label="Abrir menu">
+      <svg class="ico ico-open" aria-hidden="true"><use href="#i-menu"/></svg>
+      <svg class="ico ico-close" aria-hidden="true"><use href="#i-close"/></svg>
+    </button>
+  </div>
+</header>
 
-        <nav id="main-navigation" class="main-nav" aria-label="Navegação principal">
-          <a href="#perdas">Onde se perde</a>
-          <a href="#diferenciais">Diferenciais</a>
-          <a href="#relatorio">Relatório</a>
-          <a href="#metodo">Método</a>
-          <a href="#faq">FAQ</a>
-          <a href="/blog">Blog</a>
-        </nav>
+<main id="conteudo">
 
-        <a class="button button-primary header-blog" href="#perdas">Evidências</a>
-        <button class="button button-dark header-cta" type="button" data-lead-flow>Agendar diagnóstico</button>
+  <!-- ============ 2. HERO ============ -->
+  <section class="hero" aria-labelledby="hero-title">
+    <div class="hero-media" aria-hidden="true">
+      <img src="/public/assets/observe/seg-alimentacao.webp" alt="" width="1200" height="900" fetchpriority="high">
+    </div>
+    <div class="hero-shade" aria-hidden="true"></div>
+
+    <div class="container hero-inner">
+      <div class="hero-copy">
+        <p class="eyebrow eyebrow-light">Cliente Oculto para Restaurantes</p>
+        <h1 id="hero-title">Descubra onde seu restaurante está <span class="accent">perdendo vendas.</span></h1>
+        <p class="hero-lead">Clientes ocultos jantam na sua casa como qualquer cliente. Cronometram da comanda à passagem, conferem o prato contra a ficha técnica e registram o que o salão deixou de oferecer. O Observe+ transforma cada visita em dados, evidências e oportunidades.</p>
+        <div class="hero-actions">
+          <a class="btn btn-primary" href="#contato">Quero descobrir onde estou perdendo vendas <svg class="ico" aria-hidden="true"><use href="#i-arrow"/></svg></a>
+          <a class="btn btn-ghost" href="#como-funciona" data-video="yuGAr_NQis8"><span class="play-circle"><svg class="ico" aria-hidden="true"><use href="#i-play"/></svg></span> Ver como funciona</a>
+        </div>
       </div>
-    </header>
 
-    <main id="conteudo">
-      <section class="hero" aria-labelledby="hero-title">
-        <div class="container hero-grid">
-          <div class="hero-copy reveal">
-            <p class="hero-eyebrow">Cliente oculto para restaurantes com <span class="ia">IA</span></p>
-            <h1 id="hero-title">A mesa esperou 27 minutos, comeu calada e não reservou de novo.</h1>
-            <p class="hero-lead">Cliente oculto recorrente que cronometra o tempo entre a comanda e a passagem, confere o ponto da carne contra a ficha técnica, registra item em 86 que ninguém avisou e mede o giro de mesa no pico da sexta.</p>
-            <p class="hero-ai"><span class="hero-ai__mark ia-mark" aria-hidden="true">IA</span><span>A <span class="ia">inteligência artificial</span> lê os dados das visitas, do NPS e do checklist, cruza as unidades, encontra o que reincide e <strong>manda a prioridade da semana no seu WhatsApp</strong>.</span></p>
-            <div class="hero-actions">
-              <button class="button button-dark" type="button" data-lead-flow>Agendar diagnóstico do restaurante</button>
-            </div>
-          </div>
+      <ul class="hero-benefits">
+        <li><svg class="ico" aria-hidden="true"><use href="#i-sales"/></svg><span>Mais<br>ticket médio</span></li>
+        <li><svg class="ico" aria-hidden="true"><use href="#i-star"/></svg><span>Mais mesas<br>que voltam</span></li>
+        <li><svg class="ico" aria-hidden="true"><use href="#i-clock"/></svg><span>Serviço no<br>tempo certo</span></li>
+        <li><svg class="ico" aria-hidden="true"><use href="#i-data"/></svg><span>Decisões baseadas<br>em dados reais</span></li>
+      </ul>
+    </div>
+  </section>
 
-          <div class="hero-visual reveal">
-            <img
-              src="/public/assets/restaurantes/hero-restaurante.jpg"
-              alt="Cliente almoçando sozinho em restaurante, sem chamar a atenção da equipe"
-              width="661"
-              height="441"
-            />
-          </div>
-        </div>
-      </section>
-
-      <section class="section differentials-section" id="diferenciais" aria-labelledby="dif-title">
-        <div class="container">
-          <div class="section-heading reveal">
-            <p class="section-kicker">Por que Observe Mais</p>
-            <h2 id="dif-title">Cliente oculto sozinho mostra um lado. <span>Nós mostramos os três.</span></h2>
-            <p>Uma visita isolada mostra um turno. A Observe Mais junta essa visita ao que o cliente responde no NPS e ao que a liderança reporta no checklist — e é no cruzamento das três que aparece o que o restaurante precisa corrigir.</p>
-          </div>
-
-          <div class="iov-stage reveal">
-            <div class="iov-copy">
-              <h3 class="iov-title">3 sinais.<span>IOV.</span></h3>
-              <p class="iov-tagline">Misture. Veja. Decida.</p>
-              <p class="iov-lead">Cliente oculto + cliente + liderança se transformam em um único índice para agir com confiança.</p>
-            </div>
-
-            <figure class="iov-art">
-              <img
-                src="/public/assets/iov/tres-sinais-iov.jpg"
-                alt="Cliente oculto, NPS do cliente e checklist da liderança convergindo para o IOV 84, o Índice de Operação Viva"
-                width="1672"
-                height="941"
-                loading="lazy"
-              />
-            </figure>
-
-            <ol class="iov-steps">
-              <li>Dados conectados</li>
-              <li>Analisando sinais</li>
-              <li>Gerando IOV</li>
-              <li>Decisão em tempo real</li>
-            </ol>
-          </div>
-
-          <div class="views-grid reveal" aria-label="As três fontes que formam o IOV">
-            <article class="view-card">
-              <span class="view-card__tag">O que o cliente fala</span>
-              <h3>NPS e avaliação</h3>
-              <p>A percepção de quem comeu: o que gerou atrito, o que fez voltar e o que fez desistir de indicar.</p>
-            </article>
-            <article class="view-card">
-              <span class="view-card__tag">O que a liderança reporta</span>
-              <h3>Checklist da operação</h3>
-              <p>O padrão que o gerente registra como executado, item a item, turno a turno, unidade a unidade.</p>
-            </article>
-            <article class="view-card">
-              <span class="view-card__tag">O que o avaliador vê</span>
-              <h3>Visita de cliente oculto</h3>
-              <p>A refeição real, com roteiro e critério — sem aviso à equipe e sem interferir no serviço.</p>
-            </article>
-          </div>
-
-          <div class="gap-callout reveal">
-            <p class="gap-callout__lead">É aqui que está o dinheiro:</p>
-            <p class="gap-callout__body">O checklist do mise en place diz <strong>tudo conforme</strong>. O avaliador cronometra <strong>27 minutos entre a comanda e a passagem</strong> numa sexta às 21h. O cliente responde <strong>nota 6</strong> e escreve "demorou muito". Isso não é erro de medição: é o ponto exato onde a casa perdeu a recompra.</p>
-            <p class="gap-callout__foot">Com uma fonte só, essa divergência é invisível. É por isso que as três precisam estar na mesma leitura.</p>
-          </div>
-
-          <div class="differential-list reveal">
-            <article>
-              <h3>Um IOV, não três relatórios</h3>
-              <p>As três fontes convergem em um índice comparável entre unidades, turnos e ciclos — em vez de três documentos que ninguém cruza.</p>
-            </article>
-            <article>
-              <h3><span class="ia">IA</span> que lê o volume por você</h3>
-              <p>A <span class="ia">inteligência artificial</span> cruza os itens checados de todas as unidades e mostra o que reincide: a mesma praça estourando o tempo de passagem, sempre no jantar de sexta.</p>
-            </article>
-            <article>
-              <h3>Diagnóstico antes de promessa</h3>
-              <p>Não prometemos aumento de ticket antes de sentar na sua casa. Medimos, mostramos o registro com hora e praça, e só então discutimos o que dá para corrigir primeiro.</p>
-            </article>
-            <article>
-              <h3>Recorrência que vira rotina</h3>
-              <p>O ciclo seguinte volta nos mesmos pontos: o que foi corrigido, o que voltou a falhar e qual unidade sustentou o padrão — para a correção não durar só a semana da cobrança.</p>
-            </article>
-          </div>
-
-          <button class="button button-primary differentials-cta" type="button" data-lead-flow>Agendar diagnóstico do restaurante</button>
-        </div>
-      </section>
-
-      <section class="metrics-strip" id="perdas" aria-labelledby="perdas-title">
-        <div class="container metrics-heading reveal">
-          <h2 id="perdas-title">Onde a casa perde dinheiro <span>entre a comanda e a conta</span></h2>
-        </div>
-        <div class="container metrics-grid reveal">
-          <article>
-            <h3>Salão</h3>
-            <p>Mesa sentada sem abordagem, praça descoberta no pico, runner sumido, sobremesa e couvert nunca oferecidos</p>
-            <small>Cada sobremesa não oferecida é ticket médio que já estava na mesa e foi embora</small>
-          </article>
-          <article>
-            <h3>Cozinha</h3>
-            <p>Tempo entre comanda e passagem, ponto fora da ficha técnica, prato montado diferente do cardápio, item em 86 sem aviso ao salão</p>
-            <small>Prato que sai diferente do que a foto prometeu não volta como reclamação, volta como mesa vazia</small>
-          </article>
-          <article>
-            <h3>Fechamento</h3>
-            <p>Demora para fechar a conta, erro na comanda, taxa de serviço sem explicação, ninguém se despede</p>
-            <small>É o último contato antes de ele decidir onde vai jantar no próximo sábado</small>
-          </article>
-        </div>
-        <figure class="container metrics-media metrics-media--nativa reveal">
-          <img
-            src="/public/assets/restaurantes/cozinha-operacao.webp"
-            alt="Cozinha de restaurante com louça acumulada, lixo no chão e bancada desorganizada durante o serviço"
-            width="600"
-            height="400"
-            loading="lazy"
-          />
-          <figcaption>Louça acumulada e piso molhado em plena operação: a praça travou, o tempo de passagem subiu e o salão inteiro sentiu — sem ninguém reclamar na mesa.</figcaption>
-        </figure>
-
-        <figure class="container resto-ticket reveal" aria-labelledby="resto-ticket-caption">
-          <figcaption class="resto-ticket__tag">Linha do tempo de uma visita</figcaption>
-          <ul>
-            <li><i>18:42</i><span><b>Recepção</b>Sem abordagem por 4 minutos</span><em class="is-bad">Falha</em></li>
-            <li><i>18:57</i><span><b>Pedido</b>Item do cardápio indisponível</span><em class="is-bad">Falha</em></li>
-            <li><i>19:24</i><span><b>Entrega</b>27 min entre pedido e prato</span><em class="is-alerta">Atenção</em></li>
-            <li><i>19:26</i><span><b>Prato</b>Servido abaixo da temperatura</span><em class="is-bad">Falha</em></li>
-            <li><i>20:05</i><span><b>Conta</b>Fechamento em 3 minutos</span><em class="is-ok">Conforme</em></li>
-          </ul>
-          <p class="resto-ticket__foot" id="resto-ticket-caption">Exemplo ilustrativo. A mesa saiu sem reclamar de nada disso.</p>
-        </figure>
-
-      </section>
-
-      <section class="section value-section" aria-labelledby="value-title">
-        <div class="container value-grid">
-          <div class="value-copy reveal">
-            <p class="section-kicker">Perda silenciosa no restaurante</p>
-            <h2 id="value-title">Quase ninguém devolve o prato. <span>Só não reserva de novo.</span></h2>
-            <p>
-              A casa encheu na sexta e o caixa fechou bem. O que não aparece ali: a mesa 12 esperou 27 minutos sem ninguém avisar, o prato principal tinha acabado e o garçom só descobriu na hora do pedido, e ninguém ofereceu sobremesa em nenhuma das quatro mesas da praça.
-            </p>
-            <p>
-              A Observe Mais registra isso com hora e praça, antes de virar queda no ticket médio, nota baixa no Google e no iFood, ou um sábado que rendeu menos e ninguém soube explicar por quê.
-            </p>
-            <button class="button button-primary" type="button" data-lead-flow>Agendar diagnóstico do restaurante</button>
-          </div>
-
-          <div class="value-media reveal">
-            <div class="resto-gap" aria-label="Divergência entre as três visões">
-              <div class="resto-gap__row">
-                <span>Checklist da liderança</span>
-                <b class="is-ok">96%</b>
-              </div>
-              <div class="resto-gap__row">
-                <span>Cliente oculto em visita</span>
-                <b class="is-alerta">81%</b>
-              </div>
-              <div class="resto-gap__row">
-                <span>NPS do cliente</span>
-                <b class="is-bad">32</b>
-              </div>
-              <p class="resto-gap__nota">A operação acredita estar entregando. O cliente discorda. É essa distância que o diagnóstico mede.</p>
-              <p class="resto-gap__aviso">Cenário ilustrativo, para mostrar como as três leituras se comportam. Não é resultado de cliente.</p>
-            </div>
-          </div>
-        </div>
-      </section>
-
-      <section class="section solutions-section" id="solucoes" aria-labelledby="solutions-title">
-        <div class="container">
-          <div class="section-heading reveal">
-            <p class="section-kicker">Três visões operacionais</p>
-            <h2 id="solutions-title">Evidências por área viram <span>prioridade por unidade.</span></h2>
-            <p>A Observe Mais cruza execução observada, percepção de quem comeu e leitura da liderança para mostrar onde o restaurante precisa agir primeiro.</p>
-          </div>
-
-          <figure class="iovpanel reveal" aria-labelledby="iovpanel-caption">
-            <header class="iovpanel__head">
-              <div>
-                <strong>IOV — Índice de Operação Viva</strong>
-                <span>As três leituras da experiência reunidas em um índice comparável.</span>
-              </div>
-              <p class="iovpanel__filters" aria-hidden="true"><span>Ano</span><span>Mês</span><span>Marca</span><span>Unidade</span></p>
-            </header>
-
-            <div class="iovpanel__kpis">
-              <div class="iovpanel__indice">
-                <span>IOV</span>
-                <strong>72,4</strong>
-                <em>Atenção</em>
-              </div>
-              <div class="iovpanel__kpi">
-                <span>O que o avaliador vê</span>
-                <strong>81,4%</strong>
-                <small>Cliente oculto — conformidade</small>
-              </div>
-              <div class="iovpanel__kpi">
-                <span>O que o cliente fala</span>
-                <strong>32</strong>
-                <small>Voz do cliente — NPS</small>
-              </div>
-              <div class="iovpanel__kpi">
-                <span>O que a liderança reporta</span>
-                <strong>96,2%</strong>
-                <small>Checklist — conformidade</small>
-              </div>
-            </div>
-
-            <p class="iovpanel__section-label">As <b>3 visões</b> que constroem o IOV</p>
-
-            <div class="iovpanel__views">
-              <article>
-                <h4>O que o avaliador vê</h4>
-                <p class="iovpanel__metric"><strong>96</strong><span>visitas no ciclo</span></p>
-                <div class="iovpanel__stack" role="img" aria-label="81,4% conforme, 6,2% não aplicável e 12,4% inconforme">
-                  <i class="is-ok" style="width: 81.4%"></i>
-                  <i class="is-na" style="width: 6.2%"></i>
-                  <i class="is-bad" style="width: 12.4%"></i>
-                </div>
-                <ul class="iovpanel__dots">
-                  <li class="is-ok">Conforme 81,4%</li>
-                  <li class="is-na">N/A 6,2%</li>
-                  <li class="is-bad">Inconforme 12,4%</li>
-                </ul>
-              </article>
-
-              <article>
-                <h4>O que o cliente fala</h4>
-                <p class="iovpanel__metric"><strong>1.240</strong><span>avaliações</span></p>
-                <div class="iovpanel__donut iovpanel__donut--resto" role="img" aria-label="48% promotores, 6% neutros e 46% detratores"><span>NPS</span></div>
-                <ul class="iovpanel__dots">
-                  <li class="is-ok">Promotor 48,0%</li>
-                  <li class="is-na">Neutro 6,0%</li>
-                  <li class="is-bad">Detrator 46,0%</li>
-                </ul>
-              </article>
-
-              <article>
-                <h4>O que a liderança reporta</h4>
-                <p class="iovpanel__metric"><strong>2.269</strong><span>itens checados</span></p>
-                <div class="iovpanel__stack" role="img" aria-label="96,2% conforme e 3,8% inconforme">
-                  <i class="is-ok" style="width: 96.2%"></i>
-                  <i class="is-bad" style="width: 3.8%"></i>
-                </div>
-                <ul class="iovpanel__dots">
-                  <li class="is-ok">Conforme 96,2%</li>
-                  <li class="is-bad">Inconforme 3,8%</li>
-                </ul>
-              </article>
-            </div>
-
-            <div class="iovpanel__priority">
-              <div class="iovpanel__diagnosis">
-                <span>Diagnóstico das visões</span>
-                <strong>Operação reporta padrão, mas o cliente não percebe</strong>
-              </div>
-              <div>
-                <span>Pilar crítico</span>
-                <strong>Tempo de serviço</strong>
-                <small>31,4% de inconformidade</small>
-              </div>
-              <div>
-                <span>Área crítica</span>
-                <strong>Cozinha</strong>
-                <small>Jantar de sexta e sábado</small>
-              </div>
-            </div>
-
-            <figcaption id="iovpanel-caption">O IOV é uma leitura comparável entre unidades, turnos e ciclos — serve para ordenar prioridade, não como nota absoluta. As faixas de corte são definidas com o cliente na proposta. Exemplo ilustrativo, com unidades anonimizadas e números fictícios.</figcaption>
-          </figure>
-
-          <p class="solutions-divergence reveal">
-            Repare no que a leitura integrada revela: a liderança reportou <strong>96,2% de conformidade</strong> e o avaliador registrou <strong>81,4%</strong> — mas o cliente devolveu <strong>NPS 32</strong>. A operação acredita estar entregando o padrão e ainda assim está perdendo a mesa. <span>Nenhuma das três visões, sozinha, mostraria isso.</span>
-          </p>
-
-          <div class="solutions-grid iov-modules">
-            <article class="solution-card reveal" data-iov-module="auditor-profissional">
-              <div class="card-icon" aria-hidden="true">01</div>
-              <span class="module-role">Avaliador vê execução</span>
-              <h3>Execução do serviço</h3>
-              <p>O avaliador janta como cliente e cronometra: quanto tempo até a abordagem, quanto entre a comanda e a passagem, se o ponto saiu como pede a ficha técnica, se ofereceram entrada, bebida e sobremesa, e quanto demorou a conta.</p>
-              <a href="#relatorio">Ver relatório por área <span>→</span></a>
-            </article>
-            <article class="solution-card reveal" data-iov-module="cliente-real">
-              <div class="card-icon" aria-hidden="true">02</div>
-              <span class="module-role">Cliente sente atrito</span>
-              <h3>Experiência real</h3>
-              <p>A pesquisa mostra onde a noite desandou: esperou sem ninguém explicar, pediu o que estava no cardápio e não tinha, recebeu o ponto errado ou levantou a mão três vezes sem ser visto.</p>
-              <a href="#relatorio">Ver relatório por área <span>→</span></a>
-            </article>
-            <article class="solution-card reveal" data-iov-module="operacao-interna">
-              <div class="card-icon" aria-hidden="true">03</div>
-              <span class="module-role">Liderança confirma rotina</span>
-              <h3>Prioridade de correção</h3>
-              <p>O gerente compara o checklist de mise en place com o que o avaliador viu na sexta às 21h, e a reunião define quem cobre a praça, quem avisa o salão do 86 e como isso será medido no próximo ciclo.</p>
-              <a href="#relatorio">Ver relatório por área <span>→</span></a>
-            </article>
-          </div>
-
-          <div class="iov-flow reveal" data-iov-flow aria-label="Como as três visões formam o IOV">
-            <article data-iov-step="tres-visoes"><span>01</span><strong>Evidências por área</strong><p>Recepção, praça, cozinha, bar, banheiros e fechamento de conta.</p></article>
-            <i aria-hidden="true">→</i>
-            <article data-iov-step="cruzamento"><span>02</span><strong>Divergências</strong><p>O checklist do mise en place contra o que a mesa viveu às 21h.</p></article>
-            <i aria-hidden="true">→</i>
-            <article class="iov-flow__result" data-iov-step="iov"><span>03</span><strong>Prioridade por unidade</strong><p>Leitura comparável para agir onde há mais risco.</p></article>
-            <i aria-hidden="true">→</i>
-            <article data-iov-step="plano-de-acao"><span>04</span><strong>Plano de correção</strong><p>Responsável, prazo e nova medição para evoluir o padrão.</p></article>
-          </div>
-
-          <aside class="iov-ai reveal" aria-label="Camada de Inteligência Artificial">
-            <span class="iov-ai__mark ia-mark" aria-hidden="true">IA</span>
-            <div>
-              <p class="section-kicker">Depois do diagnóstico</p>
-              <h3>A <span class="ia">IA</span> lê o volume de dados que ninguém tem tempo de ler</h3>
-              <p>Cinco unidades geram milhares de itens checados por ciclo. Ninguém lê isso entre um serviço e outro. A <span class="ia">inteligência artificial</span> encontra o padrão — qual praça trava, em qual turno, em qual casa — e manda a prioridade da semana no WhatsApp, em vez de um PDF que ninguém abre.</p>
-              <p class="iov-ai__note">A <span class="ia">IA</span> interpreta e prioriza. A visita ao restaurante continua sendo feita por avaliadores humanos.</p>
-            </div>
-          </aside>
-        </div>
-      </section>
-
-      <section class="section platform-section" id="relatorio" aria-labelledby="relatorio-title">
-        <div class="container platform-grid">
-          <div class="platform-copy reveal">
-            <p class="section-kicker">Relatório por área</p>
-            <h2 id="relatorio-title">Veja qual unidade, área e turno <span>estão custando recorrência.</span></h2>
-            <p>
-              O relatório organiza as evidências por recepção, tempo de serviço, prato, bar, limpeza e fechamento. Assim a liderança compara unidades, identifica reincidência e decide o que corrigir primeiro.
-            </p>
-            <p class="platform-disclaimer">A composição ao lado reproduz a estrutura real do relatório com unidades anonimizadas e números de exemplo. Indicadores, áreas e frequência são definidos na proposta comercial.</p>
-            <button class="button button-primary" type="button" data-lead-flow>Agendar diagnóstico do restaurante</button>
-          </div>
-
-          <div class="platform-media reveal">
-            <figure class="report-mock" aria-labelledby="report-mock-caption">
-              <div class="report-mock__bar" aria-hidden="true">
-                <span></span><span></span><span></span>
-                <strong>Painel Cliente Oculto</strong>
-              </div>
-
-              <div class="report-mock__kpis">
-                <div class="report-kpi report-kpi--ok">
-                  <span>Conformidade</span>
-                  <strong>81,4%</strong>
-                  <small>1.847 itens conformes</small>
-                </div>
-                <div class="report-kpi report-kpi--alert">
-                  <span>Inconformidade</span>
-                  <strong>18,6%</strong>
-                  <small>422 itens inconformes</small>
-                </div>
-                <div class="report-kpi report-kpi--critical">
-                  <span>Pilar crítico</span>
-                  <strong>Tempo de serviço</strong>
-                  <small>Área crítica: cozinha</small>
-                </div>
-              </div>
-
-              <div class="report-mock__panels">
-                <div class="report-panel">
-                  <h4>Conformidade por unidade</h4>
-                  <ul class="report-rank">
-                    <li><span>Unidade A — Centro</span><b>91,2%</b></li>
-                    <li><span>Unidade B — Shopping</span><b>86,7%</b></li>
-                    <li><span>Unidade C — Orla</span><b>79,4%</b></li>
-                    <li><span>Unidade D — Rodovia</span><b>68,1%</b></li>
-                  </ul>
-                </div>
-
-                <div class="report-panel">
-                  <h4>Desempenho por área</h4>
-                  <ul class="report-bars">
-                    <li>
-                      <span>Cozinha</span>
-                      <div class="report-bar"><i style="width: 31.4%"></i></div>
-                      <b>31,4%</b>
-                    </li>
-                    <li>
-                      <span>Salão</span>
-                      <div class="report-bar"><i style="width: 24.8%"></i></div>
-                      <b>24,8%</b>
-                    </li>
-                    <li>
-                      <span>Banheiros</span>
-                      <div class="report-bar"><i style="width: 19.2%"></i></div>
-                      <b>19,2%</b>
-                    </li>
-                    <li>
-                      <span>Bar</span>
-                      <div class="report-bar"><i style="width: 12.6%"></i></div>
-                      <b>12,6%</b>
-                    </li>
-                    <li>
-                      <span>Recepção</span>
-                      <div class="report-bar"><i style="width: 9.1%"></i></div>
-                      <b>9,1%</b>
-                    </li>
-                  </ul>
-                  <p class="report-bars__legend">% de inconformidade no ciclo</p>
-                </div>
-              </div>
-
-              <div class="report-panel report-panel--wide">
-                <h4>Itens com maior inconformidade</h4>
-                <ol class="report-items">
-                  <li><span>Prato servido na temperatura correta</span><b>38,2%</b></li>
-                  <li><span>Tempo entre pedido e entrega dentro do padrão</span><b>34,7%</b></li>
-                  <li><span>Banheiro limpo, abastecido e sem odor</span><b>29,5%</b></li>
-                </ol>
-              </div>
-
-              <p class="report-mock__ai"><span class="ia-mark" aria-hidden="true">IA</span>Prioridade do ciclo: tempo de saída da cozinha na Unidade D reincidiu por 3 visitas seguidas, sempre no jantar de sexta. Resumo enviado ao WhatsApp da liderança.</p>
-
-              <figcaption id="report-mock-caption">Exemplo ilustrativo da estrutura do relatório. Unidades anonimizadas e números fictícios.</figcaption>
-            </figure>
-          </div>
-        </div>
-      </section>
-
-      <section class="testimonials-section" id="depoimentos" aria-label="Depoimento de cliente">
-        <figure class="testimonial-proof testimonial-proof--contida reveal">
-          <img
-            src="/public/assets/restaurantes/cliente-avaliando.jpg"
-            alt="Cliente fotografando o prato no restaurante para avaliar a experiência"
-            width="678"
-            height="452"
-            loading="lazy"
-          />
-        </figure>
-        <article class="testimonial-card featured reveal">
-          <img class="testimonial-logo" src="/public/assets/clients/nativas.png" alt="Churrascaria Nativas" width="500" height="500" loading="lazy" />
-          <blockquote>“A análise criteriosa nos ajudou a transformar atendimento, rotina e padrão de loja em ação.”</blockquote>
-          <footer><strong>Marcus</strong><span>Churrascaria Nativas SIA</span></footer>
-          <div class="stars" aria-label="5 de 5 estrelas">★★★★★</div>
-        </article>
-      </section>
-
-      <section class="section about-section" id="metodo" aria-labelledby="metodo-title">
-        <div class="container">
-          <div class="section-heading reveal">
-            <p class="section-kicker">Como funciona</p>
-            <h2 id="metodo-title">Cliente oculto com roteiro, evidência e <span>reunião de priorização.</span></h2>
-            <p>A visita não é crítica gastronômica. É medição do serviço: tempo, padrão de prato contra ficha técnica, abordagem e fechamento — no dia e no turno que você escolher, porque terça no almoço e sexta às 21h são duas casas diferentes.</p>
-          </div>
-
-          <figure class="metodo-media reveal">
-            <img
-              src="/public/assets/restaurantes/salao-espera.jpg"
-              alt="Cliente à mesa reclamando com o garçom durante o atendimento no salão"
-              width="800"
-              height="540"
-              loading="lazy"
-            />
-            <figcaption>Quando o atrito chega a virar reclamação na mesa, a maior parte dos clientes insatisfeitos já foi embora calada.</figcaption>
-          </figure>
-
-          <ol class="resto-passos reveal">
-            <li>
-              <span>01</span>
-              <h3>Briefing e roteiro</h3>
-              <p>Definimos junto o que será medido: tempo de abordagem, tempo de passagem por praça, aderência à ficha técnica, ofertas de entrada e sobremesa, limpeza e fechamento de conta.</p>
-            </li>
-            <li>
-              <span>02</span>
-              <h3>Visita sem aviso</h3>
-              <p>O avaliador janta como qualquer cliente e registra cada etapa com hora no relógio: sentou, foi abordado, pediu, recebeu, pagou.</p>
-            </li>
-            <li>
-              <span>03</span>
-              <h3>Cruzamento das três visões</h3>
-              <p>A visita é comparada ao NPS do cliente e ao checklist da liderança. A <span class="ia">IA</span> aponta onde as três discordam.</p>
-            </li>
-            <li>
-              <span>04</span>
-              <h3>Reunião de correção</h3>
-              <p>A devolutiva define responsável, prazo e nova medição. O objetivo não é caçar garçom, é mostrar à liderança onde a praça precisa de gente, treino ou processo.</p>
-            </li>
-          </ol>
-        </div>
-      </section>
-
-      <section class="section faq-section" id="faq" aria-labelledby="faq-title">
-        <div class="container">
-          <h2 id="faq-title" class="reveal">FAQ — Dúvidas Frequentes</h2>
-          <div class="faq-list reveal">
-            <details><summary>Como funciona o cliente oculto em restaurante?<span>+</span></summary><p>Um avaliador janta como qualquer cliente, sem aviso à equipe, e cronometra cada etapa: quanto até a abordagem, quanto entre a comanda e a passagem, se o ponto saiu como pede a ficha técnica, se ofereceram entrada e sobremesa, e quanto demorou a conta.</p></details>
-            <details><summary>O que é avaliado na visita?<span>+</span></summary><p>Tempo de abordagem, tempo de passagem por praça, ponto e montagem contra a ficha técnica, item em 86 comunicado ao salão, oferta de entrada, bebida e sobremesa, limpeza de salão e banheiros, e o fechamento da conta. O roteiro é definido no briefing.</p></details>
-            <details><summary>A equipe fica sabendo da visita?<span>+</span></summary><p>Não. A visita acontece sem aviso para que a experiência observada seja a mesma que qualquer cliente teria. O objetivo não é punir a equipe, e sim mostrar onde a operação precisa de apoio.</p></details>
-            <details><summary>Serve para restaurante com uma unidade só?<span>+</span></summary><p>Sim. Com uma casa só, a comparação é entre turnos e dias: almoço de terça contra jantar de sexta, que é quando a praça costuma travar. Em redes, a comparação também acontece entre unidades.</p></details>
-            <details><summary>Quanto custa contratar cliente oculto para restaurante?<span>+</span></summary><p>Depende de quantas casas, com que frequência, quantos turnos e quantos itens serão medidos. A conversa inicial define o escopo antes da proposta comercial.</p></details>
-            <details><summary>O que a inteligência artificial faz no diagnóstico?<span>+</span></summary><p>A IA faz a leitura do volume de dados coletados em visita, NPS e checklist, encontra reincidência e divergência entre turnos e unidades, e transforma isso em insights priorizados entregues no WhatsApp do gestor. A visita continua sendo feita por avaliadores humanos.</p></details>
-          </div>
-        </div>
-      </section>
-
-      <section class="section final-cta-section final-cta-section--resto" aria-labelledby="final-cta-title">
-        <div class="container final-cta reveal">
-          <h2 id="final-cta-title">Descubra o que a sua casa perde <span>antes de aparecer no fechamento do mês.</span></h2>
-          <p>Agende um diagnóstico de cliente oculto e transforme tempo de passagem, ponto fora da ficha técnica, praça descoberta e sobremesa não oferecida em uma lista de prioridades por unidade, com responsável e prazo.</p>
-
-          <ol class="cta-passos">
-            <li><b>1</b><span>Conversa inicial para entender o objetivo, as unidades e o que hoje é crítico na sua operação.</span></li>
-            <li><b>2</b><span>Definição conjunta do roteiro: o que será observado, com que critério e em qual frequência.</span></li>
-            <li><b>3</b><span>Só então a proposta, com escopo e valor. Nada é cobrado para chegar até aqui.</span></li>
-          </ol>
-
-          <button class="button button-dark" type="button" data-lead-flow>Agendar diagnóstico do restaurante</button>
-          <small>Indicado para restaurantes independentes, churrascarias, redes e operações com múltiplas unidades.</small>
-        </div>
-      </section>
-    </main>
-
-    <footer class="site-footer">
-      <div class="container footer-grid">
-        <div class="footer-brand"><img class="footer-logo" src="/public/assets/logo-observe-plus-dark-web.png" alt="Observe Mais" width="440" height="87" loading="lazy" /><p>Cliente oculto para restaurantes com <span class="ia">IA</span> • NPS, checklist e visita na mesma leitura • prioridades que viram ação.</p></div>
-        <div><strong>Diagnóstico</strong><a href="#perdas">Onde se perde</a><a href="#diferenciais">Diferenciais</a><a href="#relatorio">Relatório por área</a></div>
-        <div><strong>Conteúdo</strong><a href="/blog">Blog</a><a href="#metodo">Método</a><a href="#faq">FAQ</a><a href="/">Cliente oculto para supermercados</a></div>
-        <div id="contato"><strong>Contato</strong><a href="mailto:contato@observemais.com.br">contato@observemais.com.br</a><a href="https://wa.me/5561993715292" target="_blank" rel="noopener noreferrer">WhatsApp</a><a href="https://www.instagram.com/observall" target="_blank" rel="noopener noreferrer">Instagram</a><a href="https://www.youtube.com/@Observall" target="_blank" rel="noopener noreferrer">YouTube</a></div>
+  <!-- ============ 3. DOR ============ -->
+  <section class="section pain" aria-labelledby="pain-title">
+    <div class="container pain-grid">
+      <div class="pain-copy reveal">
+        <p class="eyebrow">O ponto cego do salão</p>
+        <h2 id="pain-title">Você sabe por que algumas mesas comem, pagam e <span class="accent">não voltam?</span></h2>
+        <ul class="pain-questions">
+          <li><svg class="ico" aria-hidden="true"><use href="#i-help"/></svg>A mesa é abordada logo que senta?</li>
+          <li><svg class="ico" aria-hidden="true"><use href="#i-help"/></svg>O garçom sugere entrada e bebida?</li>
+          <li><svg class="ico" aria-hidden="true"><use href="#i-help"/></svg>O prato sai como pede a ficha técnica?</li>
+          <li><svg class="ico" aria-hidden="true"><use href="#i-help"/></svg>A passagem está no tempo do padrão?</li>
+          <li><svg class="ico" aria-hidden="true"><use href="#i-help"/></svg>O salão sabe o que está em 86?</li>
+          <li><svg class="ico" aria-hidden="true"><use href="#i-help"/></svg>Alguém ofereceu sobremesa e café?</li>
+          <li class="wide"><svg class="ico" aria-hidden="true"><use href="#i-help"/></svg>O cliente sairia disposto a reservar de novo?</li>
+        </ul>
       </div>
-      <div class="container footer-bottom"><span>© <span id="current-year">2026</span> Observe Mais. Todos os direitos reservados.</span><a href="#topo">Voltar ao topo ↑</a></div>
-    </footer>
-
-    <div class="lead-flow" id="lead-flow" role="dialog" aria-modal="true" aria-labelledby="lead-flow-title" hidden>
-      <div class="lead-flow__backdrop" data-flow-close></div>
-
-      <div class="lead-flow__card">
-        <button class="lead-flow__close" type="button" data-flow-close aria-label="Fechar formulário">×</button>
-
-        <header class="lead-flow__head">
-          <img src="/public/assets/logo-observe-plus-light-web.png" alt="Observe Mais" width="440" height="87" />
-          <div class="lead-flow__progress" role="progressbar" aria-valuemin="1" aria-valuemax="5" aria-valuenow="1" aria-label="Progresso do formulário">
-            <i data-flow-bar></i>
-          </div>
-        </header>
-
-        <form class="lead-flow__body" id="lead-flow-form" novalidate>
-          <p class="lead-flow__intro">Precisamos de algumas informações para preparar o diagnóstico certo para a sua operação.</p>
-
-          <div class="lead-step is-active" data-step="email">
-            <label for="flow-email">Qual é o seu e-mail?</label>
-            <input id="flow-email" name="email" type="email" inputmode="email" autocomplete="email" placeholder="voce@restaurante.com.br" />
-          </div>
-
-          <div class="lead-step" data-step="whatsapp">
-            <label for="flow-whatsapp">Qual é o seu WhatsApp?</label>
-            <input id="flow-whatsapp" name="whatsapp" type="tel" inputmode="tel" autocomplete="tel" placeholder="(61) 99999-9999" />
-          </div>
-
-          <div class="lead-step" data-step="nome">
-            <label for="flow-nome">Como podemos te chamar?</label>
-            <input id="flow-nome" name="nome" type="text" autocomplete="name" placeholder="Seu nome completo" />
-          </div>
-
-          <div class="lead-step" data-step="empresa">
-            <label for="flow-empresa">Qual é o seu restaurante?</label>
-            <input id="flow-empresa" name="empresa" type="text" autocomplete="organization" placeholder="Nome do restaurante ou da rede" />
-          </div>
-
-          <div class="lead-step" data-step="cargo">
-            <label for="flow-cargo">Qual é o seu cargo?</label>
-            <input id="flow-cargo" name="cargo" type="text" autocomplete="organization-title" placeholder="Proprietário, sócio, gerente de operações…" />
-          </div>
-
-          <p class="lead-flow__error" id="lead-flow-error" role="alert" hidden></p>
-
-          <div class="lead-flow__actions">
-            <button class="lead-flow__back" type="button" data-flow-back hidden>← Voltar</button>
-            <button class="button button-primary lead-flow__next" type="submit" data-flow-next>Confirmar →</button>
-          </div>
-
-          <p class="lead-flow__legal">Ao confirmar, você aceita ser contatado pela equipe Observe Mais sobre o diagnóstico. Seus dados não são compartilhados com terceiros.</p>
-        </form>
-
-        <div class="lead-flow__done" id="lead-flow-done" hidden>
-          <span class="lead-flow__check" aria-hidden="true">✓</span>
-          <h2>Recebemos seus dados.</h2>
-          <p>Nossa equipe vai retomar o contato para alinhar objetivo, unidades e roteiro do diagnóstico.</p>
-          <a
-            class="button button-primary"
-            id="lead-flow-whatsapp"
-            href="https://wa.me/5561993715292?text=Ol%C3%A1%2C%20preenchi%20o%20formul%C3%A1rio%20no%20site%20e%20quero%20agendar%20o%20diagn%C3%B3stico%20do%20meu%20restaurante."
-            target="_blank"
-            rel="noopener noreferrer"
-          >Adiantar pelo WhatsApp</a>
-          <button class="lead-flow__back" type="button" data-flow-close>Fechar</button>
+      <figure class="pain-media reveal">
+        <div class="photo photo-placeholder">
+          <img src="/public/assets/restaurantes/salao-espera.jpg" alt="Cliente à mesa reclamando com o garçom durante o atendimento no salão" loading="lazy" width="800" height="540">
         </div>
+      </figure>
+    </div>
+    <div class="container">
+      <p class="pain-closing reveal">
+        <svg class="ico" aria-hidden="true"><use href="#i-eye"/></svg>
+        <span>O Observe+ mostra o que realmente acontece no salão <strong>quando você não está olhando.</strong></span>
+      </p>
+    </div>
+  </section>
 
-        <h2 id="lead-flow-title" class="visually-hidden">Agendar diagnóstico do restaurante</h2>
+  <!-- ============ 4. COMO FUNCIONA ============ -->
+  <section class="section how" id="como-funciona" aria-labelledby="how-title">
+    <div class="container">
+      <header class="section-head center reveal">
+        <p class="eyebrow">Como funciona</p>
+        <h2 id="how-title">Clientes reais. Refeições reais. <span class="accent">Dados para decidir.</span></h2>
+      </header>
+
+      <ol class="steps reveal">
+        <li class="step">
+          <span class="step-icon"><svg class="ico" aria-hidden="true"><use href="#i-plan"/></svg></span>
+          <span class="step-num">01</span>
+          <h3>Planejamos</h3>
+          <p>Definimos com você o roteiro: turnos, dias e pontos críticos da casa.</p>
+        </li>
+        <li class="step">
+          <span class="step-icon"><svg class="ico" aria-hidden="true"><use href="#i-visit"/></svg></span>
+          <span class="step-num">02</span>
+          <h3>Visitamos</h3>
+          <p>O cliente oculto janta sem aviso à equipe, como qualquer cliente.</p>
+        </li>
+        <li class="step">
+          <span class="step-icon"><svg class="ico" aria-hidden="true"><use href="#i-camera"/></svg></span>
+          <span class="step-num">03</span>
+          <h3>Evidenciamos</h3>
+          <p>Cada etapa é registrada com hora: sentou, foi abordado, pediu, recebeu, pagou.</p>
+        </li>
+        <li class="step">
+          <span class="step-icon"><svg class="ico" aria-hidden="true"><use href="#i-data"/></svg></span>
+          <span class="step-num">04</span>
+          <h3>Transformamos em dados</h3>
+          <p>Você recebe indicadores por área, unidade e turno, com fotos e comparativos.</p>
+        </li>
+        <li class="step">
+          <span class="step-icon"><svg class="ico" aria-hidden="true"><use href="#i-target"/></svg></span>
+          <span class="step-num">05</span>
+          <h3>Geramos ação</h3>
+          <p>A liderança sabe quem cobre a praça, quem avisa o salão e o que medir no próximo ciclo.</p>
+        </li>
+      </ol>
+    </div>
+  </section>
+
+  <!-- ============ 5. PLATAFORMA ============ -->
+  <section class="section platform" id="plataforma" aria-labelledby="platform-title">
+    <div class="container platform-grid platform-grid--text">
+      <div class="platform-copy reveal">
+        <p class="eyebrow">Plataforma Observe+</p>
+        <h2 id="platform-title">Da mesa ao resultado. Tudo em um só lugar.</h2>
+        <p class="lead">Relatórios por unidade, área e turno, evidências em fotos, comparativo entre casas e planos de ação práticos para o serviço evoluir.</p>
+        <a class="btn btn-primary" href="#contato">Conheça a plataforma <svg class="ico" aria-hidden="true"><use href="#i-arrow"/></svg></a>
+      </div>
+
+      <div class="deliver-card reveal">
+        <p class="deliver-card__title">O que sua gestão recebe</p>
+        <ul class="checklist">
+          <li><span class="ck"><svg aria-hidden="true"><use href="#i-check"/></svg></span>Nota geral da operação</li>
+          <li><span class="ck"><svg aria-hidden="true"><use href="#i-check"/></svg></span>Ranking de unidades</li>
+          <li><span class="ck"><svg aria-hidden="true"><use href="#i-check"/></svg></span>Indicadores por área</li>
+          <li><span class="ck"><svg aria-hidden="true"><use href="#i-check"/></svg></span>Fotos e evidências</li>
+          <li><span class="ck"><svg aria-hidden="true"><use href="#i-check"/></svg></span>Tempos por etapa do serviço</li>
+          <li><span class="ck"><svg aria-hidden="true"><use href="#i-check"/></svg></span>Principais perdas identificadas</li>
+          <li><span class="ck"><svg aria-hidden="true"><use href="#i-check"/></svg></span>Plano de ação</li>
+        </ul>
       </div>
     </div>
+  </section>
 
-    <a class="whatsapp-float" href="https://wa.me/5561999555580?text=Ol%C3%A1%2C%20vim%20pela%20p%C3%A1gina%20de%20restaurantes%20da%20Observe%20Mais." target="_blank" rel="noopener noreferrer" aria-label="Conversar com a Observe Mais no WhatsApp" title="WhatsApp: +55 61 99955-5580">
-      <svg class="whatsapp-icon" viewBox="0 0 32 32" aria-hidden="true" focusable="false">
-        <path d="M16.01 3.2A12.63 12.63 0 0 0 5.1 22.2L3.5 28.8l6.76-1.58a12.62 12.62 0 0 0 5.75 1.38h.01A12.7 12.7 0 0 0 28.8 15.95 12.73 12.73 0 0 0 16.01 3.2Zm0 22.98h-.01a10.24 10.24 0 0 1-5.2-1.42l-.38-.23-4.02.94.96-3.92-.25-.4A10.2 10.2 0 1 1 26.38 16 10.36 10.36 0 0 1 16.01 26.18Zm5.6-7.63c-.31-.15-1.82-.9-2.1-1-.28-.11-.48-.15-.69.15-.2.31-.79 1-.97 1.2-.18.2-.36.23-.67.08-.31-.15-1.3-.48-2.48-1.53a9.3 9.3 0 0 1-1.72-2.14c-.18-.31-.02-.48.14-.63.14-.14.31-.36.46-.54.15-.18.2-.31.31-.51.1-.2.05-.38-.03-.54-.08-.15-.69-1.66-.94-2.27-.25-.6-.5-.52-.69-.53h-.59c-.2 0-.54.08-.82.38-.28.31-1.07 1.05-1.07 2.56s1.1 2.97 1.25 3.17c.15.2 2.16 3.3 5.24 4.63.73.32 1.3.51 1.75.65.74.23 1.41.2 1.94.12.59-.09 1.82-.74 2.08-1.45.26-.72.26-1.33.18-1.45-.08-.13-.28-.2-.59-.34Z" />
-      </svg>
-    </a>
-  </body>
+  <!-- ============ 6. O QUE AVALIAMOS ============ -->
+  <section class="section dimensions" id="solucoes" aria-labelledby="dim-title">
+    <div class="container">
+      <header class="section-head center reveal">
+        <p class="eyebrow">O que avaliamos</p>
+        <h2 id="dim-title">Não avaliamos apenas se a comida estava boa.</h2>
+        <p class="lead">Medimos o serviço da recepção à conta e mostramos as falhas que podem estar <strong>custando vendas.</strong></p>
+      </header>
+
+      <ul class="dim-grid reveal">
+        <li class="dim-card">
+          <svg class="ico" aria-hidden="true"><use href="#i-chat"/></svg>
+          <h3>Recepção</h3>
+          <p>Tempo até a abordagem, espera por mesa, cordialidade e primeira impressão.</p>
+        </li>
+        <li class="dim-card">
+          <svg class="ico" aria-hidden="true"><use href="#i-handshake"/></svg>
+          <h3>Atendimento no salão</h3>
+          <p>Praça coberta no pico, atenção à mesa, runner e garçom que enxergam o cliente.</p>
+        </li>
+        <li class="dim-card">
+          <svg class="ico" aria-hidden="true"><use href="#i-sales"/></svg>
+          <h3>Sugestão de venda</h3>
+          <p>Entrada, bebida, sobremesa e café oferecidos: ticket médio que já estava na mesa.</p>
+        </li>
+        <li class="dim-card">
+          <svg class="ico" aria-hidden="true"><use href="#i-food"/></svg>
+          <h3>Cozinha e prato</h3>
+          <p>Tempo da comanda à passagem, ponto, montagem e temperatura contra a ficha técnica.</p>
+        </li>
+        <li class="dim-card">
+          <svg class="ico" aria-hidden="true"><use href="#i-store"/></svg>
+          <h3>Ambiente e limpeza</h3>
+          <p>Salão, mesa posta, banheiros abastecidos e conforto durante todo o serviço.</p>
+        </li>
+        <li class="dim-card">
+          <svg class="ico" aria-hidden="true"><use href="#i-card"/></svg>
+          <h3>Fechamento da conta</h3>
+          <p>Tempo para fechar, erro na comanda, taxa de serviço explicada e despedida.</p>
+        </li>
+      </ul>
+    </div>
+  </section>
+
+  <!-- ============ 7. PROVA SOCIAL ============ -->
+  <section class="proof" id="clientes" aria-labelledby="proof-title">
+    <div class="container">
+      <h2 id="proof-title" class="proof-title reveal">Empresas que querem enxergar sua operação de verdade usam o Observe+.</h2>
+      <ul class="logos reveal" aria-label="Logos de clientes">
+        <li><img src="/public/assets/clients/nativas.png" alt="Churrascaria Nativas" width="500" height="500" loading="lazy"></li>
+        <li><img src="/public/assets/clients/tecnotica.png" alt="Tecnótica" width="611" height="736" loading="lazy"></li>
+      </ul>
+    </div>
+  </section>
+
+  <!-- ============ 8. TIPOS DE CASA ============ -->
+  <section class="section segments" id="segmentos" aria-labelledby="seg-title">
+    <div class="container">
+      <header class="section-head reveal">
+        <p class="eyebrow">Para quem é</p>
+        <h2 id="seg-title">Feito para casas onde o serviço decide <span class="accent">se o cliente volta.</span></h2>
+      </header>
+
+      <ul class="seg-grid reveal">
+        <li class="seg"><img src="/public/assets/restaurantes/hero-restaurante.jpg" alt="Cliente almoçando em restaurante à la carte" loading="lazy" width="661" height="441"><svg class="seg-ico" aria-hidden="true"><use href="#i-food"/></svg><span>Restaurantes à la carte</span></li>
+        <li class="seg"><img src="/public/assets/restaurantes/cliente-avaliando.jpg" alt="Cliente fotografando o prato servido na mesa" loading="lazy" width="678" height="452"><svg class="seg-ico" aria-hidden="true"><use href="#i-food"/></svg><span>Churrascarias e rodízios</span></li>
+        <li class="seg"><img src="/public/assets/observe/case-03.webp" alt="Pagamento no balcão de uma cafeteria" loading="lazy" width="1200" height="800"><svg class="seg-ico" aria-hidden="true"><use href="#i-service"/></svg><span>Cafeterias e padarias</span></li>
+        <li class="seg"><img src="/public/assets/observe/seg-franquias.webp" alt="Unidade de uma rede de franquias" loading="lazy" width="1200" height="900"><svg class="seg-ico" aria-hidden="true"><use href="#i-network"/></svg><span>Redes e franquias</span></li>
+      </ul>
+    </div>
+  </section>
+
+  <!-- ============ 9. CASES ============ -->
+  <section class="section cases cases--single" id="cases" aria-labelledby="cases-title">
+    <div class="container">
+      <header class="section-head cases-head reveal">
+        <div>
+          <p class="eyebrow">Depoimento</p>
+          <h2 id="cases-title">O que diz quem <span class="accent">já usa.</span></h2>
+        </div>
+      </header>
+
+      <div class="carousel reveal" aria-roledescription="carrossel" aria-label="Depoimentos de clientes Observe+">
+        <div class="carousel-track" tabindex="0">
+
+          <article class="case" aria-roledescription="slide" aria-label="Depoimento 1 de 1">
+            <div class="case-media case-media--logo">
+              <img src="/public/assets/clients/nativas.png" alt="Churrascaria Nativas" loading="lazy" width="500" height="500">
+              <span class="case-tag">Churrascaria <i>|</i> Nativas SIA</span>
+            </div>
+            <div class="case-body">
+              <blockquote>“A análise criteriosa nos ajudou a <strong>ajustar processos e elevar o padrão de atendimento.</strong> Hoje temos mais segurança na execução.”<footer>Marcus · Gerente Geral, Churrascaria Nativas SIA</footer></blockquote>
+            </div>
+          </article>
+
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ============ 10. DIFERENCIAL ============ -->
+  <section class="section diff" aria-labelledby="diff-title">
+    <div class="container">
+      <header class="section-head center reveal">
+        <p class="eyebrow">O grande diferencial</p>
+        <h2 id="diff-title">Avaliação no app mostra o que o cliente diz.<br><span class="accent">O Observe+ mostra o que realmente aconteceu.</span></h2>
+      </header>
+
+      <div class="diff-grid reveal">
+        <div class="diff-card diff-survey">
+          <span class="diff-label">Pesquisa / NPS / avaliações</span>
+          <svg class="diff-ico" aria-hidden="true"><use href="#i-chat"/></svg>
+          <h3>Percepção declarada pelo cliente.</h3>
+          <p>O que o cliente lembra, sente e decide contar depois de ir embora. A maioria vai calada.</p>
+        </div>
+
+        <span class="diff-vs" aria-hidden="true">vs</span>
+
+        <div class="diff-card diff-observe">
+          <span class="diff-label"><svg aria-hidden="true"><use href="#logo-mark"/></svg>Observe+</span>
+          <ul class="diff-chain">
+            <li><svg class="ico" aria-hidden="true"><use href="#i-eye"/></svg>Serviço observado</li>
+            <li><svg class="ico" aria-hidden="true"><use href="#i-clock"/></svg>Tempo de cada etapa</li>
+            <li><svg class="ico" aria-hidden="true"><use href="#i-data"/></svg>Indicador por área</li>
+            <li><svg class="ico" aria-hidden="true"><use href="#i-target"/></svg>Oportunidade</li>
+          </ul>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ============ 11. CTA FINAL ============ -->
+  <section class="final-cta final-cta--form" id="contato" aria-labelledby="cta-title">
+    <div class="final-bg" aria-hidden="true">
+      <img src="/public/assets/restaurantes/og-restaurantes.jpg" alt="" loading="lazy" width="1200" height="630">
+    </div>
+    <span class="deco deco-ring" aria-hidden="true"></span>
+    <span class="deco deco-plus" aria-hidden="true"></span>
+    <span class="deco deco-dots" aria-hidden="true"></span>
+
+    <div class="container final-form-grid">
+      <div class="reveal">
+        <h2 id="cta-title">Pronto para descobrir onde seu restaurante está <span class="accent">perdendo vendas?</span></h2>
+        <p>Preencha o formulário e um especialista do Observe+ entra em contato para entender suas casas, turnos e o que hoje é crítico no serviço.</p>
+        <a class="final-link" href="https://wa.me/5561993715292?text=Ol%C3%A1%21%20Quero%20descobrir%20onde%20meu%20restaurante%20est%C3%A1%20perdendo%20vendas." target="_blank" rel="noopener noreferrer">Prefere o WhatsApp? Fale com um especialista</a>
+      </div>
+
+      <div class="kommo-form" id="formulario">
+      <!-- Formulário Kommo (CRM). O script insere o formulário logo antes da tag
+           amoforms_script_1734095: o código precisa ficar dentro deste bloco. -->
+      <p class="kommo-form__loading">Carregando formulário…</p>
+      <script>!function(a,m,o,c,r,m){a[o+c]=a[o+c]||{setMeta:function(p){this.params=(this.params||[]).concat([p])}},a[o+r]=a[o+r]||function(f){a[o+r].f=(a[o+r].f||[]).concat([f])},a[o+r]({id:"1734095",hash:"04a0a9cda52e3f6789d1bad640123783",locale:"pt"}),a[o+m]=a[o+m]||function(f,k){a[o+m].f=(a[o+m].f||[]).concat([[f,k]])}}(window,0,"amo_forms_","params","load","loaded");</script><script id="amoforms_script_1734095" async="async" charset="utf-8" src="https://forms.kommo.com/forms/assets/js/amoforms.js?1792506232"></script>
+      </div>
+    </div>
+  </section>
+</main>
+
+<!-- ============ 12. RODAPÉ ============ -->
+<footer class="site-footer">
+  <div class="container footer-grid">
+    <div class="footer-brand">
+      <a class="brand" href="#topo" aria-label="Observe+ — voltar ao topo">
+        <svg class="brand-mark" aria-hidden="true"><use href="#logo-mark"/></svg>
+        <span class="brand-text">
+          <span class="brand-name">Observe<span class="plus">+</span></span>
+          <span class="brand-tagline">Enxergue o que está custando vendas.</span>
+        </span>
+      </a>
+      <ul class="social">
+        <li><a href="https://www.instagram.com/observall" target="_blank" rel="noopener noreferrer" aria-label="Instagram"><svg class="ico" aria-hidden="true"><use href="#i-instagram"/></svg></a></li>
+        <li><a href="https://www.youtube.com/@Observall" target="_blank" rel="noopener noreferrer" aria-label="YouTube"><svg class="ico" aria-hidden="true"><use href="#i-youtube"/></svg></a></li>
+        <li><a class="is-whatsapp" href="https://wa.me/5561993715292" target="_blank" rel="noopener noreferrer" aria-label="WhatsApp"><svg class="ico" aria-hidden="true"><use href="#i-whatsapp"/></svg></a></li>
+      </ul>
+    </div>
+    <nav class="footer-col" aria-label="Soluções">
+      <h3>Soluções</h3>
+      <ul>
+        <li><a href="#solucoes">O que avaliamos</a></li>
+        <li><a href="#plataforma">Plataforma</a></li>
+        <li><a href="#como-funciona">Como funciona</a></li>
+        <li><a href="/diagnostico-gratuito">Diagnóstico gratuito</a></li>
+      </ul>
+    </nav>
+    <nav class="footer-col" aria-label="Observe+">
+      <h3>Observe+</h3>
+      <ul>
+        <li><a href="/">Todos os segmentos</a></li>
+        <li><a href="#cases">Cases</a></li>
+        <li><a href="#contato">Fale com um especialista</a></li>
+        <li><a href="mailto:contato@observemais.com.br">contato@observemais.com.br</a></li>
+      </ul>
+    </nav>
+    <nav class="footer-col" id="conteudos" aria-label="Conteúdos">
+      <h3>Conteúdos</h3>
+      <ul>
+        <li><a href="/blog">Blog</a></li>
+        <li><a href="https://www.youtube.com/@Observall" target="_blank" rel="noopener noreferrer">Vídeos</a></li>
+        <li><span class="soon">Materiais <em>em breve</em></span></li>
+      </ul>
+    </nav>
+  </div>
+  <div class="container"><div class="footer-bottom">
+    <p>© <span data-year>2026</span> Observe+. Todos os direitos reservados.</p>
+    <ul>
+      <li><a href="#topo">Voltar ao topo ↑</a></li>
+    </ul>
+  </div></div>
+</footer>
+
+<!-- ============ VÍDEO ============ -->
+<div class="video-modal" id="video-modal" role="dialog" aria-modal="true" aria-label="Vídeo: como funciona o Observe+" hidden>
+  <div class="video-modal__backdrop" data-video-close></div>
+  <button class="video-modal__close" type="button" data-video-close aria-label="Fechar vídeo"><svg class="ico" aria-hidden="true"><use href="#i-close"/></svg></button>
+  <div class="video-modal__frame"></div>
+</div>
+
+<a class="whatsapp-float" href="https://wa.me/5561999555580?text=Ol%C3%A1%2C%20vim%20pela%20p%C3%A1gina%20de%20restaurantes%20do%20Observe%2B." target="_blank" rel="noopener noreferrer" aria-label="Conversar com o Observe+ no WhatsApp"><svg aria-hidden="true"><use href="#i-whatsapp"/></svg></a>
+
+</body>
 </html>

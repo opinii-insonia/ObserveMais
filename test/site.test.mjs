@@ -1,219 +1,395 @@
 import assert from 'node:assert/strict';
 import { spawn } from 'node:child_process';
-import { access, readFile } from 'node:fs/promises';
+import { access, readFile, stat } from 'node:fs/promises';
+import { Readable } from 'node:stream';
 import test from 'node:test';
 
 const read = (file) => readFile(new URL(`../${file}`, import.meta.url), 'utf8');
 
-test('a landing fala diretamente com supermercados e cliente oculto', async () => {
+const LANDINGS = ['index.html', 'restaurantes/index.html', 'diagnostico-gratuito/index.html'];
+const readLandings = () => Promise.all(LANDINGS.map(read));
+
+// Seções do modelo, na ordem em que aparecem. Restaurantes espelha a home.
+const SECOES_DO_MODELO = [
+  'class="hero"',
+  'class="section pain"',
+  'id="como-funciona"',
+  'id="plataforma"',
+  'id="solucoes"',
+  'id="clientes"',
+  'id="segmentos"',
+  'id="cases"',
+  'class="section diff"',
+  'id="contato"',
+];
+
+function assertOrdem(html, marcadores, pagina) {
+  let anterior = -1;
+  for (const marcador of marcadores) {
+    const atual = html.indexOf(marcador);
+    assert.ok(atual > -1, `${pagina}: faltou a seção ${marcador}`);
+    assert.ok(atual > anterior, `${pagina}: ${marcador} está fora de ordem`);
+    anterior = atual;
+  }
+}
+
+test('a home segue a estrutura e a copy do modelo Observe+', async () => {
   const html = await read('index.html');
 
-  assert.match(html, /Cliente oculto para supermercados com IA/i);
-  assert.match(html, /A venda que sua loja perdeu hoje não vai aparecer em nenhum relatório\./);
+  assert.match(html, /<title>Observe\+ \| Enxergue o que está custando vendas<\/title>/);
+  assert.match(html, /Descubra onde sua operação está <span class="accent">perdendo vendas\.<\/span>/);
+  assert.match(html, /Você sabe por que alguns clientes entram, mas <span class="accent">não compram\?<\/span>/);
+  assert.match(html, /Pesquisa mostra o que o cliente diz\./);
+  assertOrdem(html, SECOES_DO_MODELO, 'home');
 
-  // O alvo é o dono e o diretor de operação. A linguagem precisa ser a da rede,
-  // com cena concreta — não a de consultoria, nem a de analista de estoque.
-  for (const termo of ['venda perdida', 'gôndola vazia', 'depósito', 'prateleira', 'hortifrúti', 'empacotador', 'ticket médio', 'padaria']) {
-    assert.ok(html.includes(termo), `a landing perdeu o termo de gestão "${termo}"`);
-  }
-
-  // Jargão de inventário afasta quem decide a compra do serviço.
-  for (const jargao of ['curva A', 'PVPS', 'etiqueta órfã', 'SKU', 'encarte', 'tabloide']) {
-    assert.ok(!html.includes(jargao), `"${jargao}" é jargão de estoque, não linguagem de gestão`);
-  }
-  assert.match(html, /Evidências por setor viram[\s\S]*prioridade por loja/i);
-  assert.match(html, /Cliente oculto com roteiro, evidência e[\s\S]*reunião de priorização/i);
-  assert.match(html, /Dúvidas Frequentes/i);
-  assert.match(html, /wa\.me\/5561993715292/);
-});
-
-test('comunica a IA como diferencial, com leitura de dados e entrega no WhatsApp', async () => {
-  const html = await read('index.html');
-
-  assert.match(html, /class="hero-ai"/);
-  assert.match(html, /manda a prioridade da semana no seu WhatsApp/i);
-  assert.match(html, /Uma rede de dez lojas gera milhares de itens checados por ciclo/i);
-  assert.match(html, /interpreta e prioriza\. A visita em loja continua sendo feita por avaliadores humanos\./);
-  assert.doesNotMatch(html, /IA substitui|IA garante|diagnóstico automático sem visita/i);
-});
-
-test('toda menção a IA recebe o destaque em gradiente', async () => {
-  const [html, css] = await Promise.all([read('index.html'), read('styles.css')]);
-
-  assert.match(css, /\.ia\s*\{[^}]*color:\s*var\(--ia-solid\)/s, 'precisa de cor de fallback antes do gradiente');
-  assert.match(css, /background-clip:\s*text/);
-  assert.match(css, /\.ia-mark\s*\{[^}]*var\(--ia-gradient\)/s);
-  assert.match(css, /\.site-footer \.ia\s*\{/, 'fundo escuro precisa de gradiente próprio');
-
-  // O gradiente é roxo -> azul; não pode voltar a puxar para o verde da marca.
-  assert.match(css, /--ia-gradient:\s*linear-gradient\([^)]*#7C3AED[^)]*#2E9BF5/i);
-  assert.doesNotMatch(css, /--ia-gradient[^;]*#0FA958/i);
-
-  // Nenhuma menção textual a IA pode ficar sem o destaque.
-  const body = html.slice(html.indexOf('<body>')).replace(/<script[\s\S]*?<\/script>/g, '');
-  const plain = body.replace(/<span[^>]*class="[^"]*\bia(?:-mark)?\b[^"]*"[^>]*>[\s\S]*?<\/span>/g, '');
-  const leftovers = [...plain.matchAll(/>[^<>]*\b(IA|intelig[êe]ncia artificial)\b/gi)].map((m) => m[0].trim());
-
-  assert.deepEqual(leftovers, [], `menções a IA sem destaque: ${leftovers.join(' | ')}`);
-});
-
-test('o IOV aparece como mockup próprio das três visões', async () => {
-  const [html, css] = await Promise.all([read('index.html'), read('styles.css')]);
-
-  assert.match(html, /class="iovpanel reveal"/);
-  assert.match(html, /O que o auditor vê/);
-  assert.match(html, /O que o cliente fala/);
-  assert.match(html, /O que a liderança reporta/);
-  assert.match(html, /Boa execução, mas baixa percepção do cliente/);
-  assert.match(html, /class="solutions-divergence reveal"/);
-  assert.match(css, /\.iovpanel\s*\{/);
-
-  // Substitui a imagem antiga e não pode citar cliente real.
-  assert.doesNotMatch(html, /diagnostico-tres-visoes-supermercado-v1\.png/);
-  const mock = html.match(/<figure class="iovpanel[\s\S]*?<\/figure>/)?.[0];
-  assert.ok(mock, 'o mockup do IOV deveria existir');
-  for (const brand of ['big box', 'ultrabox', 'ultra box', 'observe+']) {
-    assert.ok(!mock.toLowerCase().includes(brand), `o mockup não deveria citar "${brand}"`);
+  // Os oito segmentos do modelo.
+  for (const segmento of ['Varejo', 'Supermercados', 'Óticas', 'Alimentação', 'Academias', 'Clínicas', 'Franquias', 'Serviços']) {
+    assert.match(html, new RegExp(`<span>${segmento}</span>`), `faltou o segmento ${segmento}`);
   }
 });
 
-test('padroniza o CTA de conversão, sem barra flutuante', async () => {
-  const [html, css, js] = await Promise.all([read('index.html'), read('styles.css'), read('script.js')]);
-  const ctaLabels = [...html.matchAll(/>([^<>]*Agendar diagnóstico[^<>]*)</g)].map((match) => match[1].trim());
+test('as três landings usam o mesmo sistema visual do modelo', async () => {
+  const [css, ...paginas] = await Promise.all([read('site.css'), ...LANDINGS.map(read)]);
 
-  assert.ok(ctaLabels.length >= 6, `esperava ao menos 6 CTAs padronizados, achei ${ctaLabels.length}`);
+  assert.match(css, /--navy: #0B1520;/);
+  assert.match(css, /--orange: #FF6A00;/);
+  assert.match(css, /--font: "Montserrat"/);
 
-  assert.doesNotMatch(html, /Quero diagnosticar minha loja/i);
-  assert.doesNotMatch(html, /Encontrar perdas silenciosas da loja/i);
-  assert.doesNotMatch(html, /Conhecer resultados em supermercados/i);
+  paginas.forEach((html, i) => {
+    assert.match(html, /<link rel="stylesheet" href="\/site\.css">/, `${LANDINGS[i]} sem site.css`);
+    assert.match(html, /<script src="\/site\.js" defer><\/script>/, `${LANDINGS[i]} sem site.js`);
+    assert.match(html, /family=Montserrat/);
+    assert.match(html, /<symbol id="logo-mark"/);
+    assert.match(html, /class="brand-name">Observe<span class="plus">\+<\/span>/);
+    // O visual anterior não pode vazar para as landings.
+    assert.doesNotMatch(html, /styles\.css|script\.js|Poppins|#25D670/);
+  });
 
-  // A barra flutuante foi removida: o único elemento fixo é o botão do WhatsApp.
-  for (const source of [html, css, js]) {
-    assert.doesNotMatch(source, /cta-dock/);
-  }
-  assert.match(html, /class="whatsapp-float"/);
+  assert.match(await read('favicon.svg'), /#FF6A00/);
 });
 
-test('responde por que Observe Mais logo depois da hero', async () => {
-  const [html, css] = await Promise.all([read('index.html'), read('styles.css')]);
-
-  // O bloco precisa ser a primeira seção depois da hero: é a resposta que sustenta a página.
-  const sections = [...html.matchAll(/<section[^>]*\b(?:class="[^"]*"|id="[^"]*")[^>]*>/g)].map((m) => m[0]);
-  assert.match(sections[0], /class="hero"/);
-  assert.match(sections[1], /id="diferenciais"/);
-  assert.match(html, /Por que Observe Mais e não outra empresa de cliente oculto\?/i);
-  assert.match(html, /class="gap-callout[^"]*"/);
-});
-
-test('a abertura dos diferenciais mostra os três sinais convergindo no IOV', async () => {
-  const [html, css] = await Promise.all([read('index.html'), read('styles.css')]);
-
-  const palco = html.match(/<div class="iov-stage[\s\S]*?<\/ol>/)?.[0];
-  assert.ok(palco, 'o palco do IOV deveria existir');
-
-  // O título é "3 sinais." + "IOV.", sem o numeral antes de IOV.
-  assert.match(palco, /<h3 class="iov-title">3 sinais\.<span>IOV\.<\/span><\/h3>/);
-  assert.doesNotMatch(palco, /1\s*IOV/);
-
-  assert.match(palco, /Misture\. Veja\. Decida\./);
-  assert.match(palco, /public\/assets\/iov\/tres-sinais-iov\.jpg/);
-  assert.match(palco, /alt="[^"]*IOV[^"]*"/, 'a arte precisa de alt descrevendo o IOV');
-
-  const etapas = [...palco.matchAll(/<li>([^<]+)<\/li>/g)].map((m) => m[1]);
-  assert.deepEqual(etapas, ['Dados conectados', 'Analisando sinais', 'Gerando IOV', 'Decisão em tempo real']);
-
-  assert.match(css, /\.iov-art img\s*\{/);
-});
-
-test('o índice se chama IOV em toda a página, sem resquício de Score', async () => {
-  const fontes = await Promise.all([
+test('a vertical de restaurantes espelha a home com o vocabulário do salão', async () => {
+  const [resto, index, build, sitemap, vercel] = await Promise.all([
+    read('restaurantes/index.html'),
     read('index.html'),
-    read('styles.css'),
-    read('script.js'),
-    read('simulador-interno-a7f39c2b.html'),
+    read('scripts/build.mjs'),
+    read('sitemap.xml'),
+    read('vercel.json'),
   ]);
 
-  for (const fonte of fontes) {
-    assert.doesNotMatch(fonte, /score/i, 'sobrou referência a Score');
+  assertOrdem(resto, SECOES_DO_MODELO, 'restaurantes');
+  assert.match(resto, /<title>Cliente oculto para restaurantes \| Observe\+<\/title>/);
+  assert.match(resto, /Descubra onde seu restaurante está <span class="accent">perdendo vendas\.<\/span>/);
+  assert.match(resto, /rel="canonical" href="https:\/\/observemais\.com\.br\/restaurantes"/);
+
+  // Linguagem de quem opera a casa, não de consultoria.
+  for (const termo of ['comanda', 'passagem', 'ficha técnica', 'praça', 'em 86', 'ticket médio', 'sobremesa']) {
+    assert.ok(resto.includes(termo), `a vertical perdeu o termo de operação "${termo}"`);
+  }
+  for (const termo of ['supermercado', 'gôndola', 'Big Box', 'Ultrabox', 'bigbox']) {
+    assert.ok(!resto.toLowerCase().includes(termo.toLowerCase()), `sobrou "${termo}" na página de restaurantes`);
   }
 
-  const html = fontes[0];
-  assert.match(html, /IOV — Índice de Operação Viva/);
-  assert.match(html, /que constroem o IOV/);
-  assert.match(html, /Um IOV, não três relatórios/);
+  // A home não linka a vertical: só se chega por URL.
+  assert.doesNotMatch(index, /restaurante/i);
+
+  assert.match(build, /'\.\.\/restaurantes\/'/);
+  assert.match(sitemap, /<loc>https:\/\/observemais\.com\.br\/restaurantes<\/loc>/);
+  assert.match(vercel, /"source": "\/restaurante"/, 'o singular precisa redirecionar para o plural');
 });
 
-test('modela três visões que viram prioridade e deixa a IA depois do diagnóstico', async () => {
-  const html = await read('index.html');
-  const modules = [...html.matchAll(/<article[^>]+data-iov-module="([^"]+)"/g)].map((match) => match[1]);
-  const flowSteps = [...html.matchAll(/data-iov-step="([^"]+)"/g)].map((match) => match[1]);
+test('cartão de compartilhamento completo e absoluto nas três landings', async () => {
+  const paginas = await readLandings();
 
-  assert.deepEqual(modules, ['auditor-profissional', 'cliente-real', 'operacao-interna']);
-  assert.deepEqual(flowSteps, ['tres-visoes', 'cruzamento', 'iov', 'plano-de-acao']);
-  assert.match(html, /Evidências por setor/);
-  assert.match(html, /Divergências/);
-  assert.match(html, /Prioridade por loja/);
-  assert.match(html, /Plano de correção/);
-  assert.match(html, /class="iov-ai[^"]*"[\s\S]*Inteligência Artificial/i);
-  assert.doesNotMatch(html, /data-iov-module="ia"/i);
-});
+  for (const [i, html] of paginas.entries()) {
+    assert.match(html, /<link rel="canonical" href="https:\/\/observemais\.com\.br\//);
+    assert.match(html, /<link rel="icon" type="image\/svg\+xml" href="\/favicon\.svg">/);
+    assert.match(html, /<link rel="apple-touch-icon"/);
+    assert.match(html, /name="robots" content="index, follow/);
+    assert.match(html, /property="og:image:width" content="1200"/);
+    assert.match(html, /property="og:image:height" content="630"/);
+    assert.match(html, /name="twitter:card" content="summary_large_image"/);
 
-test('mantém SEO on-page alinhado à vertical sem prometer ranking', async () => {
-  const html = await read('index.html');
-
-  assert.match(html, /<title>Cliente oculto para supermercados com IA \| Observe Mais<\/title>/);
-  assert.match(html, /name="description"[\s\S]*Cliente oculto para supermercados com IA/);
-  assert.match(html, /property="og:image"/);
-  assert.match(html, /property="og:title" content="Observe Mais — Cliente oculto para supermercados com IA"/);
-  assert.doesNotMatch(html, /primeira posição|ranking garantido|tráfego garantido/i);
-});
-
-test('entrega favicon, canonical e cartão de compartilhamento completos', async () => {
-  const html = await read('index.html');
-
-  assert.match(html, /<link rel="canonical" href="https:\/\/observemais\.com\.br\/" \/>/);
-  assert.match(html, /<link rel="icon" href="\/favicon\.svg" type="image\/svg\+xml" \/>/);
-  assert.match(html, /<link rel="apple-touch-icon"/);
-  assert.match(html, /name="robots" content="index, follow/);
-
-  for (const tag of ['og:site_name', 'og:locale', 'og:type', 'og:url', 'og:title', 'og:description', 'og:image', 'og:image:width', 'og:image:height', 'og:image:alt']) {
-    assert.match(html, new RegExp(`property="${tag}"`), `faltou ${tag}`);
-  }
-
-  for (const tag of ['twitter:card', 'twitter:title', 'twitter:description', 'twitter:image']) {
-    assert.match(html, new RegExp(`name="${tag}"`), `faltou ${tag}`);
-  }
-
-  assert.match(html, /name="twitter:card" content="summary_large_image"/);
-
-  // og:image e canonical precisam ser absolutos: crawler não resolve caminho relativo.
-  const absolute = [...html.matchAll(/(?:property="og:image"|name="twitter:image"|rel="canonical")[^>]*?(?:content|href)="([^"]+)"/g)].map((m) => m[1]);
-  assert.ok(absolute.length >= 3);
-  for (const url of absolute) {
-    assert.match(url, /^https:\/\/observemais\.com\.br\//, `URL de compartilhamento não absoluta: ${url}`);
+    for (const tag of ['og:image', 'twitter:image']) {
+      const url = html.match(new RegExp(`(?:property|name)="${tag}" content="([^"]+)"`))?.[1];
+      assert.ok(url, `${LANDINGS[i]}: faltou ${tag}`);
+      assert.match(url, /^https:\/\/observemais\.com\.br\/public\/assets\/.+\.jpg$/);
+      // WhatsApp e Facebook costumam desistir da prévia acima de ~600KB.
+      const info = await stat(new URL(`../${url.replace('https://observemais.com.br/', '')}`, import.meta.url));
+      assert.ok(info.size < 600 * 1024, `${url} tem ${Math.round(info.size / 1024)}KB`);
+    }
   }
 });
 
-test('mantém as imagens leves o bastante para prévia e celular', async () => {
-  const { stat } = await import('node:fs/promises');
-  const html = await read('index.html');
+test('todas as imagens das landings resolvem localmente, com alt e peso controlado', async () => {
+  const paginas = await readLandings();
 
-  // WhatsApp e Facebook costumam desistir da prévia acima de ~600KB.
-  const og = await stat(new URL('../public/assets/og-observe-mais-tres-visoes.jpg', import.meta.url));
-  assert.ok(og.size < 600 * 1024, `og:image tem ${Math.round(og.size / 1024)}KB, acima do limite de prévia`);
-  assert.match(html, /property="og:image:type" content="image\/jpeg"/);
-  assert.match(html, /property="og:image:width" content="1200"/);
-  assert.match(html, /property="og:image:height" content="630"/);
+  for (const [i, html] of paginas.entries()) {
+    const fontes = [...html.matchAll(/(?:src|srcset)="(\/public\/assets\/[^"]+)"/g)].map((m) => m[1]);
+    assert.ok(fontes.length >= 4, `${LANDINGS[i]}: esperava ao menos 4 imagens, achei ${fontes.length}`);
 
-  // Fotografia entra como JPEG: PNG dobrava o peso da landing.
-  const fotos = [...html.matchAll(/src="(public\/assets\/reais\/[^"]+)"/g)].map((m) => m[1]);
-  assert.ok(fotos.length >= 3);
-  for (const foto of fotos) {
-    assert.match(foto, /\.jpg$/, `foto de operação deveria ser JPEG: ${foto}`);
-    const info = await stat(new URL(`../${foto}`, import.meta.url));
-    assert.ok(info.size < 250 * 1024, `${foto} tem ${Math.round(info.size / 1024)}KB`);
+    for (const fonte of fontes) {
+      // Caminho absoluto: /restaurantes e /diagnostico-gratuito não vivem na raiz.
+      assert.match(fonte, /^\/public\/assets\/[a-z0-9/_.-]+$/, `caminho de asset inseguro: ${fonte}`);
+      const info = await stat(new URL(`..${fonte}`, import.meta.url));
+      assert.ok(info.size < 250 * 1024, `${fonte} tem ${Math.round(info.size / 1024)}KB`);
+    }
+
+    for (const tag of html.match(/<img[^>]*>/g) || []) {
+      assert.match(tag, /\salt="[^"]*"/, `${LANDINGS[i]}: imagem sem alt: ${tag.slice(0, 90)}`);
+    }
   }
 });
+
+test('onde o modelo tinha lacuna, entram dados reais da Observe+', async () => {
+  const [index, resto, diag] = await readLandings();
+
+  // Nenhum marcador de preenchimento do modelo pode ir ao ar.
+  for (const html of [index, resto, diag]) {
+    assert.doesNotMatch(html, /logo-slot|Logo do cliente|NOME\.svg|\bXX? ?%|XX unidades|class="stats"/);
+    assert.doesNotMatch(html, /href="#"/, 'link vazio herdado do modelo');
+  }
+
+  // Só clientes confirmados.
+  for (const html of [index, diag]) {
+    for (const logo of ['bigbox', 'ultrabox', 'nativas', 'tecnotica']) {
+      assert.match(html, new RegExp(`/public/assets/clients/${logo}\\.png`), `faltou o logo ${logo}`);
+    }
+  }
+  for (const html of [index, resto, diag]) {
+    assert.doesNotMatch(html, /lojas-mel|goldko|derela/i, 'logo de cliente não confirmado');
+  }
+  assert.match(index, /Bruna Reges/);
+  assert.match(index, /Márcia Matos/);
+  assert.match(index, /Marcus · Gerente Geral/);
+  assert.match(resto, /Churrascaria Nativas SIA/);
+
+  // Contato, redes e vídeo institucional.
+  for (const html of [index, resto]) {
+    assert.match(html, /mailto:contato@observemais\.com\.br/);
+    assert.match(html, /https:\/\/www\.instagram\.com\/observall/);
+    assert.match(html, /https:\/\/www\.youtube\.com\/@Observall/);
+    assert.match(html, /wa\.me\/5561993715292/);
+    assert.match(html, /class="whatsapp-float" href="https:\/\/wa\.me\/5561999555580/);
+    assert.match(html, /data-video="yuGAr_NQis8"/);
+    assert.match(html, /<a href="\/blog">/);
+  }
+  assert.match(await read('site.js'), /youtube-nocookie\.com\/embed/);
+});
+
+test('nada de exemplo fictício: só entra o que é real', async () => {
+  const [index, resto, diag] = await readLandings();
+
+  for (const html of [index, resto, diag]) {
+    // Painel com números inventados, cases ilustrativos e resultados deduzidos saíram.
+    assert.doesNotMatch(html, /ilustrativ|Cenário|fictíci/i);
+    assert.doesNotMatch(html, /class="devices|class="report-card|class="case-flow|app-card/);
+  }
+
+  // Depoimentos: texto real, com o logo real do cliente no lugar de foto de banco de imagem.
+  assert.equal([...index.matchAll(/<article class="case"/g)].length, 3);
+  assert.equal([...resto.matchAll(/<article class="case"/g)].length, 1);
+  for (const html of [index, resto]) {
+    for (const media of html.match(/<div class="case-media[^"]*">\s*<img src="[^"]+"/g) || []) {
+      assert.match(media, /case-media--logo">\s*<img src="\/public\/assets\/clients\//);
+    }
+  }
+
+  for (const html of [index, resto, diag]) {
+    assert.doesNotMatch(html, /ROI garantido|aumento de vendas garantido|lucro garantido|líder de mercado|melhor empresa/i);
+    assert.doesNotMatch(html, /id="roi-form"|simulador-interno/);
+  }
+});
+
+test('home e restaurantes usam o formulário da Kommo, e todo CTA leva até ele', async () => {
+  const [index, resto, js, css] = await Promise.all([
+    read('index.html'),
+    read('restaurantes/index.html'),
+    read('site.js'),
+    read('site.css'),
+  ]);
+
+  for (const html of [index, resto]) {
+    // Código da Kommo exatamente uma vez, dentro do bloco #contato: o script
+    // insere o formulário logo antes da própria tag.
+    const contato = html.match(/<section class="final-cta final-cta--form" id="contato"[\s\S]*?<\/section>/)?.[0];
+    assert.ok(contato, 'faltou o bloco #contato');
+    assert.match(contato, /<div class="kommo-form" id="formulario">[\s\S]*a\[o\+r\]\(\{id:"1734095",hash:"04a0a9cda52e3f6789d1bad640123783",locale:"pt"\}\)[\s\S]*<script id="amoforms_script_1734095" async="async" charset="utf-8" src="https:\/\/forms\.kommo\.com\/forms\/assets\/js\/amoforms\.js\?1792506232"><\/script>\s*<\/div>/);
+    assert.equal([...html.matchAll(/<script id="amoforms_script_1734095"/g)].length, 1);
+
+    // O modal antigo saiu: nenhum CTA pode abrir formulário que não existe.
+    assert.doesNotMatch(html, /data-lead-flow|id="lead-flow"|lead-step/);
+    assert.ok([...html.matchAll(/href="#contato"/g)].length >= 5, 'os CTAs precisam levar ao formulário');
+  }
+
+  assert.doesNotMatch(js, /leadFlow|mostrarEtapa/);
+  assert.match(css, /\.kommo-form iframe \{ max-width: 100% !important; \}/, 'a Kommo fixa 440px no celular');
+});
+
+test('o lead segue para a planilha sem credencial no navegador', async () => {
+  const [api, appsScript, js] = await Promise.all([
+    read('api/lead-capture.js'),
+    read('scripts/planilha-leads.gs'),
+    read('site.js'),
+  ]);
+
+  assert.match(api, /SHEETS_WEBHOOK_URL/);
+  assert.match(api, /SHEETS_WEBHOOK_SECRET/);
+  assert.match(api, /function enviarParaPlanilha/);
+
+  // Falha na planilha não pode derrubar a captura: o lead já está no Blob.
+  assert.match(api, /catch[\s\S]*?return 'falhou'/);
+
+  // Apps Script devolve 200 mesmo recusando; o corpo precisa ser inspecionado.
+  assert.match(api, /dados\?\.ok === true \|\| dados\?\.status === 'success'/);
+
+  assert.match(appsScript, /function doPost/);
+  assert.match(appsScript, /dados\.segredo !== SEGREDO/);
+
+  // O segredo e a URL do Apps Script nunca podem aparecer no frontend.
+  assert.doesNotMatch(js, /SHEETS_WEBHOOK|script\.google\.com|docs\.google\.com|process\.env/);
+
+  // O caminho direto para o Zapier existe, e um destino caído não perde o lead.
+  assert.match(js, /const ZAPIER_WEBHOOK = /);
+  assert.match(js, /return zapier === true \|\| api === true/);
+  assert.match(js, /mode: 'no-cors'/);
+});
+
+test('o diagnóstico manda os campos no primeiro nível, prontos para a planilha', async () => {
+  const js = await read('site.js');
+  const payloads = [...js.matchAll(/const payload = \{[\s\S]*?\n\s*\};/g)].map((m) => m[0]);
+
+  assert.equal(payloads.length, 1, 'só o diagnóstico envia pelo site; o contato é da Kommo');
+  const [payload] = payloads;
+  for (const campo of ['source', 'tipo', 'origem', 'createdAt', 'segmento', 'localizacao', 'cidade', 'unidades', 'qualificado', 'motivo']) {
+    assert.match(payload, new RegExp(`^\\s+${campo}[:,]`, 'm'), `${campo} fora do primeiro nível`);
+  }
+  assert.match(payload, /\.\.\.lead,/);
+  assert.match(js, /const lead = \{\s*nome:[\s\S]*?empresa:[\s\S]*?email:[\s\S]*?whatsapp:/);
+});
+
+test('diagnóstico gratuito: aprova só Brasília/DF com 4 ou mais unidades', async () => {
+  const { avaliarDiagnostico } = await import('../api/lead-capture.js');
+
+  assert.equal(avaliarDiagnostico({ localizacao: 'df', unidades: 4 }).qualificado, true);
+  assert.equal(avaliarDiagnostico({ localizacao: 'df', unidades: 12 }).qualificado, true);
+  assert.equal(avaliarDiagnostico({ localizacao: 'df', unidades: 3 }).qualificado, false);
+  assert.equal(avaliarDiagnostico({ localizacao: 'entorno', unidades: 10 }).qualificado, false);
+  assert.equal(avaliarDiagnostico({ localizacao: 'outra', unidades: 1 }).motivo, 'fora de Brasília/DF e menos de 4 unidades');
+
+  // A tela usa a mesma regra que a planilha.
+  const js = await read('site.js');
+  assert.match(js, /regiaoAtendida: 'df',/);
+  assert.match(js, /unidadesMinimas: 4,/);
+  assert.match(await read('api/lead-capture.js'), /const DIAGNOSTICO_UNIDADES_MINIMAS = 4;/);
+});
+
+test('diagnóstico gratuito: a API grava todos e recalcula a aprovação no servidor', async () => {
+  const { default: handler } = await import('../api/lead-capture.js');
+  delete process.env.SHEETS_WEBHOOK_URL;
+  delete process.env.BLOB_READ_WRITE_TOKEN;
+
+  async function enviar(qualificacao, extras = {}) {
+    const corpo = JSON.stringify({
+      source: 'observe-mais-diagnostico-gratuito',
+      tipo: 'diagnostico-gratuito',
+      lead: { nome: 'Lead Teste', empresa: 'Rede Teste', whatsapp: '(61) 99999-9999', email: 'lead@example.com', cargo: 'Diretor' },
+      qualificacao,
+      ...extras,
+    });
+    const request = Readable.from([corpo]);
+    request.method = 'POST';
+    request.headers = {};
+
+    let status;
+    let json;
+    const response = {
+      setHeader() {},
+      status(code) { status = code; return this; },
+      json(dados) { json = dados; },
+    };
+    await handler(request, response);
+    return { status, json };
+  }
+
+  const aprovado = await enviar({ segmento: 'Varejo', localizacao: 'df', unidades: '6' });
+  assert.equal(aprovado.status, 200);
+  assert.equal(aprovado.json.ok, true);
+  assert.equal(aprovado.json.qualificado, true);
+
+  // Quem não tem o perfil também é cadastrado; só não é aprovado.
+  const fora = await enviar({ segmento: 'Varejo', localizacao: 'outra', cidade: 'Goiânia - GO', unidades: '9' });
+  assert.equal(fora.status, 200);
+  assert.equal(fora.json.qualificado, false);
+
+  // O navegador não decide a aprovação: valor forjado é ignorado.
+  const forjado = await enviar({ localizacao: 'df', unidades: '1' }, { qualificado: 'sim' });
+  assert.equal(forjado.json.qualificado, false);
+});
+
+test('diagnóstico gratuito: página de anúncio com formulário curto e respostas', async () => {
+  const [html, build, sitemap, vercel, appsScript] = await Promise.all([
+    read('diagnostico-gratuito/index.html'),
+    read('scripts/build.mjs'),
+    read('sitemap.xml'),
+    read('vercel.json'),
+    read('scripts/planilha-leads.gs'),
+  ]);
+
+  assert.match(html, /<title>Diagnóstico gratuito de cliente oculto \| Observe\+<\/title>/);
+  assert.match(html, /rel="canonical" href="https:\/\/observemais\.com\.br\/diagnostico-gratuito"/);
+
+  // Página de anúncio: a primeira seção já traz o formulário, e não há menu para dispersar.
+  const sections = [...html.matchAll(/<section class="([^"]+)"/g)].map((m) => m[1]);
+  assert.equal(sections[0], 'dx-hero');
+  const primeira = html.match(/<section class="dx-hero"[\s\S]*?<\/section>/)[0];
+  assert.match(primeira, /<form id="diagnostico-form" novalidate/);
+  assert.doesNotMatch(html, /class="main-nav"|class="nav-toggle"/);
+
+  // Formulário único e curto.
+  assert.doesNotMatch(html, /data-panel|form-steps/);
+  for (const campo of ['nome', 'whatsapp', 'email', 'empresa', 'segmento', 'localizacao', 'unidades', 'cidade']) {
+    assert.match(html, new RegExp(`name="${campo}"`), `faltou o campo ${campo}`);
+  }
+  const form = html.match(/<form id="diagnostico-form"[\s\S]*?<\/form>/)[0];
+  assert.ok([...form.matchAll(/ name="/g)].length <= 8, 'o formulário do anúncio precisa ser curto');
+  assert.match(html, /<option value="df">Brasília \/ Distrito Federal<\/option>/);
+  assert.match(html, /id="diagnostico-aprovado"/);
+  assert.match(html, /id="diagnostico-cadastrado"/);
+  assert.match(html, /Brasília \(DF\) com 4 ou mais unidades/);
+  assert.doesNotMatch(html, /data-lead-flow|id="lead-flow"|amoforms/);
+
+  assert.match(appsScript, /const ABA_DIAGNOSTICO = 'Diagnóstico gratuito';/);
+  assert.match(appsScript, /'Qualificado'/);
+  assert.match(appsScript, /dados\.tipo === 'diagnostico-gratuito'/);
+
+  assert.match(build, /'\.\.\/diagnostico-gratuito\/'/);
+  assert.match(sitemap, /<loc>https:\/\/observemais\.com\.br\/diagnostico-gratuito<\/loc>/);
+  assert.match(vercel, /"source": "\/diagnostico",\s*"destination": "\/diagnostico-gratuito"/);
+});
+
+test('as landings continuam semânticas, acessíveis e responsivas', async () => {
+  const [css, ...paginas] = await Promise.all([read('site.css'), ...LANDINGS.map(read)]);
+
+  for (const html of paginas) {
+    assert.match(html, /<a class="skip-link" href="#[a-z-]+">/);
+    assert.match(html, /<header class="site-header/);
+    assert.match(html, /<main id="conteudo">/);
+    assert.match(html, /<footer class="site-footer">/);
+    assert.match(html, /<html lang="pt-BR">/);
+  }
+  for (const html of paginas.slice(0, 2)) assert.match(html, /aria-label="Navegação principal"/);
+  assert.match(css, /@media \(max-width: 767px\)/);
+  assert.match(css, /@media \(prefers-reduced-motion: reduce\)/);
+  assert.match(css, /:focus-visible/);
+});
+
+test('não incorpora marca, URLs ou copies de terceiros', async () => {
+  const fontes = `${(await readLandings()).join('\n')}\n${await read('site.css')}\n${await read('site.js')}`;
+
+  assert.doesNotMatch(fontes, /seuclienteoculto|Seu Cliente Oculto|SCO Experience|observemais\.vercel\.app/i);
+});
+
 
 test('publica favicon, robots e sitemap na raiz do build', async () => {
   const build = await read('scripts/build.mjs');
@@ -227,194 +403,6 @@ test('publica favicon, robots e sitemap na raiz do build', async () => {
   assert.match(robots, /Sitemap: https:\/\/observemais\.com\.br\/sitemap\.xml/);
   assert.match(robots, /Disallow: \/api\//);
   assert.match(sitemap, /<loc>https:\/\/observemais\.com\.br\/<\/loc>/);
-});
-
-test('usa dados estruturados somente para conteúdo visível real', async () => {
-  const html = await read('index.html');
-  const jsonLd = [...html.matchAll(/<script type="application\/ld\+json">([\s\S]*?)<\/script>/g)].map((match) => JSON.parse(match[1]));
-  const organization = jsonLd.find((item) => item['@type'] === 'Organization');
-  const faq = jsonLd.find((item) => item['@type'] === 'FAQPage');
-
-  // O texto visível pode conter marcação inline (ex.: <span class="ia">); o contrato é o
-  // conteúdo, não as tags. Por isso comparamos contra o HTML sem marcação.
-  const visible = html.replace(/<script[\s\S]*?<\/script>/g, '').replace(/<[^>]+>/g, '');
-
-  assert.equal(organization.name, 'Observe Mais');
-  assert.ok(faq.mainEntity.length >= 5);
-
-  for (const item of faq.mainEntity) {
-    assert.ok(visible.includes(item.name), `pergunta ausente do conteúdo visível: ${item.name}`);
-    assert.ok(
-      visible.includes(item.acceptedAnswer.text.slice(0, 44)),
-      `resposta ausente do conteúdo visível: ${item.name}`,
-    );
-  }
-});
-
-test('mantém linguagem segura para simulação de perda silenciosa', async () => {
-  const [html, css, js] = await Promise.all([read('index.html'), read('styles.css'), read('script.js')]);
-  const productSource = `${html}\n${css}\n${js}`;
-
-  assert.doesNotMatch(productSource, /Alpine/i);
-  assert.doesNotMatch(html, /fórmula do Score|peso(?:s)? do Score/i);
-  assert.doesNotMatch(html, /ROI garantido|aumento de vendas garantido|lucro garantido/i);
-
-  // O simulador saiu da landing: nem calculadora, nem números de ROI na página pública.
-  assert.doesNotMatch(html, /id="roi-form"|calculator-layout|id="resultados"/);
-  assert.doesNotMatch(html, /payback|ROI anual/i);
-});
-
-test('usa a identidade Observe Mais no header e rodapé', async () => {
-  const html = await read('index.html');
-
-  assert.match(html, /Observe Mais/);
-  assert.match(html, /class="brand-logo"[\s\S]*?logo-observe-plus-light-web.png[\s\S]*?alt="Observe Mais"/);
-  assert.match(html, /class="footer-logo"[\s\S]*?logo-observe-plus-dark-web.png[\s\S]*?alt="Observe Mais"/);
-  assert.doesNotMatch(html, /class="brand-wordmark"/);
-  assert.doesNotMatch(html, /alt="Observall"/);
-});
-
-test('não incorpora marca, URLs ou copies específicas da referência de terceiros', async () => {
-  const source = `${await read('index.html')}\n${await read('styles.css')}\n${await read('script.js')}`;
-
-  assert.doesNotMatch(source, /seuclienteoculto/i);
-  assert.doesNotMatch(source, /Seu Cliente Oculto/);
-  assert.doesNotMatch(source, /maior e melhor empresa/i);
-  assert.doesNotMatch(source, /América Latina/i);
-  assert.doesNotMatch(source, /SCO Experience/i);
-  assert.doesNotMatch(source, /Mídia e parceiros/i);
-});
-
-test('preserva a sequência de seções comerciais', async () => {
-  const html = await read('index.html');
-
-  const order = [
-    'class="hero"',
-    'id="diferenciais"',
-    'class="metrics-strip"',
-    'class="section value-section"',
-    'id="solucoes"',
-    'id="plataforma"',
-    'id="clientes"',
-    'id="depoimentos"',
-    'id="sobre"',
-    'id="faq"',
-    'class="section final-cta-section"',
-  ];
-
-  let previous = -1;
-  for (const marker of order) {
-    const current = html.indexOf(marker);
-    assert.ok(current > previous, `${marker} deveria aparecer depois da seção anterior`);
-    previous = current;
-  }
-});
-
-test('substitui métricas numéricas soltas por evidências de supermercado', async () => {
-  const [html, css] = await Promise.all([read('index.html'), read('styles.css')]);
-
-  for (const icon of ['icon-store', 'icon-receipt', 'icon-card', 'icon-pie-chart', 'icon-eye', 'icon-coins', 'icon-trend', 'icon-clock', 'icon-chart', 'icon-wallet']) {
-    assert.match(html, new RegExp(`id="${icon}"`));
-  }
-
-  assert.match(html, /Gôndola e preço/);
-  assert.match(html, /Perecíveis/);
-  assert.match(html, /Frente de loja/);
-  assert.match(html, /Gôndola vazia com produto parado no depósito, etiqueta sem produto, preço da etiqueta diferente do caixa/);
-
-  assert.doesNotMatch(html, /69,6%/);
-  assert.doesNotMatch(html, /\+22 mil/);
-  assert.doesNotMatch(html, /\+3 mil/);
-  assert.match(css, /\.metrics-grid h3\s*\{[^}]*color:\s*var\(--green\)/s);
-  assert.match(css, /\.field-icon,\s*\.result-icon\s*\{[^}]*stroke:\s*currentColor/s);
-});
-
-test('incorpora o vídeo enviado na área de método', async () => {
-  const [html, videoJs] = await Promise.all([read('index.html'), read('video.js')]);
-
-  assert.match(html, /class="about-video reveal" data-youtube-video="yuGAr_NQis8"/);
-  assert.match(html, /public\/assets\/generated-supermercado\/metodo-auditor-supermercado-v1\.jpg/);
-  assert.match(html, /Reproduzir vídeo/);
-  assert.match(videoJs, /youtube-nocookie\.com\/embed/);
-  assert.match(videoJs, /replaceChildren\(iframe\)/);
-  assert.match(videoJs, /window\.location\.protocol === 'file:'/);
-});
-
-test('todo CTA de conversão abre o formulário inteligente', async () => {
-  const [html, js] = await Promise.all([read('index.html'), read('script.js')]);
-
-  // Nenhum CTA de conversão pode continuar mandando direto para o WhatsApp:
-  // o lead precisa passar pelo formulário antes.
-  const ctas = [...html.matchAll(/<(a|button)[^>]*>([^<]*Agendar diagnóstico[^<]*)</g)];
-  assert.ok(ctas.length >= 6, `esperava ao menos 6 CTAs, achei ${ctas.length}`);
-  for (const [tag] of ctas.map((m) => [m[1]])) {
-    assert.equal(tag, 'button', 'CTA de conversão deveria ser botão que abre o formulário');
-  }
-  assert.equal([...html.matchAll(/data-lead-flow/g)].length, ctas.length);
-
-  assert.match(html, /id="lead-flow"/);
-  assert.match(js, /\/api\/lead-capture/);
-  assert.doesNotMatch(js, /lead-capture\.php/);
-});
-
-test('o formulário pergunta um campo por vez, na ordem definida', async () => {
-  const [html, js, css] = await Promise.all([read('index.html'), read('script.js'), read('styles.css')]);
-
-  const etapas = [...html.matchAll(/class="lead-step[^"]*" data-step="([^"]+)"/g)].map((m) => m[1]);
-  assert.deepEqual(etapas, ['email', 'whatsapp', 'nome', 'empresa', 'cargo']);
-
-  // Só uma etapa visível por vez.
-  assert.match(css, /\.lead-step\s*\{[^}]*display:\s*none/s);
-  assert.match(css, /\.lead-step\.is-active\s*\{[^}]*display:\s*block/s);
-
-  for (const chave of etapas) {
-    assert.match(js, new RegExp(`${chave}:\\s*\\{`), `faltou regra de validação para ${chave}`);
-  }
-
-  assert.match(js, /function mostrarEtapa/);
-  assert.match(js, /data-flow-bar/);
-  assert.match(html, /role="progressbar"/);
-});
-
-test('o lead segue para a planilha sem credencial no navegador', async () => {
-  const [api, appsScript, js] = await Promise.all([
-    read('api/lead-capture.js'),
-    read('scripts/planilha-leads.gs'),
-    read('script.js'),
-  ]);
-
-  assert.match(api, /SHEETS_WEBHOOK_URL/);
-  assert.match(api, /SHEETS_WEBHOOK_SECRET/);
-  assert.match(api, /function enviarParaPlanilha/);
-  assert.match(api, /cargo:/);
-
-  // Falha na planilha não pode derrubar a captura: o lead já está no Blob.
-  assert.match(api, /catch[\s\S]*?return 'falhou'/);
-
-  // Apps Script devolve 200 mesmo recusando; conferir só o status daria falso "gravou".
-  // O corpo precisa ser inspecionado, aceitando os dois destinos suportados.
-  assert.match(api, /dados\?\.ok === true \|\| dados\?\.status === 'success'/);
-
-  assert.match(appsScript, /function doPost/);
-  assert.match(appsScript, /dados\.segredo !== SEGREDO/);
-
-  // O segredo e a URL do Apps Script nunca podem aparecer no frontend.
-  assert.doesNotMatch(js, /SHEETS_WEBHOOK|script\.google\.com|docs\.google\.com/);
-
-  // O caminho direto para o Zapier existe, e um destino caído não perde o lead.
-  assert.match(js, /const ZAPIER_WEBHOOK = /);
-  assert.match(js, /return zapier === true \|\| api === true/);
-  assert.match(js, /mode: 'no-cors'/);
-});
-
-test('o lead sai com os campos no primeiro nível, prontos para a planilha', async () => {
-  const js = await read('script.js');
-  const payload = js.match(/const payload = \{[\s\S]*?\n  \};/)?.[0];
-
-  assert.ok(payload, 'o payload do lead deveria existir');
-  for (const campo of ['nome', 'empresa', 'cargo', 'email', 'whatsapp', 'origem']) {
-    assert.match(payload, new RegExp(`^\\s{4}${campo}:`, 'm'), `${campo} precisa estar no primeiro nível`);
-  }
 });
 
 test('o simulador de ROI sai da landing e vive em página interna', async () => {
@@ -525,288 +513,6 @@ test('o build e as APIs usam somente o fluxo Vercel', async () => {
   assert.match(deployGuide, /Deploy — Vercel/);
 });
 
-test('a página continua semântica, acessível e responsiva', async () => {
-  const [html, css] = await Promise.all([read('index.html'), read('styles.css')]);
-
-  assert.match(html, /<header[\s>]/);
-  assert.match(html, /<main[\s>]/);
-  assert.match(html, /<footer[\s>]/);
-  assert.match(html, /aria-label="Navegação principal"/);
-  assert.match(html, /<details/);
-  assert.match(css, /@media\s*\(max-width:\s*720px\)/);
-  assert.match(css, /:focus-visible/);
-});
-
-test('usa assets próprios com nomes alinhados a Observe Mais', async () => {
-  const html = await read('index.html');
-
-  for (const asset of [
-    'public/assets/generated-supermercado/prova-reuniao-supermercado-v1.jpg',
-    'public/assets/generated-supermercado/depoimento-relatorio-supermercado-v1.jpg',
-    'public/assets/generated-supermercado/metodo-auditor-supermercado-v1.jpg',
-    
-  ]) {
-    assert.match(html, new RegExp(asset.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')));
-    await access(new URL(`../${asset}`, import.meta.url));
-  }
-
-  await access(new URL('../public/assets/generated-supermercado/cta-supermercado-operacao-v1.jpg', import.meta.url));
-});
-
-test('as evidências de topo usam fotos reais de operação, não ilustração', async () => {
-  const html = await read('index.html');
-
-  for (const photo of [
-    'public/assets/reais/ruptura-gondola.jpg',
-    'public/assets/reais/corredor-desorganizado.jpg',
-    'public/assets/reais/fila-checkout.jpg',
-  ]) {
-    assert.match(html, new RegExp(photo.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')));
-    await access(new URL(`../${photo}`, import.meta.url));
-  }
-
-  // Hero, evidências e perda silenciosa não podem voltar para a ilustração gerada.
-  // Caminho completo: "perda-silenciosa" é substring de "simulacao-perda-silenciosa",
-  // que segue em uso legítimo na calculadora.
-  for (const generated of [
-    'public/assets/generated-supermercado/hero-supermercado-cliente-oculto-v1.png',
-    'public/assets/generated-supermercado/evidencias-checklist-supermercado-v1.png',
-    'public/assets/generated-supermercado/perda-silenciosa-supermercado-v1.png',
-  ]) {
-    assert.doesNotMatch(html, new RegExp(generated.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')));
-  }
-
-  // Nomes de arquivo precisam ser seguros em URL: sem acento, espaço ou maiúscula.
-  const sources = [...html.matchAll(/src="(public\/assets\/[^"]+)"/g)].map((m) => m[1]);
-  for (const source of sources) {
-    assert.match(source, /^[a-z0-9/_.-]+$/, `caminho de asset inseguro para URL: ${source}`);
-  }
-});
-
-test('exibe prova social voltada a supermercados', async () => {
-  const [html, css, js] = await Promise.all([read('index.html'), read('styles.css'), read('script.js')]);
-
-  assert.match(html, /id="clientes"/);
-  assert.match(html, /Supermercados que usam evidência para <span>proteger padrão de loja\.<\/span>/);
-  assert.match(html, /aria-label="Logos de clientes"/);
-
-  for (const logo of ['bigbox', 'ultrabox']) {
-    assert.match(html, new RegExp(`public/assets/clients/${logo}\\.png`));
-  }
-
-  for (const logo of ['goldko', 'derela', 'nativas', 'tecnotica', 'lojas-mel']) {
-    assert.doesNotMatch(html, new RegExp(`public/assets/clients/${logo}\\.png`));
-  }
-
-  assert.match(css, /\.client-wall\s*\{/);
-  assert.doesNotMatch(css, /@keyframes\s+logo-marquee/);
-  assert.doesNotMatch(js, /moveClientCarousel/);
-});
-
-test('mantém apenas o depoimento de supermercado, em destaque', async () => {
-  const [html, css] = await Promise.all([read('index.html'), read('styles.css')]);
-  const cards = [...html.matchAll(/class="testimonial-card[^"]*"/g)];
-
-  assert.match(html, /class="testimonials-section"/);
-  assert.equal(cards.length, 1);
-  assert.match(html, /Bruna Reges/);
-  assert.match(html, /Big Box e Ultrabox/);
-  assert.match(html, /Encontramos falhas de execução que não apareciam nos indicadores internos/);
-  assert.doesNotMatch(html, /Marcus/);
-  assert.doesNotMatch(html, /Márcia Matos/);
-  assert.match(css, /\.testimonials-section\s*\{[^}]*grid-template-columns:\s*1fr/s);
-});
-
-test('o relatório é um mockup próprio, sem nome de cliente e sem dado real', async () => {
-  const [html, css] = await Promise.all([read('index.html'), read('styles.css')]);
-
-  assert.match(html, /class="report-mock"/);
-  assert.match(html, /Exemplo ilustrativo da estrutura do relatório\. Lojas anonimizadas e números fictícios\./);
-  assert.match(html, /Loja A — Centro/);
-  assert.match(css, /\.report-mock\s*\{/);
-
-  assert.doesNotMatch(html, /dashboard-setorial-supermercado-v1\.png/);
-
-  const mock = html.match(/<figure class="report-mock"[\s\S]*?<\/figure>/)?.[0];
-  assert.ok(mock, 'o mockup do relatório deveria existir');
-  for (const brand of ['big box', 'ultra box', 'ultrabox', 'brasília', 'bigbox']) {
-    assert.ok(!mock.toLowerCase().includes(brand), `o mockup não deveria citar "${brand}"`);
-  }
-});
-
-test('todas as imagens referenciadas resolvem localmente', async () => {
-  const html = await read('index.html');
-  const sources = [...html.matchAll(/src="(public\/assets\/[^"]+)"/g)].map((match) => match[1]);
-
-  assert.ok(sources.length >= 12, `esperava ao menos 12 imagens, achei ${sources.length}`);
-  await Promise.all(sources.map((source) => access(new URL(`../${source}`, import.meta.url))));
-});
-
-test('o rodapé inclui redes sociais e WhatsApp flutuante', async () => {
-  const [html, css] = await Promise.all([read('index.html'), read('styles.css')]);
-
-  assert.match(html, /https:\/\/www\.instagram\.com\/observall/);
-  assert.match(html, /https:\/\/www\.youtube\.com\/@Observall/);
-  assert.match(html, /class="whatsapp-float"[\s\S]*?wa\.me\/5561999555580/);
-  assert.match(html, /class="whatsapp-icon"/);
-  assert.match(css, /\.whatsapp-float svg/);
-});
-
-test('a vertical de restaurantes existe, isolada da landing de supermercados', async () => {
-  const [resto, index, build, sitemap, vercel] = await Promise.all([
-    read('restaurantes/index.html'),
-    read('index.html'),
-    read('scripts/build.mjs'),
-    read('sitemap.xml'),
-    read('vercel.json'),
-  ]);
-
-  // Comunicação própria do nicho.
-  assert.match(resto, /<title>Cliente oculto para restaurantes com IA \| Observe Mais<\/title>/);
-  assert.match(resto, /A mesa esperou 27 minutos, comeu calada e não reservou de novo\./);
-
-  // Mesma exigência da landing: vocabulário de quem opera, não de consultoria.
-  for (const termo of ['comanda', 'passagem', 'ficha técnica', 'praça', 'mise en place', 'em 86', 'runner', 'ticket médio']) {
-    assert.ok(resto.includes(termo), `a vertical perdeu o termo de operação "${termo}"`);
-  }
-  assert.match(resto, /rel="canonical" href="https:\/\/observemais\.com\.br\/restaurantes"/);
-
-  // Nada de vocabulário de supermercado sobrando.
-  for (const termo of ['supermercado', 'gôndola', 'ruptura', 'checkout', 'hortifruti', 'Big Box', 'Ultrabox']) {
-    const escopo = resto.replace(/<a href="\/">[^<]*<\/a>/g, ''); // o link de volta à landing pode citar
-    assert.ok(!escopo.toLowerCase().includes(termo.toLowerCase()), `sobrou "${termo}" na página de restaurantes`);
-  }
-
-  // A landing de supermercados não ganhou link para a vertical: só se chega por URL.
-  assert.doesNotMatch(index, /restaurante/i);
-
-  // Assets em caminho absoluto: a página vive em /restaurantes/, não na raiz.
-  for (const src of [...resto.matchAll(/(?:src|href)="((?:\/public|public)\/[^"]+)"/g)].map((m) => m[1])) {
-    assert.match(src, /^\//, `asset precisa de caminho absoluto: ${src}`);
-  }
-
-  // Publicação e rotas.
-  assert.match(build, /'\.\.\/restaurantes\/'/);
-  assert.match(sitemap, /<loc>https:\/\/observemais\.com\.br\/restaurantes<\/loc>/);
-  assert.match(vercel, /"source": "\/restaurante"/, 'o singular precisa redirecionar para o plural');
-});
-
-test('a página de restaurantes reaproveita o formulário e a prova social do nicho', async () => {
-  const resto = await read('restaurantes/index.html');
-
-  // Mesmo formulário inteligente, com os mesmos IDs que script.js espera.
-  assert.match(resto, /id="lead-flow"/);
-  const etapas = [...resto.matchAll(/class="lead-step[^"]*" data-step="([^"]+)"/g)].map((m) => m[1]);
-  assert.deepEqual(etapas, ['email', 'whatsapp', 'nome', 'empresa', 'cargo']);
-  assert.ok([...resto.matchAll(/data-lead-flow/g)].length >= 5);
-
-  // Depoimento real de restaurante, não reciclado de supermercado.
-  assert.match(resto, /Churrascaria Nativas SIA/);
-  assert.equal(
-    [...resto.matchAll(/clients\/nativas\.png/g)].length,
-    1,
-    'o logo da Nativas nao pode se repetir na pagina',
-  );
-
-  // Áreas do nicho no relatório.
-  for (const area of ['Cozinha', 'Salão', 'Bar', 'Banheiros', 'Recepção']) {
-    assert.ok(resto.includes(area), `faltou a área "${area}" no relatório`);
-  }
-});
-
-test('a vertical de restaurantes espelha todas as seções da landing principal', async () => {
-  const [index, resto] = await Promise.all([read('index.html'), read('restaurantes/index.html')]);
-
-  // Cada seção da landing precisa ter equivalente na vertical. O id muda quando o
-  // vocabulário do nicho pede (insights -> perdas, plataforma -> relatorio, sobre -> metodo).
-  const equivalentes = [
-    ['class="hero"', 'class="hero"'],
-    ['id="diferenciais"', 'id="diferenciais"'],
-    ['id="insights"', 'id="perdas"'],
-    ['class="section value-section"', 'class="section value-section"'],
-    ['id="solucoes"', 'id="solucoes"'],
-    ['id="plataforma"', 'id="relatorio"'],
-    // #clientes fica de fora da vertical: com um unico logo de restaurante o muro
-    // ficava vazio e repetia o logo que ja aparece no depoimento.
-    ['id="depoimentos"', 'id="depoimentos"'],
-    ['id="sobre"', 'id="metodo"'],
-    ['id="faq"', 'id="faq"'],
-    ['class="section final-cta-section"', 'class="section final-cta-section"'],
-  ];
-
-  let anterior = -1;
-  for (const [naLanding, naVertical] of equivalentes) {
-    assert.ok(index.includes(naLanding), `a landing perdeu a seção ${naLanding}`);
-
-    // A vertical pode acrescentar modificador na classe; o que importa é a seção existir.
-    const posicao = resto.indexOf(naVertical.replace(/"$/, ''));
-    assert.ok(posicao > -1, `a vertical de restaurantes não tem a seção equivalente a ${naLanding}`);
-    assert.ok(posicao > anterior, `${naVertical} está fora de ordem na vertical`);
-    anterior = posicao;
-  }
-
-  // Os blocos que sustentam o argumento também precisam existir dos dois lados.
-  for (const bloco of ['iovpanel', 'solutions-divergence', 'iov-flow', 'iov-ai', 'gap-callout', 'differential-list', 'report-mock']) {
-    assert.ok(resto.includes(bloco), `faltou o bloco "${bloco}" na vertical de restaurantes`);
-  }
-
-  // Mesmo contrato de módulos e de fluxo do IOV.
-  const modulos = [...resto.matchAll(/data-iov-module="([^"]+)"/g)].map((m) => m[1]);
-  const etapas = [...resto.matchAll(/data-iov-step="([^"]+)"/g)].map((m) => m[1]);
-  assert.deepEqual(modulos, ['auditor-profissional', 'cliente-real', 'operacao-interna']);
-  assert.deepEqual(etapas, ['tres-visoes', 'cruzamento', 'iov', 'plano-de-acao']);
-});
-
-test('a vertical de restaurantes usa fotos do nicho, com alt e peso sob controle', async () => {
-  const { stat } = await import('node:fs/promises');
-  const resto = await read('restaurantes/index.html');
-
-  const fotos = [
-    'public/assets/restaurantes/hero-restaurante.jpg',
-    'public/assets/restaurantes/cozinha-operacao.webp',
-    'public/assets/restaurantes/cliente-avaliando.jpg',
-    'public/assets/restaurantes/salao-espera.jpg',
-  ];
-
-  for (const foto of fotos) {
-    assert.ok(resto.includes(`/${foto}`), `a foto ${foto} não está referenciada`);
-    const info = await stat(new URL(`../${foto}`, import.meta.url));
-    assert.ok(info.size < 250 * 1024, `${foto} tem ${Math.round(info.size / 1024)}KB`);
-  }
-
-  // Nenhuma foto pode entrar sem alt: elas são a evidência que sustenta o argumento.
-  for (const tag of resto.match(/<img[^>]*>/g) || []) {
-    assert.match(tag, /alt="[^"]+"/, `imagem sem alt: ${tag.slice(0, 90)}`);
-  }
-
-  // A arte do IOV é reaproveitada da landing, no mesmo bloco.
-  assert.match(resto, /class="iov-stage reveal"/);
-  assert.match(resto, /\/public\/assets\/iov\/tres-sinais-iov\.jpg/);
-  assert.match(resto, /<h3 class="iov-title">3 sinais\.<span>IOV\.<\/span><\/h3>/);
-});
-
-test('a vertical de restaurantes tem cartão de compartilhamento próprio', async () => {
-  const { stat } = await import('node:fs/promises');
-  const resto = await read('restaurantes/index.html');
-
-  const arte = 'public/assets/restaurantes/og-restaurantes.jpg';
-  const info = await stat(new URL(`../${arte}`, import.meta.url));
-  assert.ok(info.size < 600 * 1024, `og:image tem ${Math.round(info.size / 1024)}KB, acima do limite de prévia`);
-
-  for (const tag of ['og:image', 'twitter:image']) {
-    const valor = resto.match(new RegExp(`(?:property|name)="${tag}" content="([^"]+)"`))?.[1];
-    assert.ok(valor, `faltou ${tag}`);
-    assert.equal(valor, `https://observemais.com.br/${arte}`, `${tag} deveria usar a arte do nicho`);
-  }
-
-  // A arte de supermercado não pode voltar a representar a vertical.
-  assert.doesNotMatch(resto, /og-observe-mais-tres-visoes/);
-
-  assert.match(resto, /property="og:image:width" content="1200"/);
-  assert.match(resto, /property="og:image:height" content="630"/);
-  assert.match(resto, /property="og:image:alt" content="[^"]*restaurante[^"]*"/i);
-});
-
 test('o blog é gerado a partir dos artigos e sai no build', async () => {
   const { artigos } = await import('../scripts/blog-artigos.mjs');
   const [indice, build, sitemap, pkg] = await Promise.all([
@@ -832,24 +538,6 @@ test('o blog é gerado a partir dos artigos e sai no build', async () => {
   assert.match(build, /'\.\.\/blog\/'/);
   assert.match(pkg, /"blog": "node scripts\/gerar-blog\.mjs"/);
   assert.match(pkg, /gerar-blog\.mjs && node scripts\/build\.mjs/, 'o build precisa regerar o blog antes de copiar');
-});
-
-test('o blog aparece no menu das duas verticais', async () => {
-  const [index, resto, indiceBlog] = await Promise.all([
-    read('index.html'),
-    read('restaurantes/index.html'),
-    read('blog/index.html'),
-  ]);
-
-  for (const [pagina, nome] of [[index, 'supermercados'], [resto, 'restaurantes']]) {
-    const nav = pagina.match(/<nav id="main-navigation"[\s\S]*?<\/nav>/)?.[0];
-    assert.ok(nav, `não achei o menu da vertical de ${nome}`);
-    assert.match(nav, /<a href="\/blog">Blog<\/a>/, `faltou o link do blog no menu de ${nome}`);
-  }
-
-  // O blog volta para as duas verticais.
-  assert.match(indiceBlog, /<a href="\/">Supermercados<\/a>/);
-  assert.match(indiceBlog, /<a href="\/restaurantes">Restaurantes<\/a>/);
 });
 
 test('o blog tem busca própria e conteúdo autoral com fonte citada', async () => {
@@ -886,33 +574,6 @@ test('o blog não reproduz marca nem conteúdo de concorrente', async () => {
   }
 });
 
-test('nenhum bloco numérico da vertical passa como resultado de cliente', async () => {
-  const resto = await read('restaurantes/index.html');
-
-  // Cada componente que exibe número precisa declarar que é exemplo: sem isso o
-  // leitor toma o dado como resultado real, e não há prova para sustentar.
-  const blocos = [
-    ['resto-ticket', /Exemplo ilustrativo/],
-    ['resto-gap', /Cenário ilustrativo/],
-    ['iovpanel', /Exemplo ilustrativo/],
-    ['report-mock', /Exemplo ilustrativo/],
-  ];
-
-  for (const [classe, aviso] of blocos) {
-    const inicio = resto.indexOf(`class="${classe}`);
-    assert.ok(inicio > -1, `não achei o bloco ${classe}`);
-    const trecho = resto.slice(inicio, resto.indexOf('</figure>', inicio) + 9 || inicio + 4000);
-    assert.match(trecho, aviso, `o bloco ${classe} exibe número sem dizer que é exemplo`);
-  }
-
-  // Alegações sobre concorrência não têm como ser provadas aqui.
-  assert.doesNotMatch(resto, /a maioria das empresas/i);
-  assert.doesNotMatch(resto, /melhor empresa|líder de mercado|comprovadamente/i);
-
-  // O IOV precisa explicar que é leitura comparável, não nota absoluta.
-  assert.match(resto, /leitura comparável entre unidades, turnos e ciclos/);
-});
-
 test('o painel de publicação não expõe segredo em nada que o navegador baixa', async () => {
   const publicos = await Promise.all([
     read('admin/index.html'),
@@ -921,6 +582,8 @@ test('o painel de publicação não expõe segredo em nada que o navegador baixa
     read('script.js'),
     read('index.html'),
     read('restaurantes/index.html'),
+    read('site.js'),
+    read('diagnostico-gratuito/index.html'),
   ]);
 
   for (const fonte of publicos) {
@@ -977,7 +640,7 @@ test('o conteúdo digitado no painel não vira HTML executável', async () => {
 });
 
 test('o painel fica fora do site público e do índice de busca', async () => {
-  const [painel, robots, sitemap, index, resto, blog, build] = await Promise.all([
+  const [painel, robots, sitemap, index, resto, blog, build, diag] = await Promise.all([
     read('admin/index.html'),
     read('robots.txt'),
     read('sitemap.xml'),
@@ -985,13 +648,14 @@ test('o painel fica fora do site público e do índice de busca', async () => {
     read('restaurantes/index.html'),
     read('blog/index.html'),
     read('scripts/build.mjs'),
+    read('diagnostico-gratuito/index.html'),
   ]);
 
   assert.match(painel, /name="robots" content="noindex, nofollow/);
 
   // Nenhuma página pública pode linkar o painel, e o caminho não entra no
   // robots.txt nem no sitemap — os dois são públicos e entregariam o endereço.
-  for (const publica of [index, resto, blog, robots, sitemap]) {
+  for (const publica of [index, resto, diag, blog, robots, sitemap]) {
     assert.doesNotMatch(publica, /\/admin/);
   }
 
@@ -1016,31 +680,13 @@ test('artigo publicado pelo painel usa o mesmo renderizador dos versionados', as
   assert.match(vercel, /"destination": "\/api\/artigo\?slug=:slug"/);
 });
 
-test('o CTA final de cada vertical usa imagem do próprio nicho', async () => {
-  const { stat } = await import('node:fs/promises');
-  const [css, resto, index] = await Promise.all([
-    read('styles.css'),
-    read('restaurantes/index.html'),
-    read('index.html'),
-  ]);
-
-  // A vertical de restaurantes não pode herdar a foto de supermercado do CTA.
-  assert.match(resto, /final-cta-section--resto/);
-  assert.match(css, /\.final-cta-section--resto\s*\{[\s\S]*?restaurantes\/og-restaurantes\.jpg/);
-  assert.doesNotMatch(index, /final-cta-section--resto/);
-
-  // Imagem de fundo pesada custa em toda visita, mesmo quase invisível sob o verde.
-  for (const [, caminho] of css.matchAll(/url\("(public\/assets\/[^"]+)"\)/g)) {
-    const info = await stat(new URL(`../${caminho}`, import.meta.url));
-    assert.ok(info.size < 250 * 1024, `${caminho} tem ${Math.round(info.size / 1024)}KB de fundo`);
-  }
-});
-
 test('a auditoria de assets enxerga o que o CSS carrega', async () => {
   const script = await read('scripts/assets-nao-usados.mjs');
 
   // Varrer só o HTML deixava passar background-image, que é o caso mais caro.
   assert.match(script, /styles\.css/);
+  assert.match(script, /site\.css/);
+  assert.match(script, /diagnostico-gratuito\/index\.html/);
   assert.ok(script.includes(String.raw`url\(`), 'a varredura precisa cobrir url() do CSS');
   assert.match(script, /restaurantes\/index\.html/);
 });
@@ -1205,4 +851,22 @@ test('artigo publicado aparece na hora para quem publicou', async () => {
   assert.match(script, /window\.atualizarGradeDoBlog = atualizarGradeDoBlog/);
   assert.match(script, /blog-feed\?t=\$\{Date\.now\(\)\}/, 'precisa de parâmetro único para furar o cache');
   assert.match(editor, /atualizarGradeDoBlog\?\.\(\{ semCache: true \}\)/);
+});
+
+test('o blog aparece no menu das landings e volta para elas', async () => {
+  const [index, resto, indiceBlog] = await Promise.all([
+    read('index.html'),
+    read('restaurantes/index.html'),
+    read('blog/index.html'),
+  ]);
+
+  for (const [pagina, nome] of [[index, 'home'], [resto, 'restaurantes']]) {
+    const nav = pagina.match(/<nav class="main-nav" id="main-nav"[\s\S]*?<\/nav>/)?.[0];
+    assert.ok(nav, `não achei o menu da página ${nome}`);
+    assert.match(nav, /<a href="\/blog">Conteúdos<\/a>/, `faltou o link do blog no menu de ${nome}`);
+  }
+
+  assert.match(indiceBlog, /<a href="\/">Início<\/a>/);
+  assert.match(indiceBlog, /<a href="\/restaurantes">Restaurantes<\/a>/);
+  assert.match(indiceBlog, /<a href="\/diagnostico-gratuito">Diagnóstico gratuito<\/a>/);
 });

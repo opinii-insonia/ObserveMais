@@ -71,6 +71,15 @@ function toCsv(records) {
     'empresa',
     'whatsapp',
     'email',
+    'cargo',
+    'tipo',
+    'origem',
+    'diagnosticoSegmento',
+    'diagnosticoLocalizacao',
+    'diagnosticoCidade',
+    'diagnosticoUnidades',
+    'diagnosticoQualificado',
+    'diagnosticoMotivo',
     'quantidadeDeLojas',
     'cuponsPorMes',
     'ticketMedio',
@@ -86,6 +95,7 @@ function toCsv(records) {
   const rows = records.map((record) => {
     const simulation = record.simulation || {};
     const lead = record.lead || {};
+    const diagnostico = record.qualificacao || {};
 
     return [
       record.createdAt,
@@ -93,6 +103,15 @@ function toCsv(records) {
       lead.empresa,
       lead.whatsapp,
       lead.email,
+      lead.cargo,
+      record.tipo,
+      record.origem,
+      diagnostico.segmento,
+      diagnostico.localizacao,
+      diagnostico.cidade,
+      diagnostico.unidades,
+      record.qualificacao ? (diagnostico.qualificado ? 'sim' : 'não') : '',
+      diagnostico.motivo,
       simulation.quantidadeDeLojas,
       simulation.cuponsPorMes,
       simulation.ticketMedio,

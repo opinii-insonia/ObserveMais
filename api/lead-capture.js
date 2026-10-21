@@ -28,6 +28,41 @@ function cleanText(value) {
 }
 
 /**
+ * Regra do diagnóstico gratuito: todo mundo é cadastrado, mas só é aprovado
+ * quem tem unidades em Brasília/DF e ao menos UNIDADES_MINIMAS unidades.
+ *
+ * O navegador calcula a mesma regra para responder na tela (site.js); aqui ela
+ * é recalculada porque a coluna "Qualificado" da planilha não pode depender do
+ * que o visitante mandou.
+ */
+const DIAGNOSTICO_REGIAO = 'df';
+const DIAGNOSTICO_UNIDADES_MINIMAS = 4;
+const LOCALIZACOES = ['df', 'entorno', 'outra'];
+
+export function avaliarDiagnostico({ localizacao, unidades }) {
+  const naRegiao = localizacao === DIAGNOSTICO_REGIAO;
+  const porteOk = Number(unidades) >= DIAGNOSTICO_UNIDADES_MINIMAS;
+  const motivos = [];
+  if (!naRegiao) motivos.push('fora de Brasília/DF');
+  if (!porteOk) motivos.push(`menos de ${DIAGNOSTICO_UNIDADES_MINIMAS} unidades`);
+  return { qualificado: naRegiao && porteOk, motivo: motivos.join(' e ') || 'perfil atendido' };
+}
+
+function lerQualificacao(bruto) {
+  if (!bruto || typeof bruto !== 'object') return null;
+
+  const unidades = Number.parseInt(bruto.unidades, 10);
+  const qualificacao = {
+    segmento: cleanText(bruto.segmento),
+    localizacao: LOCALIZACOES.includes(bruto.localizacao) ? bruto.localizacao : 'outra',
+    cidade: cleanText(bruto.cidade),
+    unidades: Number.isFinite(unidades) && unidades > 0 ? Math.min(unidades, 5000) : 0,
+  };
+
+  return { ...qualificacao, ...avaliarDiagnostico(qualificacao) };
+}
+
+/**
  * Envia o lead para a planilha do Google.
  *
  * A gravação é feita por um Web App do Apps Script vinculado à planilha, cuja URL
@@ -55,6 +90,14 @@ async function enviarParaPlanilha(record) {
         whatsapp: record.lead.whatsapp,
         origem: record.origem,
         fonte: record.source,
+        // Diagnóstico gratuito: o Apps Script grava estes campos em aba própria.
+        tipo: record.tipo,
+        segmento: record.qualificacao?.segmento || '',
+        localizacao: record.qualificacao?.localizacao || '',
+        cidade: record.qualificacao?.cidade || '',
+        unidades: record.qualificacao?.unidades ?? '',
+        qualificado: record.qualificacao ? (record.qualificacao.qualificado ? 'sim' : 'não') : '',
+        motivo: record.qualificacao?.motivo || '',
       }),
       signal: AbortSignal.timeout(8000),
     });
@@ -107,12 +150,17 @@ export default async function handler(request, response) {
       return;
     }
 
+    const qualificacao = payload?.tipo === 'diagnostico-gratuito' ? lerQualificacao(payload?.qualificacao) : null;
+
     const record = {
       id: crypto.randomUUID(),
       source: cleanText(payload?.source) || 'observall-site-roi',
+      tipo: qualificacao ? 'diagnostico-gratuito' : 'contato',
       origem: cleanText(payload?.origem),
+      pagina: cleanText(payload?.pagina),
       createdAt: new Date().toISOString(),
       lead,
+      qualificacao,
       simulation: payload?.simulation || {},
       client: {
         ipHash: crypto.createHash('sha256').update(request.headers['x-forwarded-for'] || '').digest('hex'),
@@ -144,7 +192,12 @@ export default async function handler(request, response) {
 
     const sheet = await enviarParaPlanilha(record);
 
-    response.status(200).json({ ok: true, storage, sheet });
+    response.status(200).json({
+      ok: true,
+      storage,
+      sheet,
+      ...(qualificacao ? { qualificado: qualificacao.qualificado } : {}),
+    });
   } catch (error) {
     response.status(400).json({ ok: false, error: 'invalid_payload' });
   }

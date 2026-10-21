@@ -19,6 +19,7 @@
 
 const SEGREDO = 'troque-por-uma-senha-longa-e-aleatoria';
 const ABA = 'Leads';
+const ABA_DIAGNOSTICO = 'Diagnóstico gratuito';
 
 const COLUNAS = [
   'Recebido em',
@@ -32,6 +33,25 @@ const COLUNAS = [
   'ID',
 ];
 
+// Cadastros do diagnóstico gratuito: todos entram, com a coluna Qualificado
+// dizendo quem tem o perfil (Brasília/DF e 4 ou mais unidades).
+const COLUNAS_DIAGNOSTICO = [
+  'Recebido em',
+  'Qualificado',
+  'Motivo',
+  'Nome',
+  'Empresa',
+  'Cargo',
+  'E-mail',
+  'WhatsApp',
+  'Segmento',
+  'Localização',
+  'Cidade',
+  'Unidades',
+  'Fonte',
+  'ID',
+];
+
 function doPost(e) {
   try {
     const dados = JSON.parse(e.postData.contents);
@@ -40,7 +60,27 @@ function doPost(e) {
       return resposta({ ok: false, erro: 'nao_autorizado' });
     }
 
-    const aba = obterAba();
+    if (dados.tipo === 'diagnostico-gratuito') {
+      obterAba(ABA_DIAGNOSTICO, COLUNAS_DIAGNOSTICO).appendRow([
+        formatarData(dados.recebidoEm),
+        dados.qualificado || '',
+        dados.motivo || '',
+        dados.nome || '',
+        dados.empresa || '',
+        dados.cargo || '',
+        dados.email || '',
+        dados.whatsapp || '',
+        dados.segmento || '',
+        dados.localizacao || '',
+        dados.cidade || '',
+        dados.unidades || '',
+        dados.fonte || '',
+        dados.id || '',
+      ]);
+      return resposta({ ok: true });
+    }
+
+    const aba = obterAba(ABA, COLUNAS);
 
     aba.appendRow([
       formatarData(dados.recebidoEm),
@@ -60,18 +100,18 @@ function doPost(e) {
   }
 }
 
-function obterAba() {
+function obterAba(nome, colunas) {
   const planilha = SpreadsheetApp.getActiveSpreadsheet();
-  let aba = planilha.getSheetByName(ABA);
+  let aba = planilha.getSheetByName(nome);
 
   if (!aba) {
-    aba = planilha.insertSheet(ABA);
+    aba = planilha.insertSheet(nome);
   }
 
   // Cria o cabeçalho na primeira execução.
   if (aba.getLastRow() === 0) {
-    aba.appendRow(COLUNAS);
-    aba.getRange(1, 1, 1, COLUNAS.length).setFontWeight('bold');
+    aba.appendRow(colunas);
+    aba.getRange(1, 1, 1, colunas.length).setFontWeight('bold');
     aba.setFrozenRows(1);
   }
 
