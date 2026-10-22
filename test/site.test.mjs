@@ -48,17 +48,16 @@ test('a home segue a estrutura e a copy do modelo Observe+', async () => {
   }
 });
 
-test('as três landings usam o layout do modelo com a identidade verde Observe+', async () => {
+test('as três landings usam o layout e o laranja do modelo, com o logo oficial', async () => {
   const [css, favicon, ...paginas] = await Promise.all([read('site.css'), read('favicon.svg'), ...LANDINGS.map(read)]);
 
   assert.match(css, /--navy: #0B1520;/);
-  assert.match(css, /--green: #25D670;/);
-  assert.match(css, /--green-ink: #12924A;/, 'verde escuro para texto sobre fundo claro');
+  assert.match(css, /--orange: #FF6A00;/);
   assert.match(css, /--font: "Montserrat"/);
 
-  // Onde era laranja agora é verde: nenhum resto do laranja do modelo.
+  // A identidade voltou ao laranja: nenhum resto da fase verde.
   for (const fonte of [css, favicon, ...paginas]) {
-    assert.doesNotMatch(fonte, /orange|#FF6A00|255, ?106, ?0|255, ?140, ?50/i);
+    assert.doesNotMatch(fonte, /--green|#25D670|#12924A|#3BE584|#1FC45E|#4BF07F|37, ?214, ?112/i);
   }
 
   paginas.forEach((html, i) => {
@@ -80,8 +79,8 @@ test('as três landings usam o layout do modelo com a identidade verde Observe+'
   for (const arquivo of ['logo-observe-mais.svg', 'logo-observe-mais-branco.svg', 'simbolo-observe-mais.svg']) {
     await access(new URL(`../public/assets/observe/${arquivo}`, import.meta.url));
   }
-  assert.match(favicon, /fill="url\(#ffundo\)"/);
-  assert.match(favicon, /#3BE584|#25D670|#1FC45E/, 'favicon em verde');
+  assert.match(favicon, /id="ffundo"[^>]*fill="#0B1520"/);
+  assert.match(favicon, /#FF6A00/, 'favicon em laranja');
 });
 
 test('a vertical de restaurantes espelha a home com o vocabulário do salão', async () => {
