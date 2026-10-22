@@ -48,24 +48,40 @@ test('a home segue a estrutura e a copy do modelo Observe+', async () => {
   }
 });
 
-test('as três landings usam o mesmo sistema visual do modelo', async () => {
-  const [css, ...paginas] = await Promise.all([read('site.css'), ...LANDINGS.map(read)]);
+test('as três landings usam o layout do modelo com a identidade verde Observe+', async () => {
+  const [css, favicon, ...paginas] = await Promise.all([read('site.css'), read('favicon.svg'), ...LANDINGS.map(read)]);
 
   assert.match(css, /--navy: #0B1520;/);
-  assert.match(css, /--orange: #FF6A00;/);
+  assert.match(css, /--green: #25D670;/);
+  assert.match(css, /--green-ink: #12924A;/, 'verde escuro para texto sobre fundo claro');
   assert.match(css, /--font: "Montserrat"/);
+
+  // Onde era laranja agora é verde: nenhum resto do laranja do modelo.
+  for (const fonte of [css, favicon, ...paginas]) {
+    assert.doesNotMatch(fonte, /orange|#FF6A00|255, ?106, ?0|255, ?140, ?50/i);
+  }
 
   paginas.forEach((html, i) => {
     assert.match(html, /<link rel="stylesheet" href="\/site\.css">/, `${LANDINGS[i]} sem site.css`);
     assert.match(html, /<script src="\/site\.js" defer><\/script>/, `${LANDINGS[i]} sem site.js`);
     assert.match(html, /family=Montserrat/);
-    assert.match(html, /<symbol id="logo-mark"/);
-    assert.match(html, /class="brand-name">Observe<span class="plus">\+<\/span>/);
-    // O visual anterior não pode vazar para as landings.
-    assert.doesNotMatch(html, /styles\.css|script\.js|Poppins|#25D670/);
+    // Logo oficial em vetor (redesenhado do quadro de identidade), com a assinatura da marca.
+    assert.match(html, /<symbol id="logo-full" viewBox="[^"]+">/);
+    assert.match(html, /<symbol id="logo-mark" viewBox="[^"]+">/);
+    // O <use> já aplica o viewBox do símbolo: o svg externo precisa começar em 0 0,
+    // senão o deslocamento vertical do símbolo é aplicado duas vezes e corta o logo.
+    assert.match(html, /<svg class="brand-logo" viewBox="0 0 [\d.]+ [\d.]+" aria-hidden="true"><use href="#logo-full"\/><\/svg>/);
+    assert.match(html, /<span class="brand-tagline">Ver\. Provar\. Agir\.<\/span>/);
+    assert.doesNotMatch(html, /brand-name|brand-mark/);
+    // O visual do blog não pode vazar para as landings.
+    assert.doesNotMatch(html, /styles\.css|script\.js|Poppins/);
   });
 
-  assert.match(await read('favicon.svg'), /#FF6A00/);
+  for (const arquivo of ['logo-observe-mais.svg', 'logo-observe-mais-branco.svg', 'simbolo-observe-mais.svg']) {
+    await access(new URL(`../public/assets/observe/${arquivo}`, import.meta.url));
+  }
+  assert.match(favicon, /fill="url\(#ffundo\)"/);
+  assert.match(favicon, /#3BE584|#25D670|#1FC45E/, 'favicon em verde');
 });
 
 test('a vertical de restaurantes espelha a home com o vocabulário do salão', async () => {
