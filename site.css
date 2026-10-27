@@ -890,3 +890,10 @@ body.is-locked { overflow: hidden; }
   .site-footer .brand .brand-tagline { display: block; }
 }
 @media (max-width: 767px) { .site-header .brand-logo { width: 156px; } }
+
+/* Confirmação depois do envio pelo formulário Kommo */
+.kommo-sucesso { text-align: center; padding: 32px 16px; }
+.kommo-sucesso[hidden] { display: none; }
+.kommo-sucesso h3 { font-size: 1.5rem; margin: 16px 0 10px; }
+.kommo-sucesso p { color: var(--muted); font-size: 1.05rem; margin-bottom: 24px; }
+.kommo-form.is-enviado iframe, .kommo-form.is-enviado .kommo-form__loading { display: none !important; }

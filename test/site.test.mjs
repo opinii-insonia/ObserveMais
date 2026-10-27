@@ -185,7 +185,7 @@ test('onde o modelo tinha lacuna, entram dados reais da Observe+', async () => {
     assert.match(html, /https:\/\/www\.instagram\.com\/observall/);
     assert.match(html, /https:\/\/www\.youtube\.com\/@Observall/);
     assert.match(html, /wa\.me\/5561993715292/);
-    assert.match(html, /class="whatsapp-float" href="https:\/\/wa\.me\/5561999555580/);
+    assert.match(html, /class="whatsapp-float" href="https:\/\/wa\.me\/5561993715292/);
     assert.match(html, /data-video="yuGAr_NQis8"/);
     assert.match(html, /<a href="\/blog">/);
   }
@@ -229,7 +229,7 @@ test('home e restaurantes usam o formulário da Kommo, e todo CTA leva até ele'
     // insere o formulário logo antes da própria tag.
     const contato = html.match(/<section class="final-cta final-cta--form" id="contato"[\s\S]*?<\/section>/)?.[0];
     assert.ok(contato, 'faltou o bloco #contato');
-    assert.match(contato, /<div class="kommo-form" id="formulario">[\s\S]*a\[o\+r\]\(\{id:"1734095",hash:"04a0a9cda52e3f6789d1bad640123783",locale:"pt"\}\)[\s\S]*<script id="amoforms_script_1734095" async="async" charset="utf-8" src="https:\/\/forms\.kommo\.com\/forms\/assets\/js\/amoforms\.js\?1792506232"><\/script>\s*<\/div>/);
+    assert.match(contato, /<div class="kommo-form" id="formulario">[\s\S]*a\[o\+r\]\(\{id:"1734095",hash:"04a0a9cda52e3f6789d1bad640123783",locale:"pt"\}\)[\s\S]*<script id="amoforms_script_1734095" async="async" charset="utf-8" src="https:\/\/forms\.kommo\.com\/forms\/assets\/js\/amoforms\.js\?1792506232"><\/script>\s*<div class="kommo-sucesso"/);
     assert.equal([...html.matchAll(/<script id="amoforms_script_1734095"/g)].length, 1);
 
     // O modal antigo saiu: nenhum CTA pode abrir formulário que não existe.
@@ -884,4 +884,43 @@ test('o blog aparece no menu das landings e volta para elas', async () => {
   assert.match(indiceBlog, /<a href="\/">Início<\/a>/);
   assert.match(indiceBlog, /<a href="\/restaurantes">Restaurantes<\/a>/);
   assert.match(indiceBlog, /<a href="\/diagnostico-gratuito">Diagnóstico gratuito<\/a>/);
+});
+
+test('todo WhatsApp das landings leva ao número oficial +55 61 99371-5292', async () => {
+  for (const [i, html] of (await readLandings()).entries()) {
+    const numeros = [...html.matchAll(/wa\.me\/(\d+)/g)].map((m) => m[1]);
+    assert.ok(numeros.length >= 3, `${LANDINGS[i]}: esperava links de WhatsApp`);
+    for (const numero of numeros) assert.equal(numero, '5561993715292', `${LANDINGS[i]}: WhatsApp com outro número`);
+  }
+});
+
+test('todo WhatsApp abre com "Vim através do site da Observe+."', async () => {
+  for (const [i, html] of (await readLandings()).entries()) {
+    const links = [...html.matchAll(/href="(https:\/\/wa\.me\/[^"]+)"/g)].map((m) => m[1]);
+    assert.ok(links.length >= 3);
+    for (const link of links) {
+      assert.equal(decodeURIComponent(new URL(link).searchParams.get('text') || ''), 'Vim através do site da Observe+.', `${LANDINGS[i]}: ${link}`);
+    }
+  }
+});
+
+test('todo formulário confirma que um especialista entra em contato em minutos', async () => {
+  const [index, resto, diag] = await readLandings();
+  const js = await read('site.js');
+  const frase = /Dentro de minutos, um especialista entrará em contato com você\./;
+
+  // Kommo: o aviso de envio vem do iframe de forms.kommo.com.
+  for (const html of [index, resto]) {
+    const caixa = html.match(/<div class="kommo-form" id="formulario">[\s\S]*?<\/section>/)?.[0];
+    assert.match(caixa, /id="kommo-sucesso"[^>]*hidden/);
+    assert.match(caixa, frase);
+  }
+  assert.match(js, /evento\.origin !== 'https:\/\/forms\.kommo\.com'/);
+  assert.match(js, /dados\.func !== 'amoformsSuccessSubmit'/);
+
+  // Diagnóstico: as duas respostas trazem a mesma promessa.
+  for (const id of ['diagnostico-aprovado', 'diagnostico-cadastrado']) {
+    const bloco = diag.match(new RegExp(`id="${id}"[\\s\\S]*?</div>`))[0];
+    assert.match(bloco, frase, `${id} sem o aviso de contato`);
+  }
 });

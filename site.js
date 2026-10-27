@@ -223,6 +223,26 @@
   });
 
   // =========================================================
+  // Formulário Kommo: confirmação depois do envio
+  // =========================================================
+
+  // O formulário roda num iframe de forms.kommo.com e avisa a página com
+  // {"func":"amoformsSuccessSubmit"} quando o lead foi aceito.
+  const kommoBox = document.querySelector('.kommo-form');
+  const kommoSucesso = document.querySelector('#kommo-sucesso');
+  if (kommoBox && kommoSucesso) {
+    window.addEventListener('message', (evento) => {
+      if (evento.origin !== 'https://forms.kommo.com') return;
+      let dados;
+      try { dados = typeof evento.data === 'string' ? JSON.parse(evento.data) : evento.data; } catch (erro) { return; }
+      if (!dados || dados.func !== 'amoformsSuccessSubmit') return;
+      kommoBox.classList.add('is-enviado');
+      kommoSucesso.hidden = false;
+      kommoSucesso.focus();
+    });
+  }
+
+  // =========================================================
   // Diagnóstico gratuito: cadastro de todos, aprovação por perfil
   // =========================================================
 
