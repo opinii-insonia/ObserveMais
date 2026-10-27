@@ -116,12 +116,15 @@
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(payload),
       });
+      const dados = await resposta.json().catch(() => null);
+      // Recusa declarada (ex.: e-mail pessoal) não é falha de rede: o lead
+      // não deve seguir para a planilha, e o visitante precisa saber o motivo.
+      if (resposta.status === 422 && dados?.error) return dados;
       if (!resposta.ok) throw new Error(`lead-capture respondeu ${resposta.status}`);
-      const dados = await resposta.json().catch(() => ({ ok: true }));
-      if (dados.ok === false) throw new Error('lead-capture recusou o envio');
-      return true;
+      if (dados?.ok === false) throw new Error('lead-capture recusou o envio');
+      return dados || { ok: true };
     } catch (erro) {
-      return false;
+      return null;
     }
   }
 
@@ -132,13 +135,21 @@
       const salvos = JSON.parse(window.localStorage.getItem(chave) || '[]');
       salvos.push(payload);
       window.localStorage.setItem(chave, JSON.stringify(salvos));
-      return true;
+      return { ok: true };
     }
 
-    const [zapier, api] = await Promise.all([enviarParaZapier(payload), enviarParaApi(payload)]);
+    // A API vem primeiro porque é ela que decide o perfil: o resultado segue
+    // junto para a planilha, em vez de ser calculado aqui no navegador.
+    const api = await enviarParaApi(payload);
+    if (api && api.ok === false) return { ok: false, erro: api.error };
+
+    const paraPlanilha = typeof api?.qualificado === 'boolean'
+      ? { ...payload, qualificado: api.qualificado ? 'sim' : 'não' }
+      : payload;
+    const zapier = await enviarParaZapier(paraPlanilha);
 
     // Basta um destino ter aceitado: o lead não se perde se um dos dois cair.
-    return zapier === true || api === true;
+    return { ok: api !== null || zapier === true, qualificado: api?.qualificado };
   }
 
   const LEAD_RULES = {
@@ -243,27 +254,30 @@
   }
 
   // =========================================================
-  // Diagnóstico gratuito: cadastro de todos, aprovação por perfil
+  // Diagnóstico gratuito: cadastra todos e mostra o painel que a API indicar
   // =========================================================
 
   /**
-   * Regra de aprovação do diagnóstico gratuito. Todo mundo é cadastrado na
-   * planilha; só muda a resposta mostrada e a coluna "Qualificado".
-   * A API recalcula a mesma regra no servidor (api/lead-capture.js), então
-   * alterar aqui sem alterar lá deixa a planilha e a tela em desacordo.
+   * O cadastro é para operações, então só aceita e-mail corporativo. A lista
+   * espelha a de api/lead-capture.js, que é quem recusa de verdade; aqui ela
+   * serve para avisar antes do envio.
    */
-  const DIAGNOSTICO = {
-    regiaoAtendida: 'df',
-    unidadesMinimas: 4,
-  };
+  const DOMINIOS_PESSOAIS = new Set([
+    'gmail.com', 'googlemail.com',
+    'hotmail.com', 'hotmail.com.br', 'outlook.com', 'outlook.com.br', 'live.com', 'live.com.br', 'msn.com',
+    'yahoo.com', 'yahoo.com.br', 'ymail.com',
+    'icloud.com', 'me.com', 'mac.com', 'aol.com',
+    'proton.me', 'protonmail.com', 'tutanota.com', 'gmx.com', 'mail.com', 'yandex.com', 'zoho.com', 'hey.com',
+    'bol.com.br', 'uol.com.br', 'terra.com.br', 'ig.com.br', 'globo.com', 'globomail.com', 'r7.com',
+    'zipmail.com.br', 'oi.com.br', 'superig.com.br', 'pop.com.br', 'click21.com.br', 'itelefonica.com.br',
+  ]);
 
-  function avaliarDiagnostico({ localizacao, unidades }) {
-    const naRegiao = localizacao === DIAGNOSTICO.regiaoAtendida;
-    const porteOk = Number(unidades) >= DIAGNOSTICO.unidadesMinimas;
-    const motivos = [];
-    if (!naRegiao) motivos.push('fora de Brasília/DF');
-    if (!porteOk) motivos.push(`menos de ${DIAGNOSTICO.unidadesMinimas} unidades`);
-    return { qualificado: naRegiao && porteOk, motivo: motivos.join(' e ') || 'perfil atendido' };
+  const ERRO_EMAIL_CORPORATIVO = 'Use o e-mail corporativo da sua empresa. Não aceitamos Gmail, Hotmail e similares.';
+
+  function emailCorporativo(email) {
+    const dominio = String(email || '').trim().toLowerCase().split('@')[1];
+    if (!dominio || !dominio.includes('.')) return false;
+    return !DOMINIOS_PESSOAIS.has(dominio);
   }
 
   const dxForm = document.querySelector('#diagnostico-form');
@@ -276,7 +290,10 @@
     const regras = {
       nome: LEAD_RULES.nome,
       whatsapp: LEAD_RULES.whatsapp,
-      email: LEAD_RULES.email,
+      email: {
+        valida: (v) => LEAD_RULES.email.valida(v) && emailCorporativo(v),
+        erro: (v) => (LEAD_RULES.email.valida(v) ? ERRO_EMAIL_CORPORATIVO : LEAD_RULES.email.erro),
+      },
       empresa: LEAD_RULES.empresa,
       segmento: { valida: (v) => v !== '', erro: 'Escolha o segmento da sua operação.' },
       localizacao: { valida: (v) => v !== '', erro: 'Diga onde ficam suas unidades.' },
@@ -300,7 +317,7 @@
         const ok = regra.valida(campo.value);
         campo.setAttribute('aria-invalid', String(!ok));
         if (!ok) {
-          erro.textContent = regra.erro;
+          erro.textContent = typeof regra.erro === 'function' ? regra.erro(campo.value) : regra.erro;
           erro.hidden = false;
           campo.focus();
           return false;
@@ -326,8 +343,6 @@
         email: f.email.value.trim(),
         whatsapp: f.whatsapp.value.trim(),
       };
-      const { qualificado, motivo } = avaliarDiagnostico(qualificacao);
-
       const payload = {
         source: 'observe-mais-diagnostico-gratuito',
         tipo: 'diagnostico-gratuito',
@@ -340,26 +355,27 @@
         localizacao: qualificacao.localizacao,
         cidade: qualificacao.cidade,
         unidades: qualificacao.unidades,
-        qualificado: qualificado ? 'sim' : 'não',
-        motivo,
         lead,
         qualificacao,
       };
 
       enviar.disabled = true;
       enviar.firstChild.textContent = 'Enviando… ';
-      const ok = await enviarLead(payload);
+      const envio = await enviarLead(payload);
       enviar.disabled = false;
       enviar.firstChild.textContent = 'Quero meu diagnóstico ';
 
-      if (!ok) {
-        erro.textContent = 'Não foi possível enviar agora. Tente novamente em alguns instantes.';
+      if (!envio.ok) {
+        const pessoal = envio.erro === 'email_nao_corporativo';
+        erro.textContent = pessoal ? ERRO_EMAIL_CORPORATIVO : 'Não foi possível enviar agora. Tente novamente em alguns instantes.';
         erro.hidden = false;
+        if (pessoal) { f.email.setAttribute('aria-invalid', 'true'); f.email.focus(); }
         return;
       }
 
+      // Sem resposta da API (rede instável), o painel neutro serve aos dois casos.
       dxForm.hidden = true;
-      const resultado = document.querySelector(qualificado ? '#diagnostico-aprovado' : '#diagnostico-cadastrado');
+      const resultado = document.querySelector(envio.qualificado === true ? '#diagnostico-aprovado' : '#diagnostico-cadastrado');
       resultado.querySelectorAll('[data-nome]').forEach((el) => { el.textContent = lead.nome.split(' ')[0]; });
       resultado.hidden = false;
       resultado.setAttribute('tabindex', '-1');

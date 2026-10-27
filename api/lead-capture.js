@@ -31,13 +31,37 @@ function cleanText(value) {
  * Regra do diagnóstico gratuito: todo mundo é cadastrado, mas só é aprovado
  * quem tem unidades em Brasília/DF e ao menos UNIDADES_MINIMAS unidades.
  *
- * O navegador calcula a mesma regra para responder na tela (site.js); aqui ela
- * é recalculada porque a coluna "Qualificado" da planilha não pode depender do
- * que o visitante mandou.
+ * A regra vive só aqui, no servidor. O navegador não a conhece: ele apenas
+ * mostra o painel que esta resposta indicar. É isso que impede o critério de
+ * aparecer para quem preenche o formulário, inclusive no código da página.
  */
 const DIAGNOSTICO_REGIAO = 'df';
-const DIAGNOSTICO_UNIDADES_MINIMAS = 4;
+const DIAGNOSTICO_UNIDADES_MINIMAS = 2;
 const LOCALIZACOES = ['df', 'entorno', 'outra'];
+
+/**
+ * O diagnóstico é para operações, então o cadastro exige e-mail corporativo.
+ * A lista cobre os provedores pessoais usados no Brasil; o que não estiver
+ * nela é tratado como domínio próprio da empresa.
+ *
+ * site.js repete esta lista para avisar o visitante antes do envio; aqui a
+ * recusa é aplicada de verdade.
+ */
+const DOMINIOS_PESSOAIS = new Set([
+  'gmail.com', 'googlemail.com',
+  'hotmail.com', 'hotmail.com.br', 'outlook.com', 'outlook.com.br', 'live.com', 'live.com.br', 'msn.com',
+  'yahoo.com', 'yahoo.com.br', 'ymail.com',
+  'icloud.com', 'me.com', 'mac.com', 'aol.com',
+  'proton.me', 'protonmail.com', 'tutanota.com', 'gmx.com', 'mail.com', 'yandex.com', 'zoho.com', 'hey.com',
+  'bol.com.br', 'uol.com.br', 'terra.com.br', 'ig.com.br', 'globo.com', 'globomail.com', 'r7.com',
+  'zipmail.com.br', 'oi.com.br', 'superig.com.br', 'pop.com.br', 'click21.com.br', 'itelefonica.com.br',
+]);
+
+export function emailCorporativo(email) {
+  const dominio = String(email || '').trim().toLowerCase().split('@')[1];
+  if (!dominio || !dominio.includes('.')) return false;
+  return !DOMINIOS_PESSOAIS.has(dominio);
+}
 
 export function avaliarDiagnostico({ localizacao, unidades }) {
   const naRegiao = localizacao === DIAGNOSTICO_REGIAO;
@@ -150,7 +174,14 @@ export default async function handler(request, response) {
       return;
     }
 
-    const qualificacao = payload?.tipo === 'diagnostico-gratuito' ? lerQualificacao(payload?.qualificacao) : null;
+    const ehDiagnostico = payload?.tipo === 'diagnostico-gratuito';
+
+    if (ehDiagnostico && !emailCorporativo(lead.email)) {
+      response.status(422).json({ ok: false, error: 'email_nao_corporativo' });
+      return;
+    }
+
+    const qualificacao = ehDiagnostico ? lerQualificacao(payload?.qualificacao) : null;
 
     const record = {
       id: crypto.randomUUID(),

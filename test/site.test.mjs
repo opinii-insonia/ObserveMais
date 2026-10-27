@@ -167,7 +167,7 @@ test('onde o modelo tinha lacuna, entram dados reais da Observe+', async () => {
 
   // Só clientes confirmados.
   for (const html of [index, diag]) {
-    for (const logo of ['bigbox', 'ultrabox', 'nativas', 'tecnotica']) {
+    for (const logo of ['bigbox', 'ultrabox', 'malunga', 'nativas', 'tecnotica']) {
       assert.match(html, new RegExp(`/public/assets/clients/${logo}\\.png`), `faltou o logo ${logo}`);
     }
   }
@@ -266,7 +266,7 @@ test('o lead segue para a planilha sem credencial no navegador', async () => {
 
   // O caminho direto para o Zapier existe, e um destino caído não perde o lead.
   assert.match(js, /const ZAPIER_WEBHOOK = /);
-  assert.match(js, /return zapier === true \|\| api === true/);
+  assert.match(js, /return \{ ok: api !== null \|\| zapier === true/);
   assert.match(js, /mode: 'no-cors'/);
 });
 
@@ -276,27 +276,26 @@ test('o diagnóstico manda os campos no primeiro nível, prontos para a planilha
 
   assert.equal(payloads.length, 1, 'só o diagnóstico envia pelo site; o contato é da Kommo');
   const [payload] = payloads;
-  for (const campo of ['source', 'tipo', 'origem', 'createdAt', 'segmento', 'localizacao', 'cidade', 'unidades', 'qualificado', 'motivo']) {
+  for (const campo of ['source', 'tipo', 'origem', 'createdAt', 'segmento', 'localizacao', 'cidade', 'unidades']) {
     assert.match(payload, new RegExp(`^\\s+${campo}[:,]`, 'm'), `${campo} fora do primeiro nível`);
   }
+  // "qualificado" entra depois, com o valor que o servidor devolveu.
+  assert.doesNotMatch(payload, /^\s+qualificado:/m);
+  assert.match(js, /\{ \.\.\.payload, qualificado: api\.qualificado \? 'sim' : 'não' \}/);
   assert.match(payload, /\.\.\.lead,/);
   assert.match(js, /const lead = \{\s*nome:[\s\S]*?empresa:[\s\S]*?email:[\s\S]*?whatsapp:/);
 });
 
-test('diagnóstico gratuito: aprova só Brasília/DF com 4 ou mais unidades', async () => {
+test('diagnóstico gratuito: aprova só Brasília/DF com 2 ou mais unidades', async () => {
   const { avaliarDiagnostico } = await import('../api/lead-capture.js');
 
-  assert.equal(avaliarDiagnostico({ localizacao: 'df', unidades: 4 }).qualificado, true);
+  assert.equal(avaliarDiagnostico({ localizacao: 'df', unidades: 2 }).qualificado, true);
   assert.equal(avaliarDiagnostico({ localizacao: 'df', unidades: 12 }).qualificado, true);
-  assert.equal(avaliarDiagnostico({ localizacao: 'df', unidades: 3 }).qualificado, false);
+  assert.equal(avaliarDiagnostico({ localizacao: 'df', unidades: 1 }).qualificado, false);
   assert.equal(avaliarDiagnostico({ localizacao: 'entorno', unidades: 10 }).qualificado, false);
-  assert.equal(avaliarDiagnostico({ localizacao: 'outra', unidades: 1 }).motivo, 'fora de Brasília/DF e menos de 4 unidades');
+  assert.equal(avaliarDiagnostico({ localizacao: 'outra', unidades: 1 }).motivo, 'fora de Brasília/DF e menos de 2 unidades');
 
-  // A tela usa a mesma regra que a planilha.
-  const js = await read('site.js');
-  assert.match(js, /regiaoAtendida: 'df',/);
-  assert.match(js, /unidadesMinimas: 4,/);
-  assert.match(await read('api/lead-capture.js'), /const DIAGNOSTICO_UNIDADES_MINIMAS = 4;/);
+  assert.match(await read('api/lead-capture.js'), /const DIAGNOSTICO_UNIDADES_MINIMAS = 2;/);
 });
 
 test('diagnóstico gratuito: a API grava todos e recalcula a aprovação no servidor', async () => {
@@ -342,7 +341,7 @@ test('diagnóstico gratuito: a API grava todos e recalcula a aprovação no serv
   assert.equal(forjado.json.qualificado, false);
 });
 
-test('diagnóstico gratuito: página de anúncio com formulário curto e respostas', async () => {
+test('diagnóstico gratuito: landing de conversão com formulário curto e respostas', async () => {
   const [html, build, sitemap, vercel, appsScript] = await Promise.all([
     read('diagnostico-gratuito/index.html'),
     read('scripts/build.mjs'),
@@ -354,12 +353,12 @@ test('diagnóstico gratuito: página de anúncio com formulário curto e respost
   assert.match(html, /<title>Diagnóstico gratuito de cliente oculto \| Observe\+<\/title>/);
   assert.match(html, /rel="canonical" href="https:\/\/observemais\.com\.br\/diagnostico-gratuito"/);
 
-  // Página de anúncio: a primeira seção já traz o formulário, e não há menu para dispersar.
-  const sections = [...html.matchAll(/<section class="([^"]+)"/g)].map((m) => m[1]);
-  assert.equal(sections[0], 'dx-hero');
-  const primeira = html.match(/<section class="dx-hero"[\s\S]*?<\/section>/)[0];
-  assert.match(primeira, /<form id="diagnostico-form" novalidate/);
+  // Página de anúncio: sem menu para dispersar, e todo CTA leva ao formulário.
   assert.doesNotMatch(html, /class="main-nav"|class="nav-toggle"/);
+  const sections = [...html.matchAll(/<section class="([^"]+)"/g)].map((m) => m[1]);
+  assert.match(sections[0], /^lp-hero/);
+  assert.ok([...html.matchAll(/href="#diagnostico"/g)].length >= 3, 'os CTAs precisam levar ao formulário');
+  assert.match(html, /<section class="lp-oferta" id="diagnostico"[\s\S]*<form id="diagnostico-form" novalidate/);
 
   // Formulário único e curto.
   assert.doesNotMatch(html, /data-panel|form-steps/);
@@ -371,7 +370,6 @@ test('diagnóstico gratuito: página de anúncio com formulário curto e respost
   assert.match(html, /<option value="df">Brasília \/ Distrito Federal<\/option>/);
   assert.match(html, /id="diagnostico-aprovado"/);
   assert.match(html, /id="diagnostico-cadastrado"/);
-  assert.match(html, /Brasília \(DF\) com 4 ou mais unidades/);
   assert.doesNotMatch(html, /data-lead-flow|id="lead-flow"|amoforms/);
 
   assert.match(appsScript, /const ABA_DIAGNOSTICO = 'Diagnóstico gratuito';/);
@@ -907,7 +905,7 @@ test('todo WhatsApp abre com "Vim através do site da Observe+."', async () => {
 test('todo formulário confirma que um especialista entra em contato em minutos', async () => {
   const [index, resto, diag] = await readLandings();
   const js = await read('site.js');
-  const frase = /Dentro de minutos, um especialista entrará em contato com você\./;
+  const frase = /Dentro de minutos, um especialista entrará em contato com você/;
 
   // Kommo: o aviso de envio vem do iframe de forms.kommo.com.
   for (const html of [index, resto]) {
@@ -923,4 +921,80 @@ test('todo formulário confirma que um especialista entra em contato em minutos'
     const bloco = diag.match(new RegExp(`id="${id}"[\\s\\S]*?</div>`))[0];
     assert.match(bloco, frase, `${id} sem o aviso de contato`);
   }
+});
+
+test('o critério do diagnóstico não aparece para quem preenche o formulário', async () => {
+  const [html, js] = await Promise.all([read('diagnostico-gratuito/index.html'), read('site.js')]);
+
+  // Nem no texto da página, nem nas respostas depois do envio.
+  const visivel = html.replace(/<script[\s\S]*?<\/script>/g, '').replace(/<[^>]+>/g, ' ');
+  for (const bloco of [visivel, ...['diagnostico-aprovado', 'diagnostico-cadastrado'].map((id) => html.match(new RegExp(`id="${id}"[\\s\\S]*?</div>`))[0])]) {
+    assert.doesNotMatch(bloco, /\b(duas|2|4) ou mais unidades|a partir de \d+ unidades|m[ií]nimo de \d+ unidades/i);
+    assert.doesNotMatch(bloco, /dispon[ií]vel (apenas|somente|só) para|aten[dt]emos (apenas|somente|só)|perfil atendido/i);
+  }
+  // A única menção a Brasília é a opção do campo que coleta a localização.
+  assert.equal((visivel.match(/Bras[ií]lia/gi) || []).length, 1);
+
+  // A regra vive no servidor: o código da página não pode revelá-la.
+  assert.doesNotMatch(js, /avaliarDiagnostico|unidadesMinimas|regiaoAtendida|'df'|Bras[ií]lia/i);
+  assert.match(js, /envio\.qualificado === true \? '#diagnostico-aprovado' : '#diagnostico-cadastrado'/);
+});
+
+test('o diagnóstico só aceita e-mail corporativo', async () => {
+  const { emailCorporativo } = await import('../api/lead-capture.js');
+  const [html, js, api] = await Promise.all([
+    read('diagnostico-gratuito/index.html'),
+    read('site.js'),
+    read('api/lead-capture.js'),
+  ]);
+
+  for (const bom of ['gestao@suaempresa.com.br', 'contato@malunga.com.br', 'a@b.co']) {
+    assert.equal(emailCorporativo(bom), true, `${bom} deveria ser aceito`);
+  }
+  for (const pessoal of ['x@gmail.com', 'x@hotmail.com.br', 'x@outlook.com', 'x@yahoo.com.br', 'x@uol.com.br', 'x@icloud.com', 'x@bol.com.br']) {
+    assert.equal(emailCorporativo(pessoal), false, `${pessoal} deveria ser recusado`);
+  }
+  for (const invalido of ['', 'sem-arroba', 'x@semponto']) assert.equal(emailCorporativo(invalido), false);
+
+  // A recusa vale no servidor, não só na tela.
+  assert.match(api, /ehDiagnostico && !emailCorporativo\(lead\.email\)/);
+  assert.match(api, /'email_nao_corporativo'/);
+  assert.match(js, /email_nao_corporativo/);
+  assert.match(html, /<span>E-mail corporativo<\/span>/);
+});
+
+test('a landing do diagnóstico tem os blocos que sustentam a conversão', async () => {
+  const html = await read('diagnostico-gratuito/index.html');
+  const ordem = ['lp-hero', 'lp-video', 'lp-dor', 'lp-prova', 'lp-relatorio', 'lp-paraquem', 'lp-oferta', 'lp-garantia', 'faq', 'lp-final'];
+  let anterior = -1;
+  for (const bloco of ordem) {
+    const pos = html.indexOf(`class="${bloco}"`) > -1 ? html.indexOf(`class="${bloco}"`) : html.indexOf(`${bloco}"`);
+    assert.ok(pos > anterior, `${bloco} está fora de ordem ou faltando`);
+    anterior = pos;
+  }
+
+  // Oferta: preço zero em destaque, sem valor inventado para os itens.
+  assert.match(html, /Tudo isso por apenas/);
+  assert.equal([...html.matchAll(/R\$ ?<strong>0,00<\/strong>|R\$ 0,00/g)].length >= 1, true);
+  assert.doesNotMatch(html, /R\$\s?(?!0,00)\d/, 'não inventar preço de tabela sem valor confirmado');
+
+  // Vídeo institucional da Observe+ e depoimentos reais.
+  assert.match(html, /data-video="yuGAr_NQis8"/);
+  for (const autor of ['Bruna Reges', 'Márcia Matos', 'Marcus']) {
+    assert.match(html, new RegExp(autor), `faltou o depoimento de ${autor}`);
+  }
+  assert.equal([...html.matchAll(/class="depo-card"/g)].length, 3);
+
+  // Dores explícitas e o mockup do relatório.
+  assert.ok([...html.matchAll(/class="dor-card"/g)].length >= 5, 'as dores precisam estar claras');
+  assert.match(html, /class="rel__app"/);
+  for (const parte of ['rel__kpis', 'rel__critico', 'rel__rank', 'rel__barras', 'rel__tabela', 'rel__areas']) {
+    assert.match(html, new RegExp(parte), `faltou ${parte} no mockup do relatório`);
+  }
+  // O mockup reproduz a estrutura, mas não expõe desempenho de cliente identificado.
+  const mock = html.match(/<figure class="rel reveal"[\s\S]*?<\/figure>/)[0];
+  for (const marca of ['big box', 'bigbox', 'ultra box', 'ultrabox', 'malunga', 'nativas', 'tecnótica', 'bolos do']) {
+    assert.ok(!mock.toLowerCase().includes(marca), `o mockup não pode citar "${marca}"`);
+  }
+  assert.match(mock, /Unidades anonimizadas/);
 });

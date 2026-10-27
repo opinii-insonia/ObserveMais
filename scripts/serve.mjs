@@ -1,6 +1,7 @@
 import { createReadStream, existsSync, statSync } from 'node:fs';
 import { createServer } from 'node:http';
 import { extname, join, normalize } from 'node:path';
+import { avaliarDiagnostico, emailCorporativo } from '../api/lead-capture.js';
 
 const root = normalize(new URL('../', import.meta.url).pathname.replace(/^\/(.:)/, '$1'));
 const port = Number(process.env.PORT || 4173);
@@ -37,8 +38,20 @@ async function captureLead(request, response) {
       return;
     }
 
+    // Mesma regra da função de produção, importada em vez de copiada: assim o
+    // smoke local exercita a decisão real, sem repetir o critério aqui.
+    const diagnostico = payload?.tipo === 'diagnostico-gratuito';
+    if (diagnostico && !emailCorporativo(lead.email)) {
+      response.writeHead(422, { 'Content-Type': 'application/json; charset=utf-8' });
+      response.end(JSON.stringify({ ok: false, error: 'email_nao_corporativo' }));
+      return;
+    }
+
+    const resposta = { ok: true, storage: 'local-dev' };
+    if (diagnostico) resposta.qualificado = avaliarDiagnostico(payload?.qualificacao || {}).qualificado;
+
     response.writeHead(200, { 'Content-Type': 'application/json; charset=utf-8', 'Cache-Control': 'no-store' });
-    response.end(JSON.stringify({ ok: true, storage: 'local-dev' }));
+    response.end(JSON.stringify(resposta));
   } catch (error) {
     response.writeHead(400, { 'Content-Type': 'application/json; charset=utf-8' });
     response.end(JSON.stringify({ ok: false, error: 'invalid_payload' }));

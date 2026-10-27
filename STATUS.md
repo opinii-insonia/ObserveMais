@@ -13,6 +13,10 @@
 - [x] Contato da home e de /restaurantes passa a ser o formulário Kommo (id 1734095) no bloco #contato; o modal próprio saiu.
 - [x] /diagnostico-gratuito enxuto para tráfego de anúncio: formulário único na primeira dobra, sem menu.
 - [ ] Na Kommo: trocar o campo "Empresa" (hoje é Nota/Comentário) pelo campo de Empresa, tirar a imagem lateral e os textos "Cabeçalho"/"Parágrafo", ajustar placeholders e cor do botão.
+- [x] Rodada 3: WhatsApp único (+55 61 99371-5292) com a mensagem "Vim através do site da Observe+."; confirmação "Dentro de minutos, um especialista entrará em contato com você" na Kommo e no diagnóstico; logo da Mercado Malunga no mural de clientes.
+- [x] Diagnóstico: corte passou para 2 unidades, cadastro exige e-mail corporativo e o critério saiu de toda a parte visível — a decisão vive só na API e o navegador apenas exibe o painel que ela indicar.
+- [x] Rodada 4: /diagnostico-gratuito refeita como landing de conversão (hero → vídeo → dor → prova → relatório → para quem → oferta R$ 0,00 + formulário → compromisso → passos → FAQ → CTA final), inspirada na estrutura de cobre.metodoteia.com com identidade própria. Mockup do painel de relatório em HTML/CSS, com unidades anonimizadas.
+- [ ] Confirmar se podemos exibir os valores de tabela dos entregáveis (hoje cada item aparece como "Incluído", sem preço riscado).
 - [ ] Ajustar o Zap para separar `tipo = diagnostico-gratuito` em aba própria.
 - [ ] Publicação, somente mediante autorização explícita.
 

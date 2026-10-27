@@ -66,14 +66,23 @@ Campos, imagem e cores do formulário são configurados na própria Kommo.
 
 ### Diagnóstico gratuito (/diagnostico-gratuito)
 
-Todo cadastro é gravado, aprovado ou não. A aprovação é **Brasília/DF com 4 ou mais
-unidades**; a regra vive em `api/lead-capture.js` (`DIAGNOSTICO_REGIAO`,
-`DIAGNOSTICO_UNIDADES_MINIMAS`) e é espelhada em `site.js` (`DIAGNOSTICO`) só para a
-resposta na tela. A API recalcula: o valor que o navegador manda é ignorado.
+Todo cadastro é gravado, aprovado ou não. A aprovação é **Brasília/DF com 2 ou mais
+unidades**, e o cadastro **só aceita e-mail corporativo** (Gmail, Hotmail, Outlook,
+UOL e afins são recusados).
+
+As duas regras vivem **só** em `api/lead-capture.js` — `DIAGNOSTICO_REGIAO`,
+`DIAGNOSTICO_UNIDADES_MINIMAS` e `DOMINIOS_PESSOAIS`. O navegador não conhece o
+critério de aprovação: ele envia os dados e mostra o painel que a resposta indicar
+(`qualificado: true` → "Tudo certo"; qualquer outro caso → "Cadastro recebido").
+É isso que impede o critério de aparecer para quem preenche o formulário, inclusive
+para quem abrir o código da página. **Mudar o critério aqui muda o site inteiro; não
+há cópia da regra no frontend.** A lista de domínios pessoais é repetida em `site.js`
+só para avisar antes do envio — quem recusa de verdade é a API.
 
 Campos extras desses envios: `tipo` = `diagnostico-gratuito`, `segmento`,
-`localizacao` (`df` | `entorno` | `outra`), `cidade`, `unidades`, `qualificado`
-(`sim` | `não`) e `motivo`.
+`localizacao` (`df` | `entorno` | `outra`), `cidade` e `unidades`. O campo
+`qualificado` (`sim` | `não`) é acrescentado pela resposta da API antes do envio ao
+Zapier; `motivo` só é preenchido no caminho do Apps Script.
 
 - **Zapier (Opção A, a ativa hoje):** os cadastros chegam no mesmo Catch Hook. No Zap,
   adicione **Paths** (ou Filter) por `tipo` e mande `diagnostico-gratuito` para uma aba
