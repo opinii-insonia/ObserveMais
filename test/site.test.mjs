@@ -356,12 +356,18 @@ test('diagnóstico gratuito: landing de conversão com formulário curto e respo
   // Página de anúncio: sem menu para dispersar, e todo CTA leva ao formulário.
   assert.doesNotMatch(html, /class="main-nav"|class="nav-toggle"/);
   const sections = [...html.matchAll(/<section class="([^"]+)"/g)].map((m) => m[1]);
-  assert.match(sections[0], /^lp-hero/);
+  assert.match(sections[0], /^lp2-topo/);
+  // A oferta abre a página; o formulário é a seção imediatamente abaixo.
+  const primeira = html.match(/<section class="lp2-topo"[\s\S]*?<\/section>/)[0];
+  assert.doesNotMatch(primeira, /<form id="diagnostico-form"/);
+  assert.match(primeira, /R\$ 0,00/);
+  assert.match(sections[1], /^lp2-cadastro/);
+  const segunda = html.match(/<section class="lp2-cadastro"[\s\S]*?<\/section>/)[0];
+  assert.match(segunda, /<form id="diagnostico-form"/);
   // No celular o formulário fica bem abaixo do texto da oferta: o CTA precisa
   // apontar para o cartão do formulário, não para o topo da seção.
   assert.ok([...html.matchAll(/href="#formulario"/g)].length >= 3, 'os CTAs precisam levar ao formulário');
   assert.match(html, /<div class="form-card reveal" id="formulario">/);
-  assert.match(html, /<section class="lp-oferta" id="diagnostico"[\s\S]*<form id="diagnostico-form" novalidate/);
 
   // Formulário único e curto.
   assert.doesNotMatch(html, /data-panel|form-steps/);
@@ -968,7 +974,7 @@ test('o diagnóstico só aceita e-mail corporativo', async () => {
 
 test('a landing do diagnóstico tem os blocos que sustentam a conversão', async () => {
   const html = await read('diagnostico-gratuito/index.html');
-  const ordem = ['lp-hero', 'lp-video', 'lp-dor', 'lp-prova', 'lp-relatorio', 'lp-paraquem', 'lp-oferta', 'lp-garantia', 'faq', 'lp-final'];
+  const ordem = ['lp2-topo', 'lp2-dor', 'lp2-recebe', 'lp2-relatorio', 'lp2-como', 'lp-prova', 'faq', 'lp-final'];
   let anterior = -1;
   for (const bloco of ordem) {
     const pos = html.indexOf(`class="${bloco}"`) > -1 ? html.indexOf(`class="${bloco}"`) : html.indexOf(`${bloco}"`);
@@ -976,10 +982,20 @@ test('a landing do diagnóstico tem os blocos que sustentam a conversão', async
     anterior = pos;
   }
 
-  // Oferta: preço zero em destaque, sem valor inventado para os itens.
-  assert.match(html, /Tudo isso por apenas/);
-  assert.equal([...html.matchAll(/R\$ ?<strong>0,00<\/strong>|R\$ 0,00/g)].length >= 1, true);
+  // Preço zero em destaque, sem valor inventado.
+  assert.ok([...html.matchAll(/R\$ ?<strong>0,00<\/strong>|R\$ 0,00/g)].length >= 2);
   assert.doesNotMatch(html, /R\$\s?(?!0,00)\d/, 'não inventar preço de tabela sem valor confirmado');
+
+  // Página de anúncio: enxuta, com imagem no lugar de parágrafo. O painel do
+  // relatório e os campos do formulário não contam — são figura e interface.
+  const texto = html
+    .replace(/<figure class="rel reveal"[\s\S]*?<\/figure>/, ' ')
+    .replace(/<script[\s\S]*?<\/script>/g, ' ')
+    .replace(/<[^>]+>/g, ' ').replace(/\s+/g, ' ').trim();
+  const palavras = texto.split(' ').length;
+  assert.ok(palavras < 560, `a landing de anúncio está longa demais: ${palavras} palavras de leitura`);
+  const fotos = [...html.matchAll(/src="\/public\/assets\/(observe|reais|restaurantes)\/[^"]+"/g)];
+  assert.ok(fotos.length >= 5, `esperava ao menos 5 fotos, achei ${fotos.length}`);
 
   // Vídeo institucional da Observe+ e depoimentos reais.
   assert.match(html, /data-video="yuGAr_NQis8"/);
@@ -988,8 +1004,9 @@ test('a landing do diagnóstico tem os blocos que sustentam a conversão', async
   }
   assert.equal([...html.matchAll(/class="depo-card"/g)].length, 3);
 
-  // Dores explícitas e o mockup do relatório.
-  assert.ok([...html.matchAll(/class="dor-card"/g)].length >= 5, 'as dores precisam estar claras');
+  // As dores continuam explícitas, agora em lista curta.
+  assert.ok([...html.matchAll(/class="lp2-dor__lista"[\s\S]*?<\/ul>/g)].length === 1);
+  assert.ok([...html.matchAll(/<li><svg class="ico" aria-hidden="true"><use href="#i-alert"\/><\/svg>/g)].length >= 3, 'as dores precisam estar claras');
   assert.match(html, /class="rel__app"/);
   for (const parte of ['rel__kpis', 'rel__critico', 'rel__rank', 'rel__barras', 'rel__tabela', 'rel__areas']) {
     assert.match(html, new RegExp(parte), `faltou ${parte} no mockup do relatório`);
@@ -1006,4 +1023,12 @@ test('nenhum texto da landing fica invisível por herdar a cor da seção', asyn
   const css = await read('site.css');
   // A seção da oferta é escura e pinta h2 de branco; o cartão do formulário é claro.
   assert.match(css, /\.lp-oferta \.form-card h2, \.lp-oferta \.form-result h2 \{ color: var\(--text\)/);
+});
+
+test('a barra de ação fixa só existe no celular', async () => {
+  const css = await read('site.css');
+  // Fora do media de celular ela some: no desktop o formulário já está na primeira tela.
+  assert.match(css, /\.lp-barra \{ display: none; \}/);
+  const mobile = css.match(/@media \(max-width: 767px\) \{[\s\S]*?\n\}/g).find((b) => b.includes('.lp-barra'));
+  assert.ok(mobile && /\.lp-barra \{[^}]*display: flex/.test(mobile), 'a barra precisa voltar no celular');
 });

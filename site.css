@@ -1330,3 +1330,117 @@ body.is-locked { overflow: hidden; }
 @media (prefers-reduced-motion: reduce) {
   .lp-barra { transition: none; }
 }
+
+/* A barra de ação é só do celular: no desktop o formulário já está na dobra. */
+.lp-barra { display: none; }
+
+/* =========================================================
+   LANDING ENXUTA DO DIAGNÓSTICO (tráfego de anúncio)
+   A oferta e o formulário ficam na primeira tela; o resto da
+   página existe só para sustentar a decisão, com imagem no
+   lugar de parágrafo.
+   ========================================================= */
+.lp2-topo { position: relative; isolation: isolate; overflow: hidden; background: var(--navy); color: #fff; padding: 44px 0 0; }
+.lp2-topo__bg { position: absolute; inset: 0; z-index: -2; }
+.lp2-topo__bg img { width: 100%; height: 100%; object-fit: cover; object-position: 72% 30%; opacity: .5; }
+.lp2-topo::before {
+  content: ""; position: absolute; inset: 0; z-index: -1;
+  background:
+    linear-gradient(100deg, var(--navy) 36%, rgba(11, 21, 32, .86) 56%, rgba(11, 21, 32, .55) 100%),
+    linear-gradient(180deg, rgba(11, 21, 32, .4), var(--navy) 94%);
+}
+.lp2-topo__grid { display: grid; grid-template-columns: 1fr; padding-bottom: 48px; }
+.lp2-cadastro { background: var(--gray-100); padding: 48px 0; scroll-margin-top: 70px; }
+.lp2-cadastro__box { max-width: 560px; }
+.lp2-oferta h1 { color: #fff; font-size: clamp(2.1rem, 4.2vw, 3.3rem); margin-bottom: 18px; }
+.lp2-sub { color: #D3DAE2; font-size: 1.08rem; max-width: 520px; margin-bottom: 26px; }
+.lp2-bullets { display: grid; gap: 14px; margin-bottom: 30px; }
+.lp2-bullets li { display: flex; align-items: center; gap: 13px; font-size: 1rem; color: #E3E8EE; }
+.lp2-bullets strong { color: #fff; font-weight: 700; }
+.lp2-bullets .ico { width: 26px; height: 26px; color: var(--orange); flex: none; stroke-width: 1.8; }
+.lp2-oferta__cta { display: inline-flex; }
+
+/* Faixa de logos logo abaixo da dobra: prova sem ocupar seção inteira. */
+.lp2-faixa { background: var(--gray-100); padding: 22px 0; }
+.lp2-logos { display: flex; flex-wrap: wrap; justify-content: center; align-items: center; gap: 12px 40px; }
+.lp2-logos img { max-height: 46px; max-width: 108px; width: auto; mix-blend-mode: multiply; opacity: .78; }
+
+/* ---------- Dor ---------- */
+.lp2-dor { background: var(--white); padding: var(--section-y) 0; }
+.lp2-dor__grid { display: grid; grid-template-columns: 1fr 1fr; gap: 56px; align-items: center; }
+.lp2-dor__foto { margin: 0; border-radius: 20px; overflow: hidden; box-shadow: var(--shadow-lg); aspect-ratio: 4 / 3; }
+.lp2-dor__foto img { width: 100%; height: 100%; object-fit: cover; }
+.lp2-dor h2 { margin-bottom: 24px; }
+.lp2-dor__lista { display: grid; gap: 14px; }
+.lp2-dor__lista li {
+  display: flex; align-items: center; gap: 13px; background: var(--gray-100); border-radius: var(--radius-sm);
+  padding: 15px 18px; font-size: .98rem; font-weight: 600; color: var(--text); line-height: 1.35;
+}
+.lp2-dor__lista .ico { width: 22px; height: 22px; color: var(--orange); flex: none; }
+
+/* ---------- O que você recebe ---------- */
+.lp2-recebe { background: var(--gray-100); }
+.recebe-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 20px; }
+.recebe-grid li { background: #fff; border-radius: var(--radius); overflow: hidden; box-shadow: var(--shadow); }
+.recebe-grid img { width: 100%; height: 190px; object-fit: cover; }
+.recebe-grid div { padding: 22px 24px 26px; position: relative; }
+.recebe-num {
+  position: absolute; top: -22px; left: 24px; width: 44px; height: 44px; border-radius: 50%;
+  display: grid; place-items: center; background: var(--orange); color: #fff; font-weight: 800; font-size: 1.05rem;
+  box-shadow: 0 6px 16px rgba(255, 106, 0, .35);
+}
+.recebe-grid h3 { margin: 14px 0 8px; font-size: 1.1rem; }
+.recebe-grid p { font-size: .92rem; color: var(--muted); line-height: 1.5; }
+
+/* ---------- Relatório ---------- */
+.lp2-relatorio { background: var(--white); }
+
+/* ---------- Vídeo + passos ---------- */
+.lp2-como { background: var(--beige); }
+.lp2-como__grid { display: grid; grid-template-columns: 1.05fr .95fr; gap: 56px; align-items: center; }
+.lp2-como h2 { margin-bottom: 26px; }
+.lp2-passos { display: grid; gap: 18px; }
+.lp2-passos li { display: flex; gap: 16px; align-items: flex-start; }
+.lp2-passos li > span {
+  width: 38px; height: 38px; flex: none; border-radius: 50%; display: grid; place-items: center;
+  background: var(--orange); color: #fff; font-weight: 800;
+}
+.lp2-passos strong { display: block; color: var(--text); font-size: 1rem; margin-bottom: 2px; }
+.lp2-passos div { font-size: .92rem; color: var(--muted); line-height: 1.5; }
+
+@media (max-width: 1099px) {
+  .lp2-dor__grid, .lp2-como__grid { grid-template-columns: 1fr; gap: 32px; }
+  .recebe-grid { grid-template-columns: 1fr; }
+  .recebe-grid img { height: 220px; }
+}
+
+@media (max-width: 767px) {
+  .lp2-topo { padding-top: 26px; }
+  .lp2-topo__bg img { object-position: 60% 25%; }
+  .lp2-topo__grid { padding-bottom: 28px; }
+  .lp2-cadastro { padding: 32px 0; }
+  .lp2-oferta h1 { font-size: clamp(1.9rem, 8.6vw, 2.4rem); margin-bottom: 14px; }
+  .lp2-sub { font-size: .98rem; margin-bottom: 20px; }
+  .lp2-bullets { gap: 10px; margin-bottom: 22px; }
+  .lp2-bullets li { font-size: .92rem; gap: 11px; }
+  .lp2-bullets .ico { width: 22px; height: 22px; }
+  /* No celular o botão rola até o formulário, que fica logo abaixo. */
+  .lp2-oferta__cta { width: 100%; }
+  .lp2-faixa { padding: 16px 0; }
+  .lp2-logos { gap: 10px 20px; }
+  .lp2-logos img { max-height: 32px; max-width: 74px; }
+
+  .lp2-dor { padding: 48px 0; }
+  .lp2-dor__foto { aspect-ratio: 3 / 2; border-radius: 14px; }
+  .lp2-dor h2 { margin-bottom: 18px; }
+  .lp2-dor__lista li { font-size: .92rem; padding: 13px 15px; gap: 11px; }
+
+  .recebe-grid { gap: 28px; }
+  .recebe-grid img { height: 170px; }
+  .recebe-grid div { padding: 20px; }
+  .recebe-grid h3 { margin-top: 12px; font-size: 1.02rem; }
+  .recebe-num { width: 38px; height: 38px; top: -19px; left: 20px; font-size: .95rem; }
+
+  .lp2-passos li { gap: 13px; }
+  .lp2-passos li > span { width: 32px; height: 32px; font-size: .9rem; }
+}
