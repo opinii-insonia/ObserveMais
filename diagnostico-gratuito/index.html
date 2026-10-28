@@ -125,79 +125,6 @@
   </section>
 
 
-  <!-- ============ 2. FORMULÁRIO ============ -->
-  <section class="lp2-cadastro" aria-label="Cadastro do diagnóstico gratuito">
-    <div class="container lp2-cadastro__box">
-      <div class="form-card reveal" id="formulario">
-        <form id="diagnostico-form" novalidate aria-labelledby="form-title">
-          <p class="form-card__selo">Gratuito · R$ 0,00</p>
-          <h2 id="form-title">Quero meu diagnóstico</h2>
-          <p class="form-card__sub">Leva menos de 1 minuto.</p>
-
-          <div class="field-row">
-            <label class="field"><span>Nome</span><input name="nome" type="text" autocomplete="name" placeholder="Seu nome" required></label>
-            <label class="field"><span>WhatsApp</span><input name="whatsapp" type="tel" inputmode="tel" autocomplete="tel" placeholder="(61) 99999-9999" required></label>
-          </div>
-          <label class="field"><span>E-mail corporativo</span><input name="email" type="email" inputmode="email" autocomplete="email" placeholder="voce@suaempresa.com.br" required></label>
-          <div class="field-row">
-            <label class="field"><span>Empresa</span><input name="empresa" type="text" autocomplete="organization" placeholder="Nome da empresa" required></label>
-            <label class="field">
-              <span>Segmento</span>
-              <select name="segmento" required>
-                <option value="">Selecione</option>
-                <option>Varejo</option>
-                <option>Supermercado</option>
-                <option>Ótica</option>
-                <option>Restaurante / alimentação</option>
-                <option>Academia</option>
-                <option>Clínica</option>
-                <option>Franquia</option>
-                <option>Serviços</option>
-                <option>Outro</option>
-              </select>
-            </label>
-          </div>
-          <div class="field-row">
-            <label class="field">
-              <span>Onde ficam suas unidades?</span>
-              <select name="localizacao" required>
-                <option value="">Selecione</option>
-                <option value="df">Brasília / Distrito Federal</option>
-                <option value="entorno">Entorno do DF (Goiás)</option>
-                <option value="outra">Outra cidade</option>
-              </select>
-            </label>
-            <label class="field">
-              <span>Quantas unidades?</span>
-              <input name="unidades" type="number" inputmode="numeric" min="1" max="5000" step="1" placeholder="Ex.: 3" required>
-            </label>
-          </div>
-          <label class="field" data-cidade hidden>
-            <span>Qual cidade e estado?</span>
-            <input name="cidade" type="text" autocomplete="address-level2" placeholder="Ex.: Goiânia - GO">
-          </label>
-
-          <p class="form-error" id="diagnostico-erro" role="alert" hidden></p>
-          <button class="btn btn-primary" type="submit" data-dx-submit>Quero meu diagnóstico <svg class="ico" aria-hidden="true"><use href="#i-arrow"/></svg></button>
-          <p class="form-legal">Seus dados não são compartilhados com terceiros.</p>
-        </form>
-
-        <div class="form-result is-approved" id="diagnostico-aprovado" role="status" hidden>
-          <span class="done-check" aria-hidden="true"><svg class="ico"><use href="#i-check"/></svg></span>
-          <h2>Tudo certo, <span data-nome></span>!</h2>
-          <p><strong>Dentro de minutos, um especialista entrará em contato com você</strong> para confirmar a unidade e agendar a visita.</p>
-          <a class="btn btn-primary" href="https://wa.me/5561993715292?text=Vim%20atrav%C3%A9s%20do%20site%20da%20Observe%2B." target="_blank" rel="noopener noreferrer">Agendar pelo WhatsApp <svg class="ico" aria-hidden="true"><use href="#i-arrow"/></svg></a>
-        </div>
-
-        <div class="form-result" id="diagnostico-cadastrado" role="status" hidden>
-          <span class="done-check" aria-hidden="true"><svg class="ico"><use href="#i-check"/></svg></span>
-          <h2>Cadastro recebido, <span data-nome></span>.</h2>
-          <p><strong>Dentro de minutos, um especialista entrará em contato com você</strong> para entender a sua operação.</p>
-          <a class="btn btn-primary" href="https://wa.me/5561993715292?text=Vim%20atrav%C3%A9s%20do%20site%20da%20Observe%2B." target="_blank" rel="noopener noreferrer">Falar com um especialista <svg class="ico" aria-hidden="true"><use href="#i-arrow"/></svg></a>
-        </div>
-      </div>
-    </div>
-  </section>
 
 
   <!-- Prova social em faixa clara: os logos têm fundo branco e não funcionam sobre o escuro. -->
@@ -248,23 +175,9 @@
           <img src="/public/assets/observe/case-03.webp" alt="Pagamento no balcão durante o atendimento" width="1200" height="800" loading="lazy">
           <div><span class="recebe-num">2</span><h3>As evidências</h3><p>Atendimento, abordagem, ambiente, produto e fechamento, registrados item a item.</p></div>
         </li>
-        <li>
-          <img src="/public/assets/observe/seg-varejo.webp" alt="Equipe de loja em atendimento" width="1200" height="900" loading="lazy">
+        <li class="recebe-rel">
           <div><span class="recebe-num">3</span><h3>O relatório</h3><p>Nota por pilar, ranking das falhas e as oportunidades de venda que ficaram na mesa.</p></div>
-        </li>
-      </ul>
-    </div>
-  </section>
-
-  <!-- ============ 4. O RELATÓRIO ============ -->
-  <section class="section lp2-relatorio" id="relatorio" aria-labelledby="relatorio-title">
-    <div class="container">
-      <header class="section-head center reveal">
-        <p class="eyebrow">O entregável</p>
-        <h2 id="relatorio-title">É isso que <span class="accent">chega para você.</span></h2>
-      </header>
-
-            <figure class="rel reveal" aria-labelledby="rel-legenda">
+          <figure class="rel reveal" aria-labelledby="rel-legenda">
         <p class="rel__dica" aria-hidden="true">Arraste para ver o painel completo →</p>
         <div class="rel__scroll">
           <div class="rel__app" role="img" aria-label="Painel do relatório Observe+: conformidade geral de 86,58%, inconformidade de 13,42%, pilar crítico pós-venda, área crítica apresentação, ranking de conformidade por unidade, conformidade por pilar, ranking de inconformidade por item e desempenho por área.">
@@ -360,9 +273,81 @@
         </div>
         <figcaption id="rel-legenda">Estrutura real do relatório Observe+. Unidades anonimizadas e números de demonstração.</figcaption>
       </figure>
+        </li>
+      </ul>
+    </div>
+  </section>
 
-      <div class="lp-cta-meio reveal">
-        <a class="btn btn-primary btn-lg" href="#formulario">Quero esse relatório <svg class="ico" aria-hidden="true"><use href="#i-arrow"/></svg></a>
+  <!-- ============ 2. FORMULÁRIO ============ -->
+  <section class="lp2-cadastro" aria-label="Cadastro do diagnóstico gratuito">
+    <div class="container lp2-cadastro__box">
+      <div class="form-card reveal" id="formulario">
+        <form id="diagnostico-form" novalidate aria-labelledby="form-title">
+          <p class="form-card__selo">Gratuito · R$ 0,00</p>
+          <h2 id="form-title">Quero meu diagnóstico</h2>
+          <p class="form-card__sub">Leva menos de 1 minuto.</p>
+
+          <div class="field-row">
+            <label class="field"><span>Nome</span><input name="nome" type="text" autocomplete="name" placeholder="Seu nome" required></label>
+            <label class="field"><span>WhatsApp</span><input name="whatsapp" type="tel" inputmode="tel" autocomplete="tel" placeholder="(61) 99999-9999" required></label>
+          </div>
+          <label class="field"><span>E-mail corporativo</span><input name="email" type="email" inputmode="email" autocomplete="email" placeholder="voce@suaempresa.com.br" required></label>
+          <div class="field-row">
+            <label class="field"><span>Empresa</span><input name="empresa" type="text" autocomplete="organization" placeholder="Nome da empresa" required></label>
+            <label class="field">
+              <span>Segmento</span>
+              <select name="segmento" required>
+                <option value="">Selecione</option>
+                <option>Varejo</option>
+                <option>Supermercado</option>
+                <option>Ótica</option>
+                <option>Restaurante / alimentação</option>
+                <option>Academia</option>
+                <option>Clínica</option>
+                <option>Franquia</option>
+                <option>Serviços</option>
+                <option>Outro</option>
+              </select>
+            </label>
+          </div>
+          <div class="field-row">
+            <label class="field">
+              <span>Onde ficam suas unidades?</span>
+              <select name="localizacao" required>
+                <option value="">Selecione</option>
+                <option value="df">Brasília / Distrito Federal</option>
+                <option value="entorno">Entorno do DF (Goiás)</option>
+                <option value="outra">Outra cidade</option>
+              </select>
+            </label>
+            <label class="field">
+              <span>Quantas unidades?</span>
+              <input name="unidades" type="number" inputmode="numeric" min="1" max="5000" step="1" placeholder="Ex.: 3" required>
+            </label>
+          </div>
+          <label class="field" data-cidade hidden>
+            <span>Qual cidade e estado?</span>
+            <input name="cidade" type="text" autocomplete="address-level2" placeholder="Ex.: Goiânia - GO">
+          </label>
+
+          <p class="form-error" id="diagnostico-erro" role="alert" hidden></p>
+          <button class="btn btn-primary" type="submit" data-dx-submit>Quero meu diagnóstico <svg class="ico" aria-hidden="true"><use href="#i-arrow"/></svg></button>
+          <p class="form-legal">Seus dados não são compartilhados com terceiros.</p>
+        </form>
+
+        <div class="form-result is-approved" id="diagnostico-aprovado" role="status" hidden>
+          <span class="done-check" aria-hidden="true"><svg class="ico"><use href="#i-check"/></svg></span>
+          <h2>Tudo certo, <span data-nome></span>!</h2>
+          <p><strong>Dentro de minutos, um especialista entrará em contato com você</strong> para confirmar a unidade e agendar a visita.</p>
+          <a class="btn btn-primary" href="https://wa.me/5561993715292?text=Vim%20atrav%C3%A9s%20do%20site%20da%20Observe%2B." target="_blank" rel="noopener noreferrer">Agendar pelo WhatsApp <svg class="ico" aria-hidden="true"><use href="#i-arrow"/></svg></a>
+        </div>
+
+        <div class="form-result" id="diagnostico-cadastrado" role="status" hidden>
+          <span class="done-check" aria-hidden="true"><svg class="ico"><use href="#i-check"/></svg></span>
+          <h2>Cadastro recebido, <span data-nome></span>.</h2>
+          <p><strong>Dentro de minutos, um especialista entrará em contato com você</strong> para entender a sua operação.</p>
+          <a class="btn btn-primary" href="https://wa.me/5561993715292?text=Vim%20atrav%C3%A9s%20do%20site%20da%20Observe%2B." target="_blank" rel="noopener noreferrer">Falar com um especialista <svg class="ico" aria-hidden="true"><use href="#i-arrow"/></svg></a>
+        </div>
       </div>
     </div>
   </section>

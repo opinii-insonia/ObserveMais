@@ -361,7 +361,7 @@ test('diagnóstico gratuito: landing de conversão com formulário curto e respo
   const primeira = html.match(/<section class="lp2-topo"[\s\S]*?<\/section>/)[0];
   assert.doesNotMatch(primeira, /<form id="diagnostico-form"/);
   assert.match(primeira, /R\$ 0,00/);
-  assert.match(sections[1], /^lp2-cadastro/);
+  assert.equal(sections.indexOf('lp2-cadastro'), sections.indexOf('section lp2-recebe') + 1);
   const segunda = html.match(/<section class="lp2-cadastro"[\s\S]*?<\/section>/)[0];
   assert.match(segunda, /<form id="diagnostico-form"/);
   // No celular o formulário fica bem abaixo do texto da oferta: o CTA precisa
@@ -974,7 +974,7 @@ test('o diagnóstico só aceita e-mail corporativo', async () => {
 
 test('a landing do diagnóstico tem os blocos que sustentam a conversão', async () => {
   const html = await read('diagnostico-gratuito/index.html');
-  const ordem = ['lp2-topo', 'lp2-dor', 'lp2-recebe', 'lp2-relatorio', 'lp2-como', 'lp-prova', 'faq', 'lp-final'];
+  const ordem = ['lp2-topo', 'lp2-dor', 'lp2-recebe', 'lp2-cadastro', 'lp2-como', 'lp-prova', 'faq', 'lp-final'];
   let anterior = -1;
   for (const bloco of ordem) {
     const pos = html.indexOf(`class="${bloco}"`) > -1 ? html.indexOf(`class="${bloco}"`) : html.indexOf(`${bloco}"`);

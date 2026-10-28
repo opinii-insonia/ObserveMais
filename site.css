@@ -1444,3 +1444,9 @@ body.is-locked { overflow: hidden; }
   .lp2-passos li { gap: 13px; }
   .lp2-passos li > span { width: 32px; height: 32px; font-size: .9rem; }
 }
+
+/* Item 3 de "O que você recebe": o relatório real ocupa a linha inteira. */
+.recebe-grid .recebe-rel { grid-column: 1 / -1; }
+.recebe-grid .recebe-rel > div { padding-bottom: 8px; }
+.recebe-grid .recebe-rel .rel { margin: 0; padding: 0 24px 26px; }
+.lp2-cadastro { scroll-margin-top: 70px; }
