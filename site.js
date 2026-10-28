@@ -254,6 +254,37 @@
   }
 
   // =========================================================
+  // Barra de ação fixa (celular)
+  // =========================================================
+
+  // Some enquanto o visitante está no topo ou com o formulário na tela:
+  // nesses dois momentos ela só atrapalharia.
+  const barraCta = document.querySelector('[data-barra-cta]');
+  if (barraCta) {
+    const alvo = document.querySelector('#formulario') || document.querySelector('#diagnostico');
+    let formularioNaTela = false;
+
+    const atualizarBarra = () => {
+      const passouDoTopo = window.scrollY > window.innerHeight * 0.6;
+      barraCta.classList.toggle('is-on', passouDoTopo && !formularioNaTela);
+      // Com o formulário aberto, o botão do WhatsApp sai da frente dos campos.
+      document.body.classList.toggle('is-no-form', formularioNaTela);
+    };
+
+    if (alvo && 'IntersectionObserver' in window) {
+      new IntersectionObserver((entradas) => {
+        formularioNaTela = entradas[0].isIntersecting;
+        atualizarBarra();
+      }, { rootMargin: '-10% 0px -25% 0px' }).observe(alvo);
+    }
+
+    barraCta.hidden = false;
+    window.addEventListener('scroll', atualizarBarra, { passive: true });
+    window.addEventListener('resize', atualizarBarra);
+    atualizarBarra();
+  }
+
+  // =========================================================
   // Diagnóstico gratuito: cadastra todos e mostra o painel que a API indicar
   // =========================================================
 

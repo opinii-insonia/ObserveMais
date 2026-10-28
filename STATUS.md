@@ -16,6 +16,7 @@
 - [x] Rodada 3: WhatsApp único (+55 61 99371-5292) com a mensagem "Vim através do site da Observe+."; confirmação "Dentro de minutos, um especialista entrará em contato com você" na Kommo e no diagnóstico; logo da Mercado Malunga no mural de clientes.
 - [x] Diagnóstico: corte passou para 2 unidades, cadastro exige e-mail corporativo e o critério saiu de toda a parte visível — a decisão vive só na API e o navegador apenas exibe o painel que ela indicar.
 - [x] Rodada 4: /diagnostico-gratuito refeita como landing de conversão (hero → vídeo → dor → prova → relatório → para quem → oferta R$ 0,00 + formulário → compromisso → passos → FAQ → CTA final), inspirada na estrutura de cobre.metodoteia.com com identidade própria. Mockup do painel de relatório em HTML/CSS, com unidades anonimizadas.
+- [x] Rodada 5: versão mobile da landing refeita como a principal. Painel do relatório empilhado até 900px (pilares viram barras deitadas, tabela vira cartão, nada girado e nada de arrastar), depoimentos em carrossel, barra de ação fixa que some no topo e no formulário, CTA apontando direto para o formulário e correção do título invisível dentro do cartão. Verificado de 320px a 1440px.
 - [ ] Confirmar se podemos exibir os valores de tabela dos entregáveis (hoje cada item aparece como "Incluído", sem preço riscado).
 - [ ] Ajustar o Zap para separar `tipo = diagnostico-gratuito` em aba própria.
 - [ ] Publicação, somente mediante autorização explícita.

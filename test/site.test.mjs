@@ -357,7 +357,10 @@ test('diagnóstico gratuito: landing de conversão com formulário curto e respo
   assert.doesNotMatch(html, /class="main-nav"|class="nav-toggle"/);
   const sections = [...html.matchAll(/<section class="([^"]+)"/g)].map((m) => m[1]);
   assert.match(sections[0], /^lp-hero/);
-  assert.ok([...html.matchAll(/href="#diagnostico"/g)].length >= 3, 'os CTAs precisam levar ao formulário');
+  // No celular o formulário fica bem abaixo do texto da oferta: o CTA precisa
+  // apontar para o cartão do formulário, não para o topo da seção.
+  assert.ok([...html.matchAll(/href="#formulario"/g)].length >= 3, 'os CTAs precisam levar ao formulário');
+  assert.match(html, /<div class="form-card reveal" id="formulario">/);
   assert.match(html, /<section class="lp-oferta" id="diagnostico"[\s\S]*<form id="diagnostico-form" novalidate/);
 
   // Formulário único e curto.
@@ -997,4 +1000,10 @@ test('a landing do diagnóstico tem os blocos que sustentam a conversão', async
     assert.ok(!mock.toLowerCase().includes(marca), `o mockup não pode citar "${marca}"`);
   }
   assert.match(mock, /Unidades anonimizadas/);
+});
+
+test('nenhum texto da landing fica invisível por herdar a cor da seção', async () => {
+  const css = await read('site.css');
+  // A seção da oferta é escura e pinta h2 de branco; o cartão do formulário é claro.
+  assert.match(css, /\.lp-oferta \.form-card h2, \.lp-oferta \.form-result h2 \{ color: var\(--text\)/);
 });

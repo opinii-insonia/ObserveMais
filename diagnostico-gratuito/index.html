@@ -80,7 +80,7 @@
   </defs>
 </svg>
 
-<a class="skip-link" href="#diagnostico">Pular para o formulário</a>
+<a class="skip-link" href="#formulario">Pular para o formulário</a>
 
 <p class="topbar">Visita + relatório completo · <strong>sem custo e sem compromisso</strong></p>
 
@@ -105,7 +105,7 @@
       <p class="eyebrow eyebrow-light">Diagnóstico gratuito de cliente oculto</p>
       <h1 id="hero-title">Pare de perder venda por um motivo que <span class="accent">ninguém te conta.</span></h1>
       <p class="lp-hero__lead">Um cliente oculto treinado visita a sua operação como consumidor comum. Você recebe o relatório com a nota de cada pilar, as evidências e onde agir primeiro. <strong>Por nossa conta.</strong></p>
-      <a class="btn btn-primary btn-lg" href="#diagnostico">Quero meu diagnóstico gratuito <svg class="ico" aria-hidden="true"><use href="#i-arrow"/></svg></a>
+      <a class="btn btn-primary btn-lg" href="#formulario">Quero meu diagnóstico gratuito <svg class="ico" aria-hidden="true"><use href="#i-arrow"/></svg></a>
       <ul class="lp-selos">
         <li><svg class="ico" aria-hidden="true"><use href="#i-check"/></svg>Sem custo</li>
         <li><svg class="ico" aria-hidden="true"><use href="#i-check"/></svg>Sem compromisso</li>
@@ -308,10 +308,10 @@
                   <table class="rel__tabela">
                     <thead><tr><th>Item checado</th><th>Inconformes</th><th>%</th></tr></thead>
                     <tbody>
-                      <tr><td>O vendedor fez perguntas de sondagem para entender a necessidade?</td><td>4</td><td><i class="rel__pct">100,00%</i></td></tr>
-                      <tr><td>Houve demonstração do produto durante a visita?</td><td>4</td><td><i class="rel__pct">100,00%</i></td></tr>
-                      <tr><td>A equipe ofereceu um item complementar antes do fechamento?</td><td>4</td><td><i class="rel__pct">100,00%</i></td></tr>
-                      <tr><td>O cliente foi abordado nos primeiros 2 minutos?</td><td>3</td><td><i class="rel__pct is-media">75,00%</i></td></tr>
+                      <tr><td>O vendedor fez perguntas de sondagem para entender a necessidade?</td><td data-l="Inconformes">4</td><td data-l="Falha"><i class="rel__pct">100,00%</i></td></tr>
+                      <tr><td>Houve demonstração do produto durante a visita?</td><td data-l="Inconformes">4</td><td data-l="Falha"><i class="rel__pct">100,00%</i></td></tr>
+                      <tr><td>A equipe ofereceu um item complementar antes do fechamento?</td><td data-l="Inconformes">4</td><td data-l="Falha"><i class="rel__pct">100,00%</i></td></tr>
+                      <tr><td>O cliente foi abordado nos primeiros 2 minutos?</td><td data-l="Inconformes">3</td><td data-l="Falha"><i class="rel__pct is-media">75,00%</i></td></tr>
                     </tbody>
                   </table>
                 </div>
@@ -334,7 +334,7 @@
       </figure>
 
       <div class="lp-cta-meio reveal">
-        <a class="btn btn-primary btn-lg" href="#diagnostico">Quero esse relatório da minha operação <svg class="ico" aria-hidden="true"><use href="#i-arrow"/></svg></a>
+        <a class="btn btn-primary btn-lg" href="#formulario">Quero esse relatório da minha operação <svg class="ico" aria-hidden="true"><use href="#i-arrow"/></svg></a>
       </div>
     </div>
   </section>
@@ -386,10 +386,11 @@
         </ul>
       </div>
 
-      <div class="form-card reveal">
+      <div class="form-card reveal" id="formulario">
         <form id="diagnostico-form" novalidate aria-labelledby="form-title">
+          <p class="form-card__selo">Gratuito · R$ 0,00</p>
           <h2 id="form-title">Quero meu diagnóstico gratuito</h2>
-          <p class="form-card__sub">Leva menos de 1 minuto.</p>
+          <p class="form-card__sub">Leva menos de 1 minuto. Sem cartão e sem compromisso.</p>
 
           <div class="field-row">
             <label class="field"><span>Nome</span><input name="nome" type="text" autocomplete="name" placeholder="Seu nome" required></label>
@@ -505,11 +506,17 @@
     <div class="container reveal">
       <h2 id="final-title">O próximo cliente da sua loja vai ser atendido daqui a pouco. <span class="accent">Você vai saber como?</span></h2>
       <p class="lp-final__preco">Visita + relatório completo por apenas <strong>R$ 0,00</strong></p>
-      <a class="btn btn-primary btn-lg" href="#diagnostico">Quero meu diagnóstico gratuito <svg class="ico" aria-hidden="true"><use href="#i-arrow"/></svg></a>
+      <a class="btn btn-primary btn-lg" href="#formulario">Quero meu diagnóstico gratuito <svg class="ico" aria-hidden="true"><use href="#i-arrow"/></svg></a>
       <p class="lp-final__duvida">Tem alguma dúvida? <a href="https://wa.me/5561993715292?text=Vim%20atrav%C3%A9s%20do%20site%20da%20Observe%2B." target="_blank" rel="noopener noreferrer">Fale com a gente no WhatsApp</a></p>
     </div>
   </section>
 </main>
+
+<!-- Barra de ação fixa: só aparece no celular, depois do topo e fora do formulário. -->
+<div class="lp-barra" data-barra-cta hidden>
+  <div class="lp-barra__txt"><strong>Diagnóstico gratuito</strong><span>R$ 0,00 · sem compromisso</span></div>
+  <a class="btn btn-primary" href="#formulario">Quero o meu</a>
+</div>
 
 <footer class="site-footer">
   <div class="container"><div class="footer-bottom footer-bottom--solo">

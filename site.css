@@ -826,6 +826,11 @@ body.is-locked { overflow: hidden; }
 .form-card { background: #fff; color: var(--text-2); border-radius: 20px; box-shadow: var(--shadow-lg); padding: 30px; }
 .form-card h2 { font-size: 1.35rem; margin-bottom: 6px; }
 .form-card__sub { font-size: .9rem; color: var(--muted); margin-bottom: 20px; }
+.form-card__selo {
+  display: inline-block; background: var(--orange-50); color: var(--orange);
+  font-size: .74rem; font-weight: 800; letter-spacing: .08em; text-transform: uppercase;
+  padding: 6px 12px; border-radius: 99px; margin-bottom: 12px;
+}
 .form-card .btn { width: 100%; }
 .form-card .btn[disabled] { opacity: .7; cursor: progress; transform: none; }
 .form-result { text-align: center; padding: 12px 4px; }
@@ -1078,6 +1083,8 @@ body.is-locked { overflow: hidden; }
 }
 .lp-oferta .deco-ring { left: auto; right: -180px; bottom: -210px; opacity: .85; }
 .lp-oferta h2 { color: #fff; margin-bottom: 26px; }
+/* O cartão do formulário é claro: o título dele não pode herdar o branco da seção. */
+.lp-oferta .form-card h2, .lp-oferta .form-result h2 { color: var(--text); margin-bottom: 0; }
 .lp-oferta__grid { display: grid; grid-template-columns: 1fr minmax(0, 520px); gap: 56px; align-items: start; }
 .oferta-itens { margin-bottom: 30px; }
 .oferta-itens li {
@@ -1112,6 +1119,9 @@ body.is-locked { overflow: hidden; }
 .lp-final__duvida a { color: #fff; font-weight: 600; border-bottom: 1px solid rgba(255, 255, 255, .35); }
 .lp-final__duvida a:hover { color: var(--orange); border-color: var(--orange); }
 
+/* =========================================================
+   LANDING DO DIAGNÓSTICO — TABLET
+   ========================================================= */
 @media (max-width: 1099px) {
   .dor-grid, .depo-grid { grid-template-columns: repeat(2, 1fr); }
   .paraquem-grid { grid-template-columns: repeat(2, 1fr); }
@@ -1119,36 +1129,204 @@ body.is-locked { overflow: hidden; }
   .lp-oferta .deco-ring { display: none; }
   .rel__dica { display: block; }
 }
-@media (max-width: 767px) {
-  .lp-hero { padding: 48px 0 60px; }
-  .lp-hero .btn-lg { width: 100%; white-space: normal; height: auto; min-height: 60px; padding: 14px 22px; }
-  .lp-selos { gap: 10px 18px; }
-  .lp-selos li { font-size: .82rem; }
-  .dor-grid, .depo-grid, .paraquem-grid { grid-template-columns: 1fr; }
-  .dor-fecho { flex-direction: column; align-items: flex-start; padding: 22px; gap: 12px; }
-  .lp-inclui { padding: 24px 20px; }
-  .lp-player__play { width: 62px; height: 62px; }
-  .lp-player__play .ico { width: 32px; height: 32px; }
-  .lp-player__dica { font-size: .74rem; bottom: 12px; }
-  .garantia-box { flex-direction: column; text-align: center; padding: 28px 22px; gap: 18px; }
-  .lp-cta-meio .btn, .lp-final .btn-lg { width: 100%; white-space: normal; height: auto; min-height: 60px; padding: 14px 22px; }
-  .lp-final { padding: 64px 0; }
-  .depo-card { padding: 24px 20px; }
-}
 
-/* No celular o painel se reorganiza em coluna: sem a barra de filtros na
-   frente dos números, e sem precisar arrastar para ver o que importa. */
-@media (max-width: 767px) {
+/* O painel do relatório empilha já a partir de 900px: assim nenhum celular
+   deitado e nenhum tablet pequeno precisa arrastar para ler os números. */
+@media (max-width: 900px) {
   .rel__dica { display: none; }
-  .rel__scroll { overflow-x: visible; }
-  .rel__app { min-width: 0; grid-template-columns: 1fr; }
+  .rel__scroll { overflow-x: visible; border-radius: 14px; }
+  .rel__app { min-width: 0; grid-template-columns: 1fr; font-size: 13px; }
   .rel__side { display: none; }
   .rel__main { padding: 12px; gap: 10px; }
-  .rel__kpis, .rel__grid { grid-template-columns: 1fr; }
-  .rel__critico { grid-template-columns: 1fr 1fr; }
-  .rel__kpi strong { font-size: 22px; }
-  .rel__barras { height: 185px; gap: 5px; }
-  .rel__barras small { font-size: 8.5px; writing-mode: vertical-rl; transform: rotate(180deg); max-height: 80px; }
-  .rel__barras span { font-size: 9px; }
-  .rel__tabela td:first-child { max-width: 180px; }
+
+  .rel__kpis { grid-template-columns: 1fr 1fr; gap: 8px; }
+  .rel__kpi { padding: 12px; gap: 9px; flex-direction: column; align-items: flex-start; }
+  .rel__kpi-ico { width: 30px; height: 30px; border-radius: 8px; }
+  .rel__kpi-ico svg { width: 16px; height: 16px; }
+  .rel__kpi small { font-size: 10.5px; }
+  .rel__kpi strong { font-size: 21px; }
+  .rel__kpi em { font-size: 10px; line-height: 1.3; display: block; }
+  .rel__kpi:nth-child(3) { grid-column: 1 / -1; flex-direction: row; align-items: center; }
+  .rel__critico { grid-column: 1 / -1; grid-template-columns: 1fr 1fr; gap: 12px; padding: 13px 15px; }
+  .rel__critico strong { font-size: 14px; }
+
+  .rel__grid { grid-template-columns: 1fr; gap: 10px; }
+  .rel__card { padding: 14px; }
+  .rel__card h3 { font-size: 12px; margin-bottom: 11px; }
+
+  /* Barras de pilar deitadas: o nome fica na horizontal e inteiro. */
+  .rel__barras { display: grid; grid-auto-flow: row; grid-auto-columns: auto; height: auto; gap: 9px; }
+  .rel__barras div { display: grid; grid-template-columns: 82px 1fr auto; align-items: center; gap: 9px; height: auto; }
+  .rel__barras i { order: 0; width: var(--h); max-width: none; height: 13px; border-radius: 4px; justify-self: start; }
+  .rel__barras span { order: 0; font-size: 11px; justify-self: end; }
+  .rel__barras small {
+    order: -1; writing-mode: horizontal-tb; transform: none; max-height: none;
+    font-size: 11px; color: #C6CFDA; text-align: left; white-space: normal; line-height: 1.2;
+  }
+  /* A barra e o valor dividem a mesma faixa, por isso o trilho de fundo. */
+  .rel__card--pilar .rel__barras div { position: relative; }
+  .rel__card--pilar .rel__barras div::before {
+    content: ""; grid-column: 2; grid-row: 1; height: 13px; border-radius: 4px; background: #202934; align-self: center;
+  }
+  .rel__barras i { grid-column: 2; grid-row: 1; }
+
+  /* Tabela vira cartão: cabeçalho some e cada número ganha rótulo. */
+  .rel__tabela thead { display: none; }
+  .rel__tabela, .rel__tabela tbody, .rel__tabela tr, .rel__tabela td { display: block; width: 100%; }
+  .rel__tabela tr { display: grid; grid-template-columns: 1fr auto; align-items: center; gap: 8px 10px; padding: 11px 0; border-bottom: 1px solid #202934; }
+  .rel__tabela tr:last-child { border-bottom: 0; padding-bottom: 0; }
+  .rel__tabela td { padding: 0; border: 0; }
+  .rel__tabela td:first-child { grid-column: 1 / -1; font-size: 11.5px; line-height: 1.4; max-width: none; }
+  .rel__tabela td[data-l] { display: flex; align-items: center; gap: 6px; font-size: 10.5px; color: #8793A3; }
+  .rel__tabela td[data-l]::before { content: attr(data-l) ":"; font-weight: 600; }
+  .rel__tabela td[data-l="Inconformes"] { justify-self: start; }
+  .rel__tabela td[data-l="Falha"] { justify-self: end; }
+  .rel__pct { display: inline-block; padding: 4px 10px; font-size: 10.5px; }
+
+  /* Áreas: nome em cima, barra e valor embaixo. */
+  .rel__areas li { grid-template-columns: 1fr auto; gap: 5px 10px; margin-bottom: 13px; }
+  .rel__areas li:last-child { margin-bottom: 0; }
+  .rel__areas span { grid-column: 1; font-size: 11px; white-space: normal; }
+  .rel__areas b { grid-column: 2; grid-row: 1; font-size: 11px; }
+  .rel__areas i { grid-column: 1 / -1; grid-row: 2; height: 10px; }
+  .rel figcaption { font-size: .74rem; margin-top: 12px; }
+
+}
+
+/* =========================================================
+   LANDING DO DIAGNÓSTICO — CELULAR
+   A maior parte do tráfego vem de anúncio no celular, então esta
+   é a versão principal: nada de rolagem lateral, nada de texto
+   girado e o CTA sempre ao alcance do polegar.
+   Testada de 320px (iPhone SE) a 430px (Pro Max).
+   ========================================================= */
+@media (max-width: 767px) {
+  /* ---- Base ---- */
+  .lp .topbar { font-size: .74rem; padding: 8px 14px; line-height: 1.35; }
+  .lp .btn { white-space: normal; height: auto; min-height: 54px; padding: 14px 20px; text-align: center; }
+  .lp .btn-lg { width: 100%; min-height: 60px; font-size: 1rem; }
+  .lp .section-head { margin-bottom: 32px; }
+  .lp h2 { font-size: clamp(1.55rem, 7.2vw, 2rem); }
+  .lp .lead { font-size: 1rem; }
+
+  /* ---- Hero: cabe na primeira tela, com o CTA visível sem rolar ---- */
+  .lp-hero { padding: 36px 0 44px; }
+  .lp-hero h1 { font-size: clamp(1.9rem, 8.4vw, 2.5rem); margin-bottom: 16px; }
+  .lp-hero .eyebrow { font-size: .68rem; letter-spacing: .1em; margin-bottom: 12px; }
+  .lp-hero__lead { font-size: 1rem; margin-bottom: 26px; }
+  .lp-selos { gap: 8px 16px; margin-top: 20px; }
+  .lp-selos li { font-size: .78rem; gap: 6px; }
+  .lp-selos .ico { width: 15px; height: 15px; }
+
+  /* ---- Vídeo ---- */
+  .lp-player { border-radius: 14px; }
+  .lp-player__play { width: 58px; height: 58px; }
+  .lp-player__play .ico { width: 30px; height: 30px; }
+  .lp-player__dica { font-size: .72rem; bottom: 10px; padding: 6px 12px; }
+  .lp-inclui { margin-top: 28px; padding: 24px 18px; border-radius: 16px; }
+  .lp-inclui h3 { font-size: 1.05rem; margin-bottom: 16px; }
+  .lp-inclui .checklist { gap: 12px; }
+  .lp-inclui .checklist li { font-size: .92rem; align-items: flex-start; }
+  .lp-inclui .ck { margin-top: 1px; }
+
+  /* ---- Dor: ícone ao lado do título economiza altura ---- */
+  .dor-grid, .depo-grid, .paraquem-grid { grid-template-columns: 1fr; gap: 12px; }
+  .dor-card { padding: 20px 18px; display: grid; grid-template-columns: auto 1fr; gap: 0 14px; }
+  .dor-card .ico { width: 26px; height: 26px; margin: 2px 0 0; grid-row: span 2; }
+  .dor-card h3 { font-size: .98rem; margin-bottom: 6px; }
+  .dor-card p { font-size: .88rem; grid-column: 2; }
+  .dor-fecho { flex-direction: column; align-items: flex-start; padding: 20px 18px; gap: 10px; margin-top: 28px; font-size: 1rem; }
+  .dor-fecho .ico { width: 30px; height: 30px; }
+
+  /* ---- Depoimentos: carrossel que se arrasta, em vez de 3 blocos altos ---- */
+  .depo-grid {
+    /* grid-template-columns precisa ser anulado: a regra de 1 coluna acima
+       deixaria o primeiro cartão estreito e só os seguintes com 85%. */
+    display: grid; grid-template-columns: none; grid-auto-flow: column; grid-auto-columns: 86%;
+    gap: 12px; overflow-x: auto; scroll-snap-type: x mandatory;
+    margin: 0 calc(var(--gutter) * -1) 28px; padding: 4px var(--gutter);
+    scrollbar-width: none;
+  }
+  .depo-grid::-webkit-scrollbar { display: none; }
+  .depo-card { scroll-snap-align: center; padding: 22px 18px; }
+  .depo-card > img { height: 42px; margin-bottom: 14px; }
+  .depo-card blockquote { font-size: .94rem; }
+  .depo-card footer { margin-top: 14px; padding-top: 12px; }
+  .lp-prova .logos { grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 8px; }
+  .lp-prova .logos li { height: 56px; }
+  .lp-prova .logos img { max-height: 46px; max-width: 86px; }
+
+  /* ---- Para quem ---- */
+  .paraquem-grid li { padding: 18px; display: grid; grid-template-columns: auto 1fr; gap: 0 14px; }
+  .paraquem-grid .ico { width: 26px; height: 26px; margin: 2px 0 0; grid-row: span 2; }
+  .paraquem-grid h3 { font-size: .98rem; }
+  .paraquem-grid p { font-size: .88rem; grid-column: 2; }
+
+  /* ---- Oferta e preço ---- */
+  .lp-oferta { padding: 56px 0; }
+  .lp-oferta__grid { gap: 28px; }
+  .oferta-itens li { font-size: .9rem; padding: 11px 0; gap: 12px; }
+  .oferta-itens i { font-size: .66rem; }
+  .oferta-preco { padding: 20px; text-align: center; }
+  .oferta-preco__valor { font-size: 3.2rem; }
+  .oferta-selos { margin-top: 20px; }
+  .oferta-selos li { font-size: .84rem; }
+  .form-card { padding: 22px 18px; }
+  .form-card h2 { font-size: 1.2rem; }
+  .form-card__selo { font-size: .72rem; }
+
+  /* ---- Compromisso, passos, FAQ, final ---- */
+  .garantia-box { flex-direction: column; text-align: center; padding: 26px 20px; gap: 16px; }
+  .garantia-selo { width: 62px; height: 62px; }
+  .garantia-box h2 { font-size: 1.25rem; }
+  .garantia-box p { font-size: .92rem; }
+  .dx-steps { padding: 40px 0; }
+  .dx-steps li { gap: 13px; }
+  .faq-list details { padding: 0 18px; }
+  .faq-list summary { font-size: .95rem; padding: 16px 0; gap: 12px; }
+  .faq-list details p { font-size: .9rem; }
+  .lp-cta-meio { margin-top: 32px; }
+  .lp-final { padding: 56px 0; }
+  .lp-final h2 { font-size: clamp(1.6rem, 7.4vw, 2.1rem); }
+  .lp-final__preco { font-size: 1rem; margin-bottom: 24px; }
+
+  /* ---- Barra de ação fixa ---- */
+  .lp-barra {
+    position: fixed; left: 0; right: 0; bottom: 0; z-index: 95;
+    display: flex; align-items: center; gap: 12px;
+    padding: 10px 14px calc(10px + env(safe-area-inset-bottom));
+    background: rgba(11, 21, 32, .97); border-top: 1px solid var(--line-dark);
+    box-shadow: 0 -8px 24px rgba(0, 0, 0, .3);
+    transform: translateY(110%); transition: transform .28s var(--ease);
+  }
+  .lp-barra[hidden] { display: flex; }
+  .lp-barra.is-on { transform: none; }
+  .lp-barra__txt { flex: 1; min-width: 0; line-height: 1.2; }
+  .lp-barra__txt strong { display: block; color: #fff; font-size: .88rem; font-weight: 700; }
+  .lp-barra__txt span { display: block; color: var(--orange); font-size: .76rem; font-weight: 600; }
+  .lp-barra .btn { min-height: 46px; padding: 11px 18px; font-size: .9rem; flex: none; }
+  /* O botão do WhatsApp sobe para não ficar atrás da barra. */
+  .lp .whatsapp-float { transition: transform .28s var(--ease), opacity .2s var(--ease); }
+  .lp-barra.is-on ~ .whatsapp-float { transform: translateY(-62px); }
+  /* E some de vez enquanto o formulário está na tela, para não tapar campos. */
+  .lp.is-no-form .whatsapp-float { opacity: 0; pointer-events: none; transform: translateY(24px); }
+}
+
+/* Telas estreitas (iPhone SE e afins). */
+@media (max-width: 360px) {
+  .lp-hero h1 { font-size: 1.72rem; }
+  .lp-selos { flex-direction: column; align-items: center; gap: 7px; }
+  .rel__kpis { grid-template-columns: 1fr; }
+  .rel__kpi:nth-child(3) { grid-column: auto; }
+  .rel__critico { grid-template-columns: 1fr; gap: 8px; }
+  .rel__barras div { grid-template-columns: 70px 1fr auto; gap: 7px; }
+  .rel__barras small { font-size: 10px; }
+  .oferta-preco__valor { font-size: 2.7rem; }
+  .lp-barra__txt strong { font-size: .82rem; }
+  .lp-barra__txt span { font-size: .72rem; }
+  .lp-barra .btn { min-height: 44px; padding: 10px 14px; font-size: .84rem; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .lp-barra { transition: none; }
 }
